@@ -13,7 +13,7 @@ const App: React.FC = () => {
   useEffect(() => {
     const unSubscribe = auth.onAuthStateChanged((authUser) => {
       if (authUser) {
-        dispatch(
+        dispatch(login({
             photoUrl: authUser.photoURL,
             displayName: authUser.displayName,
           })
