@@ -14,6 +14,7 @@ const App: React.FC = () => {
     const unSubscribe = auth.onAuthStateChanged((authUser) => {
       if (authUser) {
         dispatch(login({
+            uid: authUser.uid,
             photoUrl: authUser.photoURL,
             displayName: authUser.displayName,
           })
