@@ -1,0 +1,21 @@
+.header {
+  width: 100%;
+  height: 50px;
+  background-color: #fff;
+  border-bottom: 1px solid rgba(64,28,0,0.2);
+}
+
+.loginGuide {
+  display: flex;
+  flex-flow: column;
+  justify-content: center;
+}
+
+
+.footer {
+  width: 100%;
+  height: calc(100vh - (50px + 450px));
+  background-color: #f7f3e8;
+  display: flex;
+  justify-content: center;
+}
