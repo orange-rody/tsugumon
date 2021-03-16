@@ -155,6 +155,10 @@ const Auth: React.FC = () => {
   const toggleShowPassword = () => {
     setShowPassword(!showPassword);
   };
+  const toggleIsLogin = () => {
+    setShowPassword(false);
+    setIsLogin(!isLogin);
+  };
   //mousedown イベントは、ポインターが要素の中にあるときにポインティングデバイスのボタンが押下されたときに Element に発行されます。
   const handleMouseDownPassword = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
@@ -163,9 +167,8 @@ const Auth: React.FC = () => {
     await auth.createUserWithEmailAndPassword(email, password);
   };
 
-  const testUserInput = () => {
-    setEmail("testUser@gmail.com");
-    setPassword("350125go");
+  const testUserLogin = async () => {
+    await auth.signInWithEmailAndPassword("testUser@gmail.com", "350125go");
   };
 
   return (
@@ -223,7 +226,7 @@ const Auth: React.FC = () => {
                 labelWidth={80}
               />
             </FormControl>
-
+            {/* SignUp画面に移ったときのメールアドレス、パスワード入力欄の初期化 */}
             {isLogin ? (
               <Button
                 fullWidth
@@ -259,7 +262,8 @@ const Auth: React.FC = () => {
 
             <div className={styles.loginGuide}>
               <Button
-                onClick={() => setIsLogin(!isLogin)}
+                // JSX上でイベントを発火させる際、2つの関数を実行するにはどうしたらいいか？
+                onClick={toggleIsLogin}
                 size="medium"
                 className={classes.loginGuideButton}
               >
@@ -276,8 +280,9 @@ const Auth: React.FC = () => {
           </form>
         </Container>
       </div>
-      <footer className={styles.footer}>
+      <footer className={isLogin ? styles.footer : styles.footer2}>
         <Button
+          onClick={testUserLogin}
           variant="contained"
           className={classes.testUserButton}
           startIcon={<AccountCircle />}

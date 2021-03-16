@@ -14,7 +14,15 @@
 
 .footer {
   width: 100%;
-  height: calc(100vh - (50px + 450px));
+  height: calc(100vh - (50px + 380px));
+  background-color: #f7f3e8;
+  display: flex;
+  justify-content: center;
+}
+
+.footer2 {
+  width: 100%;
+  height: calc(100vh - (50px + 500px));
   background-color: #f7f3e8;
   display: flex;
   justify-content: center;
