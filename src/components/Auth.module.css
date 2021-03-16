@@ -5,25 +5,40 @@
   border-bottom: 1px solid rgba(64,28,0,0.2);
 }
 
+.loginContainer,.signUpContainer {
+  display: flex;
+  flex-direction: column;
+  margin-top: 0;
+  border-bottom: 1px solid rgba(64,28,0,0.2);
+  box-sizing: border-box;
+  background-color: #f9f9f5;
+}
+
+.loginContainer {
+  height: 380px;
+}
+
+.signUpContainer {
+  height: 500px;
+}
+
 .loginGuide {
   display: flex;
   flex-flow: column;
   justify-content: center;
 }
 
-
-.footer {
+.footer,.footer2 {
   width: 100%;
-  height: calc(100vh - (50px + 380px));
   background-color: #f7f3e8;
   display: flex;
   justify-content: center;
 }
 
+.footer {
+  height: calc(100vh - (50px + 380px));
+}
+
 .footer2 {
-  width: 100%;
   height: calc(100vh - (50px + 500px));
-  background-color: #f7f3e8;
-  display: flex;
-  justify-content: center;
 }

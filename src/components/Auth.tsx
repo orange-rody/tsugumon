@@ -25,11 +25,7 @@ import {
 } from "@material-ui/core";
 
 import { red, brown } from "@material-ui/core/colors";
-import {
-  AccountCircle,
-  MailOutline,
-  SportsRugbySharp,
-} from "@material-ui/icons";
+import { AccountCircle, MailOutline } from "@material-ui/icons";
 
 const RedButton = withStyles((theme: Theme) => ({
   root: {
@@ -54,27 +50,9 @@ const BrownButton = withStyles((theme: Theme) => ({
 const useStyles = makeStyles((theme) => ({
   textField: {
     width: "100%",
-    fontSize: "20px",
     marginTop: "20px",
     backgroundColor: "#fff",
-  },
-  loginContainer: {
-    marginTop: theme.spacing(0),
-    height: "380px",
-    boxSizing: "border-box",
-    borderBottom: "1px solid rgba(64,28,0,0.2)",
-    display: "flex",
-    flexDirection: "column",
-    backgroundColor: "#f9f9f5",
-  },
-  signUpContainer: {
-    marginTop: theme.spacing(0),
-    height: "500px",
-    boxSizing: "border-box",
-    borderBottom: "1px solid rgba(64,28,0,0.2)",
-    display: "flex",
-    flexDirection: "column",
-    backgroundColor: "#f9f9f5",
+    fontSize: "20px",
   },
   container: {
     margin: "0px",
@@ -89,20 +67,20 @@ const useStyles = makeStyles((theme) => ({
     fontSize: "18px",
   },
   avatar: {
-    backgroundColor: red[500],
     width: "35px",
     height: "35px",
     marginRight: "5px",
+    backgroundColor: red[500],
   },
   mailOutline: {
     display: "block",
-    margin: "40px auto",
-    textAlign: "center",
-    fontSize: "50px",
+    margin: "35px auto",
     padding: "10px",
-    color: "#f9f9f5",
-    backgroundColor: "#7b7769",
     borderRadius: "100%",
+    backgroundColor: "#7b7769",
+    fontSize: "50px",
+    textAlign: "center",
+    color: "#f9f9f5",
   },
   grid: {
     fontSize: "14px",
@@ -121,7 +99,7 @@ const useStyles = makeStyles((theme) => ({
   login: {
     margin: theme.spacing(3, 0, 3),
     height: "42px",
-    fontSize: "18px",
+    fontSize: "16px",
     fontWeight: "bold",
   },
   signUp: {
@@ -139,6 +117,7 @@ const useStyles = makeStyles((theme) => ({
     margin: theme.spacing(4),
     width: "350px",
     height: "50px",
+    fontSize: "16px",
   },
 }));
 
@@ -146,25 +125,28 @@ const Auth: React.FC = () => {
   const classes = useStyles();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
   const [isLogin, setIsLogin] = useState(true);
+  const [showPassword, setShowPassword] = useState(false);
 
   const signInEmail = async () => {
     await auth.signInWithEmailAndPassword(email, password);
   };
-  const toggleShowPassword = () => {
-    setShowPassword(!showPassword);
+  const signUpEmail = async () => {
+    await auth.createUserWithEmailAndPassword(email, password);
   };
   const toggleIsLogin = () => {
     setShowPassword(false);
     setIsLogin(!isLogin);
+    // EmailとPasswordのstateを初期化
+    setEmail("");
+    setPassword("");
   };
-  //mousedown イベントは、ポインターが要素の中にあるときにポインティングデバイスのボタンが押下されたときに Element に発行されます。
+  const toggleShowPassword = () => {
+    setShowPassword(!showPassword);
+  };
+  //mousedown イベントは、要素の中にあるボタンが押下されたときに発火します 。
   const handleMouseDownPassword = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-  };
-  const signUpEmail = async () => {
-    await auth.createUserWithEmailAndPassword(email, password);
   };
 
   const testUserLogin = async () => {
@@ -179,9 +161,7 @@ const Auth: React.FC = () => {
           つぐもん
         </Container>
       </header>
-      <div
-        className={isLogin ? classes.loginContainer : classes.signUpContainer}
-      >
+      <div className={isLogin ? styles.loginContainer : styles.signUpContainer}>
         <Container component="main" maxWidth="xs" className={styles.container}>
           {!isLogin && <MailOutline className={classes.mailOutline} />}
           {!isLogin && (
@@ -196,7 +176,6 @@ const Auth: React.FC = () => {
               variant="outlined"
               id="email"
               label="メールアドレス"
-              name="email"
               value={email}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 setEmail(e.target.value);
@@ -207,6 +186,7 @@ const Auth: React.FC = () => {
               <OutlinedInput
                 id="password"
                 type={showPassword ? "text" : "password"}
+                value={password}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                   setPassword(e.target.value);
                 }}
@@ -226,7 +206,6 @@ const Auth: React.FC = () => {
                 labelWidth={80}
               />
             </FormControl>
-            {/* SignUp画面に移ったときのメールアドレス、パスワード入力欄の初期化 */}
             {isLogin ? (
               <Button
                 fullWidth
@@ -262,7 +241,7 @@ const Auth: React.FC = () => {
 
             <div className={styles.loginGuide}>
               <Button
-                // JSX上でイベントを発火させる際、2つの関数を実行するにはどうしたらいいか？
+                disableRipple={true}
                 onClick={toggleIsLogin}
                 size="medium"
                 className={classes.loginGuideButton}
@@ -272,7 +251,11 @@ const Auth: React.FC = () => {
                   : "ログイン画面に戻る"}
               </Button>
               {isLogin && (
-                <Button size="medium" className={classes.loginGuideButton}>
+                <Button
+                  disableRipple={true}
+                  size="medium"
+                  className={classes.loginGuideButton}
+                >
                   パスワードが分からない場合
                 </Button>
               )}
@@ -281,14 +264,14 @@ const Auth: React.FC = () => {
         </Container>
       </div>
       <footer className={isLogin ? styles.footer : styles.footer2}>
-        <Button
+        <BrownButton
           onClick={testUserLogin}
           variant="contained"
           className={classes.testUserButton}
           startIcon={<AccountCircle />}
         >
           テストユーザーでログインする
-        </Button>
+        </BrownButton>
       </footer>
     </>
   );
