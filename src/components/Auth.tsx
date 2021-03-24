@@ -8,9 +8,9 @@ import {
   CssBaseline,
   FormControl,
   InputLabel,
+  Input,
   OutlinedInput,
   InputAdornment,
-  TextField,
   IconButton,
   FormControlLabel,
   Checkbox,
@@ -20,6 +20,7 @@ import {
   Typography,
   withStyles,
   makeStyles,
+  createStyles,
   Theme,
   Container,
 } from "@material-ui/core";
@@ -47,12 +48,14 @@ const BrownButton = withStyles((theme: Theme) => ({
   },
 }))(Button);
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles({
   textField: {
     width: "100%",
-    marginTop: "20px",
-    backgroundColor: "#fff",
+    height: "50px",
+    marginBottom: "20px",
+    backgroundColor: "white",
     fontSize: "20px",
+    borderRadius: "0px",
   },
   container: {
     margin: "0px",
@@ -74,7 +77,7 @@ const useStyles = makeStyles((theme) => ({
   },
   mailOutline: {
     display: "block",
-    margin: "35px auto",
+    margin: "30px auto",
     padding: "10px",
     borderRadius: "100%",
     backgroundColor: "#7b7769",
@@ -88,38 +91,38 @@ const useStyles = makeStyles((theme) => ({
   },
   form: {
     width: "100%", // Fix IE 11 issue.
-    marginTop: theme.spacing(3),
+    marginTop: "44px",
   },
-  button: {
+  toggleButton: {
     width: "80px",
   },
   margin: {
-    margin: theme.spacing(1),
+    margin: "20px",
   },
   login: {
-    margin: theme.spacing(3, 0, 3),
+    margin: "20px auto",
     height: "42px",
     fontSize: "16px",
     fontWeight: "bold",
   },
   signUp: {
-    margin: theme.spacing(3, 0, 3),
+    margin: "20px auto",
     height: "42px",
     fontSize: "16px",
     fontWeight: "bold",
     color: "#fff",
   },
-  loginGuideButton: {
+  guideButton: {
     width: "300px",
     margin: "5px auto",
   },
   testUserButton: {
-    margin: theme.spacing(4),
+    margin: "20px",
     width: "350px",
     height: "50px",
     fontSize: "16px",
   },
-}));
+});
 
 const Auth: React.FC = () => {
   const classes = useStyles();
@@ -155,36 +158,55 @@ const Auth: React.FC = () => {
 
   return (
     <>
-      <header className={styles.header}>
+      <header data-testid="header" className={styles.header}>
         <Container maxWidth="md" className={classes.headerContainer}>
-          <Avatar className={classes.avatar}>つ</Avatar>
+          <Avatar data-testid="avatar" className={classes.avatar}>
+            つ
+          </Avatar>
           つぐもん
         </Container>
       </header>
-      <div className={isLogin ? styles.loginContainer : styles.signUpContainer}>
+      <div
+        data-testid="main"
+        className={isLogin ? styles.loginContainer : styles.signUpContainer}
+      >
         <Container component="main" maxWidth="xs" className={styles.container}>
-          {!isLogin && <MailOutline className={classes.mailOutline} />}
           {!isLogin && (
-            <Grid item xs={12} className={classes.grid}>
+            <MailOutline
+              data-testid="mail-icon"
+              className={classes.mailOutline}
+            />
+          )}
+          {!isLogin && (
+            <Grid
+              data-testid="guide-for-input"
+              item
+              xs={12}
+              className={classes.grid}
+            >
               メールアドレスとパスワードを入力して登録してください。
             </Grid>
           )}
-          <form className={classes.form} noValidate>
-            <TextField
-              className={classes.textField}
-              size="medium"
-              variant="outlined"
-              id="email"
-              label="メールアドレス"
-              value={email}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                setEmail(e.target.value);
-              }}
-            />
+
+          <form className={classes.form}>
+            <FormControl className={classes.textField} variant="outlined">
+              <InputLabel htmlFor="email">メールアドレス</InputLabel>
+              <OutlinedInput
+                data-testid="email"
+                className={classes.textField}
+                value={email}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                  setEmail(e.target.value);
+                }}
+                labelWidth={100}
+              />
+            </FormControl>
             <FormControl className={classes.textField} variant="outlined">
               <InputLabel htmlFor="password">パスワード</InputLabel>
               <OutlinedInput
                 id="password"
+                data-testid="password"
+                className={classes.textField}
                 type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
@@ -193,9 +215,10 @@ const Auth: React.FC = () => {
                 endAdornment={
                   <InputAdornment position="end">
                     <BrownButton
+                      data-testid="toggle-button"
                       size="small"
+                      className={classes.toggleButton}
                       variant="contained"
-                      className={classes.button}
                       onClick={toggleShowPassword}
                       onMouseDown={handleMouseDownPassword}
                     >
@@ -209,8 +232,9 @@ const Auth: React.FC = () => {
             {isLogin ? (
               <Button
                 fullWidth
-                variant="contained"
+                data-testid="login"
                 className={classes.login}
+                variant="contained"
                 onClick={async () => {
                   try {
                     await signInEmail();
@@ -224,8 +248,9 @@ const Auth: React.FC = () => {
             ) : (
               <RedButton
                 fullWidth
-                variant="contained"
+                data-testid="sign-up"
                 className={classes.signUp}
+                variant="contained"
                 color="primary"
                 onClick={async () => {
                   try {
@@ -241,10 +266,11 @@ const Auth: React.FC = () => {
 
             <div className={styles.loginGuide}>
               <Button
+                data-testid="guide-for-sign-up"
+                className={classes.guideButton}
                 disableRipple={true}
                 onClick={toggleIsLogin}
                 size="medium"
-                className={classes.loginGuideButton}
               >
                 {isLogin
                   ? "ユーザー登録をされていない方はこちら"
@@ -252,9 +278,10 @@ const Auth: React.FC = () => {
               </Button>
               {isLogin && (
                 <Button
+                  data-testid="guide-for-password"
+                  className={classes.guideButton}
                   disableRipple={true}
                   size="medium"
-                  className={classes.loginGuideButton}
                 >
                   パスワードが分からない場合
                 </Button>
@@ -263,11 +290,15 @@ const Auth: React.FC = () => {
           </form>
         </Container>
       </div>
-      <footer className={isLogin ? styles.footer : styles.footer2}>
+      <footer
+        data-testid="footer"
+        className={isLogin ? styles.footer : styles.footer2}
+      >
         <BrownButton
+          data-testid="test-user-button"
+          className={classes.testUserButton}
           onClick={testUserLogin}
           variant="contained"
-          className={classes.testUserButton}
           startIcon={<AccountCircle />}
         >
           テストユーザーでログインする
