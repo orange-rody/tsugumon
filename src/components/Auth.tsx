@@ -27,6 +27,7 @@ import {
 
 import { red, brown } from "@material-ui/core/colors";
 import { AccountCircle, MailOutline } from "@material-ui/icons";
+import { SSL_OP_ALLOW_UNSAFE_LEGACY_RENEGOTIATION } from "node:constants";
 
 const RedButton = withStyles((theme: Theme) => ({
   root: {
@@ -132,10 +133,26 @@ const Auth: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
 
   const signInEmail = async () => {
-    await auth.signInWithEmailAndPassword(email, password);
+    if (email && password) {
+      await auth.signInWithEmailAndPassword(email, password);
+    } else if (!email && password) {
+      alert("メールアドレスを入力してください");
+    } else if (email && !password) {
+      alert("パスワードを入力してください");
+    } else {
+      alert("メールアドレスとパスワードを入力してください");
+    }
   };
   const signUpEmail = async () => {
-    await auth.createUserWithEmailAndPassword(email, password);
+    if (email && password) {
+      await auth.createUserWithEmailAndPassword(email, password);
+    }else if (!email && password) {
+      alert("メールアドレスを入力してください");
+    } else if (email && !password) {
+      alert("パスワードを入力してください");
+    } else {
+      alert("メールアドレスとパスワードを入力してください");
+    }
   };
   const toggleIsLogin = () => {
     setShowPassword(false);
