@@ -5,6 +5,9 @@ import styles from "./Auth.module.css";
 import {
   Button,
   Avatar,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
   CssBaseline,
   FormControl,
   InputLabel,
@@ -12,22 +15,25 @@ import {
   OutlinedInput,
   InputAdornment,
   IconButton,
-  FormControlLabel,
-  Checkbox,
   Link,
   Grid,
   Box,
   Typography,
   withStyles,
   makeStyles,
-  createStyles,
+  Modal,
   Theme,
   Container,
+  TextField,
 } from "@material-ui/core";
 
 import { red, brown } from "@material-ui/core/colors";
-import { AccountCircle, MailOutline } from "@material-ui/icons";
-import { SSL_OP_ALLOW_UNSAFE_LEGACY_RENEGOTIATION } from "node:constants";
+import {
+  AccountCircle,
+  MailOutline,
+  Send,
+  ExpandMore,
+} from "@material-ui/icons";
 
 const RedButton = withStyles((theme: Theme) => ({
   root: {
@@ -49,13 +55,23 @@ const BrownButton = withStyles((theme: Theme) => ({
   },
 }))(Button);
 
+const getModalStyle = () => {
+  const top = 50;
+  const left = 50;
+  return {
+    top: `${top}%`,
+    left: `${left}%`,
+    transform: `translate(-${top}%, -${left}%)`,
+  };
+};
+
 const useStyles = makeStyles({
   textField: {
     width: "100%",
-    height: "50px",
-    marginBottom: "20px",
+    height: "42px",
+    margin: "0px auto 15px",
     backgroundColor: "white",
-    fontSize: "20px",
+    fontSize: "15px",
     borderRadius: "0px",
   },
   container: {
@@ -96,18 +112,20 @@ const useStyles = makeStyles({
   },
   toggleButton: {
     width: "80px",
+    height: "25px",
+    fontSize: "13px",
   },
   margin: {
     margin: "20px",
   },
   login: {
-    margin: "20px auto",
+    margin: "10px auto",
     height: "42px",
     fontSize: "16px",
     fontWeight: "bold",
   },
   signUp: {
-    margin: "20px auto",
+    margin: "10px auto",
     height: "42px",
     fontSize: "16px",
     fontWeight: "bold",
@@ -115,7 +133,7 @@ const useStyles = makeStyles({
   },
   guideButton: {
     width: "300px",
-    margin: "5px auto",
+    margin: "20px auto 0px",
   },
   testUserButton: {
     margin: "20px",
@@ -123,6 +141,26 @@ const useStyles = makeStyles({
     height: "50px",
     fontSize: "16px",
   },
+  accordion: {
+    marginTop: "20px",
+    marginBottom: "40px",
+    width: "100%",
+    fontSize: "14px",
+    border: "1px solid #eee",
+  },
+  accordionDetails: {
+    height: "20px",
+    fontSize: "14px",
+    marginBottom: "15px",
+  },
+  // modal: {
+  //   outline: "none",
+  //   position: "absolute",
+  //   width: "400px",
+  //   borderRadius: "10px",
+  //   backgroundColor: "#fff",
+  //   padding: "20px",
+  // },
 });
 
 const Auth: React.FC = () => {
@@ -131,6 +169,21 @@ const Auth: React.FC = () => {
   const [password, setPassword] = useState("");
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
+  const [openModal, setOpenModal] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
+
+  const sendResetEmail = async (e: React.MouseEvent<HTMLElement>) => {
+    await auth
+      .sendPasswordResetEmail(resetEmail)
+      .then(() => {
+        setOpenModal(false);
+        setResetEmail("");
+      })
+      .catch((err) => {
+        alert(err.message);
+        setResetEmail("");
+      });
+  };
 
   const signInEmail = async () => {
     if (email && password) {
@@ -146,7 +199,7 @@ const Auth: React.FC = () => {
   const signUpEmail = async () => {
     if (email && password) {
       await auth.createUserWithEmailAndPassword(email, password);
-    }else if (!email && password) {
+    } else if (!email && password) {
       alert("メールアドレスを入力してください");
     } else if (email && !password) {
       alert("パスワードを入力してください");
@@ -239,7 +292,7 @@ const Auth: React.FC = () => {
                       onClick={toggleShowPassword}
                       onMouseDown={handleMouseDownPassword}
                     >
-                      {showPassword ? "隠す" : "表示する"}
+                      {showPassword ? "隠す" : "表示"}
                     </BrownButton>
                   </InputAdornment>
                 }
@@ -294,18 +347,46 @@ const Auth: React.FC = () => {
                   : "ログイン画面に戻る"}
               </Button>
               {isLogin && (
-                <Button
-                  data-testid="guide-for-password"
-                  className={classes.guideButton}
-                  disableRipple={true}
-                  size="medium"
-                >
-                  パスワードが分からない場合
-                </Button>
+                <Accordion className={classes.accordion} square={true}>
+                  <AccordionSummary expandIcon={<ExpandMore />}>
+                    パスワードが分からない場合
+                  </AccordionSummary>
+                  <AccordionDetails className={classes.accordionDetails}>
+                    <Button>
+                      ・こちらでパスワードの再設定をおこないます。
+                    </Button>
+                  </AccordionDetails>
+                </Accordion>
               )}
+              <span />
             </div>
           </form>
         </Container>
+        {/* <Modal
+          open={openModal}
+          onClose={() => {
+            setOpenModal(false);
+          }}
+        >
+          <div style={getModalStyle()} className={classes.modal}>
+            <div>
+              <TextField
+                InputLabelProps={{
+                  shrink: true,
+                }}
+                type="email"
+                label="Reset Email"
+                value={resetEmail}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                  setResetEmail(e.target.value);
+                }}
+              />
+              <IconButton onClick={sendResetEmail}>
+                <Send />
+              </IconButton>
+            </div>
+          </div>
+        </Modal> */}
       </div>
       <footer
         data-testid="footer"
