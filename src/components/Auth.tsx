@@ -149,7 +149,7 @@ const useStyles = makeStyles({
     border: "1px solid #eee",
   },
   accordionDetails: {
-    height: "20px",
+    height: "60px",
     fontSize: "14px",
     marginBottom: "15px",
   },
@@ -347,7 +347,11 @@ const Auth: React.FC = () => {
                   : "ログイン画面に戻る"}
               </Button>
               {isLogin && (
-                <Accordion className={classes.accordion} square={true}>
+                <Accordion
+                  className={classes.accordion}
+                  square={true}
+                  data-testid="guide-for-password"
+                >
                   <AccordionSummary expandIcon={<ExpandMore />}>
                     パスワードが分からない場合
                   </AccordionSummary>

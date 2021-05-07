@@ -1,9 +1,11 @@
 import { configureStore, ThunkAction, Action } from '@reduxjs/toolkit';
 import userReducer from '../features//userSlice';
+import postReducer from '../features/post/postSlice';
 
 export const store = configureStore({
   reducer: {
     user: userReducer,
+    post: postReducer,
   },
 });
 
