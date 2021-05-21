@@ -1,7 +1,7 @@
 import React from "react";
 import { render, screen, cleanup } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import Auth from "./Auth";
+import Auth from "../Auth";
 
 // itの後に毎回行う処理はafterEachで設定することができる
 // cleanupを実行するとrender()でレンダリングされた内容をアンマウントすることができる
@@ -25,15 +25,4 @@ describe("Rendering", () => {
   });
 });
 
-describe("Input form onChange Event", () => {
-  it("Should update input value correctly", () => {
-    render(<Auth />);
-    const inputEmail = screen.getAllByRole("textbox")[0];
-    userEvent.type(inputEmail, "test");
-    expect(inputEmail.value).toBe("test");
-    const inputPassword = screen.getByLabelText("パスワード");
-    userEvent.type(inputPassword, "test");
-    expect(inputPassword.value).toBe("test");
-    // userEvent.type(inputPassword,"")
-  });
-});
+

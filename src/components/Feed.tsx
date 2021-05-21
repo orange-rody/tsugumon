@@ -1,11 +1,11 @@
 import React from "react";
 import { auth } from "../firebase";
-import  PostInput from "../features/post/PostInput";
+import ImageInput from "../components/ImageInput/ImageInput";
 const Feed = () => {
   return (
     <div>
       Feed
-      <PostInput />
+      <ImageInput />
       <button onClick={() => auth.signOut()}>Logout</button>
     </div>
   );

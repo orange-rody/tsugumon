@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
-import { auth, provider, storage } from "../firebase";
+import { auth } from "../../firebase";
 import styles from "./Auth.module.css";
 import {
   Button,
@@ -8,30 +8,21 @@ import {
   Accordion,
   AccordionSummary,
   AccordionDetails,
-  CssBaseline,
   FormControl,
   InputLabel,
-  Input,
   OutlinedInput,
   InputAdornment,
-  IconButton,
-  Link,
   Grid,
-  Box,
-  Typography,
   withStyles,
   makeStyles,
-  Modal,
   Theme,
   Container,
-  TextField,
 } from "@material-ui/core";
 
 import { red, brown } from "@material-ui/core/colors";
 import {
   AccountCircle,
   MailOutline,
-  Send,
   ExpandMore,
 } from "@material-ui/icons";
 
@@ -54,16 +45,6 @@ const BrownButton = withStyles((theme: Theme) => ({
     },
   },
 }))(Button);
-
-const getModalStyle = () => {
-  const top = 50;
-  const left = 50;
-  return {
-    top: `${top}%`,
-    left: `${left}%`,
-    transform: `translate(-${top}%, -${left}%)`,
-  };
-};
 
 const useStyles = makeStyles({
   textField: {
@@ -366,31 +347,6 @@ const Auth: React.FC = () => {
             </div>
           </form>
         </Container>
-        {/* <Modal
-          open={openModal}
-          onClose={() => {
-            setOpenModal(false);
-          }}
-        >
-          <div style={getModalStyle()} className={classes.modal}>
-            <div>
-              <TextField
-                InputLabelProps={{
-                  shrink: true,
-                }}
-                type="email"
-                label="Reset Email"
-                value={resetEmail}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                  setResetEmail(e.target.value);
-                }}
-              />
-              <IconButton onClick={sendResetEmail}>
-                <Send />
-              </IconButton>
-            </div>
-          </div>
-        </Modal> */}
       </div>
       <footer
         data-testid="footer"

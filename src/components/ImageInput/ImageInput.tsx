@@ -1,33 +1,35 @@
 import React, { useState } from "react";
-import firebase from "firebase";
-import {storage} from "../../firebase";
-
-type MyFile = File;
+import { storage } from "../../firebase";
 
 export default function App() {
-  const [image, setImage] = useState<MyFile>();
-  const [imageUrl, setImageUrl] = useState<string | ArrayBuffer | null>("");
+  const [image, setImage] = useState<File | null>();
+  const [imageUrl, setImageUrl] = useState<string | undefined>("");
 
   const handleImage = (e: React.ChangeEvent<HTMLInputElement>) => {
     const FileList: FileList | null = e.target.files;
     if (FileList) {
-      const array = Array.from(FileList);
-      const file = array.map((file) =>
-        Object.assign(file, {
-          preview: URL.createObjectURL(file),
-        })
-      )[0];
+      const file: File | null = FileList.item(0);
       setImage(file);
       console.log(file);
-      let reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.addEventListener("load", () => {
-        setImageUrl(reader.result);
-      });
+      const reader = new FileReader();
+      reader.addEventListener(
+        "load",
+        function () {
+          // 画像ファイルを base64 文字列に変換します
+          setImageUrl(reader.result as string);
+        },
+        false
+      );
+
+      if (file) {
+        reader.readAsDataURL(file);
+      }
     }
   };
 
-  const onUpload = (e:any) => {
+  // onUploadが呼び出される瞬間、なぜかサーバへの送信がスタートしてしまうので、
+  // e.preventDefault()で規定の動作をキャンセルしています。
+  const onUpload = (e: any) => {
     e.preventDefault();
     if (image) {
       console.log(image.name);
@@ -47,7 +49,7 @@ export default function App() {
         <input type="file" onChange={handleImage} />
         <button onClick={onUpload}>Upload</button>
       </form>
-      {/* <img src={imageUrl} alt="uploader" /> */}
+      <img src={imageUrl} alt="uploader" />
     </div>
   );
 }
