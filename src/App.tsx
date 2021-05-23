@@ -1,5 +1,4 @@
 import React, { useEffect } from "react";
-import styles from "./App.module.css";
 import { useSelector, useDispatch } from "react-redux";
 import { selectUser, login, logout } from "./features/userSlice";
 import { auth } from "./firebase";
@@ -9,7 +8,10 @@ import Auth from "./components/Auth/Auth";
 const App: React.FC = () => {
   const user = useSelector(selectUser);
   const dispatch = useDispatch();
-
+  const style = {
+    width: "100vw",
+    height: "100vh",
+  };
   useEffect(() => {
     const unSubscribe = auth.onAuthStateChanged((authUser) => {
       if (authUser) {
@@ -36,13 +38,7 @@ const App: React.FC = () => {
 
   return (
     <>
-      {user.uid ? (
-        <div className={styles.app}>
-          <Feed />
-        </div>
-      ) : (
-        <Auth />
-      )}
+      <div style={style}>{user.uid ? <Feed /> : <Auth />}</div>
     </>
   );
 };
