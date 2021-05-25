@@ -1,26 +1,18 @@
 import React, { useState } from "react";
-import { storage } from "../../firebase";
-import { auth } from "../../firebase";
+import { useSelector } from "react-redux";
+import { selectUser } from "../../features/userSlice";
+import { auth, storage, db } from "../../firebase";
+import firebase from "firebase/app";
 import styles from "./ImageInput.module.css";
 import {
-  IconButton,
   Button,
-  Accordion,
-  AccordionDetails,
-  FormControl,
-  InputLabel,
-  OutlinedInput,
-  InputAdornment,
-  Grid,
-  withStyles,
   makeStyles,
   Theme,
   Container,
   createStyles,
 } from "@material-ui/core";
 
-import CloseRoundedIcon from "@material-ui/icons/Close";
-import ImageIcon from "@material-ui/icons/Image";
+import { CloseRounded, Image } from "@material-ui/icons";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -133,44 +125,75 @@ const upload = {
   display: "none",
 };
 export default function ImageInput() {
-  const [image, setImage] = useState<File | null>();
+  const user = useSelector(selectUser);
+  const [image, setImage] = useState<File | null>(null);
   const [imageUrl, setImageUrl] = useState<string | undefined>("");
+  const [caption, setCaption] = useState<String>("");
   const classes = useStyles();
   const handleImage = (e: React.ChangeEvent<HTMLInputElement>) => {
     const FileList: FileList | null = e.target.files;
     if (FileList) {
       const file: File | null = FileList.item(0);
       setImage(file);
-      console.log(file);
       const reader = new FileReader();
       reader.addEventListener(
         "load",
-        function () {
+        () => {
           // 画像ファイルを base64 文字列に変換します
+          // resultはstring,ArrayBuffer,nullの3つの値を取りうるので、as stringを使って
+          // 必ず値が文字列となるようにします
           setImageUrl(reader.result as string);
         },
         false
       );
-
       if (file) {
         reader.readAsDataURL(file);
       }
     }
   };
 
-  // onUploadが呼び出される瞬間、なぜかサーバへの送信がスタートしてしまうので、
+  const handleCaption = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const inputText = e.target.value;
+    if (inputText) {
+      setCaption(inputText);
+      console.log(caption);
+    }
+  };
+
+  // onUploadが呼び出される瞬間、ブラウザの再読み込みがスタートしてしまうので、
   // e.preventDefault()で規定の動作をキャンセルしています。
   const onUpload = (e: any) => {
     e.preventDefault();
-    if (image) {
-      console.log(image.name);
+    if (image && caption) {
       const image_name = image.name;
+      console.log(caption);
       const storageRef = storage.ref().child("images/" + image_name);
       console.log(storageRef);
-      storageRef.put(image).then(() => {
-        console.log(`${image_name}のアップロードが完了しました。`);
-      });
+      const uploadImage = storageRef.put(image);
+      uploadImage.on(
+        firebase.storage.TaskEvent.STATE_CHANGED,
+        () => {},
+        (err: any) => {
+          alert(err.message);
+        },
+        () => {
+          console.log(caption);
+          db.collection("posts").add({
+            username: user.displayName,
+            image: image_name,
+            text: caption,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+          });
+        }
+      );
+    } else if (image && !caption) {
+      const image_name = image.name;
+      const storageRef = storage.ref().child("images/" + image_name);
+      storageRef.put(image);
     }
+    setImage(null);
+    setImageUrl("");
+    setCaption("");
   };
 
   const signOut = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
@@ -187,7 +210,7 @@ export default function ImageInput() {
             onClick={signOut}
           />
           <label htmlFor="closeButton">
-            <CloseRoundedIcon className={classes.closeIcon} />
+            <CloseRounded className={classes.closeIcon} />
           </label>
           <p className={classes.title}>新規投稿</p>
         </Container>
@@ -196,7 +219,7 @@ export default function ImageInput() {
         <div style={preview}>
           {imageUrl === "" ? (
             <>
-              <ImageIcon className={classes.imageIcon} />
+              <Image className={classes.imageIcon} />
               <p className={styles.noImage}>No Image</p>
             </>
           ) : (
@@ -229,6 +252,7 @@ export default function ImageInput() {
             <textarea
               className={styles.textarea}
               placeholder="コメントを追加"
+              onChange={handleCaption}
             ></textarea>
           </li>
           <li style={list}>
