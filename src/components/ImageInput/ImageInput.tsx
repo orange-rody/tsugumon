@@ -14,6 +14,9 @@ import {
 
 import { CloseRounded, Image } from "@material-ui/icons";
 
+// TODO >> iPhoneの画面サイズに合わせてレイアウトが自動的に変わるようにする
+// メディアクエリ ブレークポイント などを使ってcssで指定した方が無難？
+// コンポーネントごとにスタイルの設定ファイルがバラバラになってしまうと、管理できなくなりそうで不安。
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     headerContainer: {
@@ -128,7 +131,7 @@ export default function ImageInput() {
   const user = useSelector(selectUser);
   const [image, setImage] = useState<File | null>(null);
   const [imageUrl, setImageUrl] = useState<string | undefined>("");
-  const [caption, setCaption] = useState<String>("");
+  const [caption, setCaption] = useState<string>("");
   const classes = useStyles();
   const handleImage = (e: React.ChangeEvent<HTMLInputElement>) => {
     const FileList: FileList | null = e.target.files;
@@ -160,13 +163,14 @@ export default function ImageInput() {
     }
   };
 
-  // onUploadが呼び出される瞬間、ブラウザの再読み込みがスタートしてしまうので、
-  // e.preventDefault()で規定の動作をキャンセルしています。
   const onUpload = (e: any) => {
+    // onUploadが呼び出される瞬間、ブラウザの再読み込みがスタートしてしまうので、
+    // e.preventDefault()で規定の動作をキャンセルします。
     e.preventDefault();
     if (image && caption) {
       const image_name = image.name;
       console.log(caption);
+      // TODO>>image_nameの暗号化
       const storageRef = storage.ref().child("images/" + image_name);
       console.log(storageRef);
       const uploadImage = storageRef.put(image);
@@ -177,8 +181,11 @@ export default function ImageInput() {
           alert(err.message);
         },
         () => {
-          console.log(caption);
+          console.log(user.displayName);
+          // firestoreのルール設定が書き込み不可になっていた場合、エラーになってしまうので注意！
           db.collection("posts").add({
+            // TODO >> usernameがnull値で登録される問題の解決
+            // もしかしたらテストユーザーの名前を登録していないことが原因かも?
             username: user.displayName,
             image: image_name,
             text: caption,
@@ -250,14 +257,17 @@ export default function ImageInput() {
           </li>
           <li style={list}>
             <textarea
+              id="textareaForm"
               className={styles.textarea}
               placeholder="コメントを追加"
               onChange={handleCaption}
+              value={caption}
             ></textarea>
           </li>
           <li style={list}>
             <button id="uploadFile" onClick={onUpload} style={upload} />
             <label htmlFor="uploadFile">
+              {/* TODO >> Imageステートが空のときは投稿ボタンが押せないようにする */}
               <Button
                 variant="contained"
                 size="medium"
