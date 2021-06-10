@@ -1,52 +1,67 @@
 import React, { useState } from "react";
-import { useDispatch } from "react-redux";
 import { auth } from "../../firebase";
-import styles from "./Auth.module.css";
+import styled from "styled-components";
+
 import {
   Button,
   Avatar,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
   FormControl,
   InputLabel,
   OutlinedInput,
   InputAdornment,
   Grid,
-  withStyles,
   makeStyles,
-  Theme,
   Container,
 } from "@material-ui/core";
 
-import { red, brown } from "@material-ui/core/colors";
-import {
-  AccountCircle,
-  MailOutline,
-  ExpandMore,
-} from "@material-ui/icons";
+import { AccountCircle, MailOutline } from "@material-ui/icons";
+import useMedia from "use-media";
 
-const RedButton = withStyles((theme: Theme) => ({
-  root: {
-    color: theme.palette.getContrastText(red[400]),
-    backgroundColor: red[400],
-    "&:hover": {
-      backgroundColor: red[500],
-    },
-  },
-}))(Button);
+const Wrapper = styled.div`
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  background-color: hsl(199, 59%, 80%);
+`;
 
-const BrownButton = withStyles((theme: Theme) => ({
-  root: {
-    color: theme.palette.getContrastText(brown[400]),
-    backgroundColor: brown[400],
-    "&:hover": {
-      backgroundColor: brown[500],
-    },
-  },
-}))(Button);
+const Header = styled.header`
+  width: 100vw;
+  height: 46px;
+  background-color: hsl(0, 0%, 100%);
+  border-bottom: 1px solid hsla(26, 100%, 12%, 0.2);
+  box-sizing: border-box;
+`;
+
+const Main = styled.main`
+  display: flex;
+  width: 100vw;
+  margin-top: 0;
+  border-bottom: 1px solid rgba(64, 28, 0, 0.2);
+  box-sizing: border-box;
+  background-color: hsl(199, 89%, 96%);
+`;
+
+const Form = styled.form`
+  width: 100%;
+  margin-top: 30px;
+`;
+
+const Footer = styled.form`
+  width: 100vw;
+  display: flex;
+  justify-content: center;
+`;
 
 const useStyles = makeStyles({
+  headerContainer: {
+    display: "flex",
+    justifyContent: "left",
+    height: "30px",
+    paddingTop: "7px",
+    lineHeight: "30px",
+    fontSize: "1rem",
+  },
   textField: {
     width: "100%",
     height: "42px",
@@ -59,68 +74,74 @@ const useStyles = makeStyles({
     margin: "0px",
     padding: "0px",
   },
-  headerContainer: {
-    display: "flex",
-    justifyContent: "left",
-    height: "35px",
-    paddingTop: "7px",
-    lineHeight: "35px",
-    fontSize: "18px",
-  },
   avatar: {
-    width: "35px",
-    height: "35px",
+    width: "30px",
+    height: "30px",
     marginRight: "5px",
-    backgroundColor: red[500],
+    backgroundColor: "#f00",
   },
-  mailOutline: {
+  mailOutlinePC: {
     display: "block",
-    margin: "30px auto",
-    padding: "10px",
+    margin: "15px auto",
+    padding: "8px",
     borderRadius: "100%",
     backgroundColor: "#7b7769",
-    fontSize: "50px",
+    fontSize: "3.2rem",
     textAlign: "center",
     color: "#f9f9f5",
   },
-  grid: {
-    fontSize: "14px",
+  mailOutlineMobile: {
+    display: "block",
+    margin: "10px auto",
+    padding: "10px",
+    borderRadius: "100%",
+    backgroundColor: "#7b7769",
+    fontSize: "2rem",
+    textAlign: "center",
+    color: "#f9f9f5",
+  },
+  gridPC: {
+    fontSize: "1rem",
     textAlign: "center",
   },
-  form: {
-    width: "100%", // Fix IE 11 issue.
-    marginTop: "44px",
+  gridMobile: {
+    fontSize: "0.7rem",
+    textAlign: "center",
   },
   toggleButton: {
     width: "80px",
     height: "25px",
     fontSize: "13px",
   },
-  margin: {
-    margin: "20px",
-  },
   login: {
-    margin: "10px auto",
+    margin: "12px auto",
     height: "42px",
     fontSize: "16px",
     fontWeight: "bold",
   },
   signUp: {
-    margin: "10px auto",
+    margin: "12px auto",
     height: "42px",
     fontSize: "16px",
     fontWeight: "bold",
     color: "#fff",
   },
   guideButton: {
+    left: "50%",
     width: "300px",
-    margin: "20px auto 0px",
+    transform: "translateX(-50%)",
+    marginTop: "20px",
+    backgroundColor: "hsl(0,0%,100%)",
+    color: "hsl(199,89%,29%)",
+    border: "1px solid hsl(199,89%,29%)",
   },
   testUserButton: {
     margin: "20px",
     width: "350px",
     height: "50px",
     fontSize: "16px",
+    backgroundColor: "hsl(0,0%,100%)",
+    color: "hsl(199,89%,29%)",
   },
   accordion: {
     marginTop: "20px",
@@ -150,20 +171,24 @@ const Auth: React.FC = () => {
   const [password, setPassword] = useState("");
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
-  const [openModal, setOpenModal] = useState(false);
-  const [resetEmail, setResetEmail] = useState("");
+  // const [openModal, setOpenModal] = useState(false);
+  // const [resetEmail, setResetEmail] = useState("");
 
-  const sendResetEmail = async (e: React.MouseEvent<HTMLElement>) => {
-    await auth
-      .sendPasswordResetEmail(resetEmail)
-      .then(() => {
-        setOpenModal(false);
-        setResetEmail("");
-      })
-      .catch((err) => {
-        alert(err.message);
-        setResetEmail("");
-      });
+  // const sendResetEmail = async (e: React.MouseEvent<HTMLElement>) => {
+  //   await auth
+  //     .sendPasswordResetEmail(resetEmail)
+  //     .then(() => {
+  //       setOpenModal(false);
+  //       setResetEmail("");
+  //     })
+  //     .catch((err) => {
+  //       alert(err.message);
+  //       setResetEmail("");
+  //     });
+  // };
+
+  const testUserLogin = async () => {
+    await auth.signInWithEmailAndPassword("testUser@gmail.com", "350125go");
   };
 
   const signInEmail = async () => {
@@ -189,8 +214,8 @@ const Auth: React.FC = () => {
     }
   };
   const toggleIsLogin = () => {
-    setShowPassword(false);
     setIsLogin(!isLogin);
+    setShowPassword(false);
     // EmailとPasswordのstateを初期化
     setEmail("");
     setPassword("");
@@ -202,30 +227,32 @@ const Auth: React.FC = () => {
   const handleMouseDownPassword = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
   };
-
-  const testUserLogin = async () => {
-    await auth.signInWithEmailAndPassword("testUser@gmail.com", "350125go");
+  const loginContainer = {
+    height: "320px",
   };
+  const signUpContainer = {
+    height: "420px",
+  };
+  const isWide = useMedia({ minWidth: "481px" });
 
   return (
-    <>
-      <header data-testid="header" className={styles.header}>
+    <Wrapper>
+      <Header data-testid="header">
         <Container maxWidth="md" className={classes.headerContainer}>
           <Avatar data-testid="avatar" className={classes.avatar}>
             つ
           </Avatar>
           つぐもん
         </Container>
-      </header>
-      <div
-        data-testid="main"
-        className={isLogin ? styles.loginContainer : styles.signUpContainer}
-      >
-        <Container component="main" maxWidth="xs" className={styles.container}>
+      </Header>
+      <Main style={isLogin ? loginContainer : signUpContainer}>
+        <Container component="main" maxWidth="xs">
           {!isLogin && (
             <MailOutline
               data-testid="mail-icon"
-              className={classes.mailOutline}
+              className={
+                isWide ? classes.mailOutlinePC : classes.mailOutlineMobile
+              }
             />
           )}
           {!isLogin && (
@@ -233,13 +260,13 @@ const Auth: React.FC = () => {
               data-testid="guide-for-input"
               item
               xs={12}
-              className={classes.grid}
+              className={isWide ? classes.gridPC : classes.gridMobile}
             >
-              メールアドレスとパスワードを入力して登録してください。
+              メールアドレスとパスワードを登録してください。
             </Grid>
           )}
 
-          <form className={classes.form}>
+          <Form>
             <FormControl className={classes.textField} variant="outlined">
               <InputLabel htmlFor="email">メールアドレス</InputLabel>
               <OutlinedInput
@@ -265,7 +292,7 @@ const Auth: React.FC = () => {
                 }}
                 endAdornment={
                   <InputAdornment position="end">
-                    <BrownButton
+                    <Button
                       data-testid="toggle-button"
                       size="small"
                       className={classes.toggleButton}
@@ -274,7 +301,7 @@ const Auth: React.FC = () => {
                       onMouseDown={handleMouseDownPassword}
                     >
                       {showPassword ? "隠す" : "表示"}
-                    </BrownButton>
+                    </Button>
                   </InputAdornment>
                 }
                 labelWidth={80}
@@ -297,7 +324,7 @@ const Auth: React.FC = () => {
                 ログインする
               </Button>
             ) : (
-              <RedButton
+              <Button
                 fullWidth
                 data-testid="sign-up"
                 className={classes.signUp}
@@ -312,10 +339,10 @@ const Auth: React.FC = () => {
                 }}
               >
                 この内容で登録する
-              </RedButton>
+              </Button>
             )}
 
-            <div className={styles.loginGuide}>
+            <div>
               <Button
                 data-testid="guide-for-sign-up"
                 className={classes.guideButton}
@@ -327,7 +354,7 @@ const Auth: React.FC = () => {
                   ? "ユーザー登録をされていない方はこちら"
                   : "ログイン画面に戻る"}
               </Button>
-              {isLogin && (
+              {/* {isLogin && (
                 <Accordion
                   className={classes.accordion}
                   square={true}
@@ -343,26 +370,23 @@ const Auth: React.FC = () => {
                   </AccordionDetails>
                 </Accordion>
               )}
-              <span />
+              <span /> */}
             </div>
-          </form>
+          </Form>
         </Container>
-      </div>
-      <footer
-        data-testid="footer"
-        className={isLogin ? styles.footer : styles.footer2}
-      >
-        <BrownButton
+      </Main>
+      <Footer data-testid="footer">
+        <Button
           data-testid="test-user-button"
           className={classes.testUserButton}
           onClick={testUserLogin}
           variant="contained"
           startIcon={<AccountCircle />}
         >
-          テストユーザーでログインする
-        </BrownButton>
-      </footer>
-    </>
+          テストユーザーでログイン
+        </Button>
+      </Footer>
+    </Wrapper>
   );
 };
 
