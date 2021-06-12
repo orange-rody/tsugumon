@@ -1,9 +1,15 @@
 import React, { useState } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { selectUser } from "../../features/userSlice";
+import {
+  selectImage,
+  selectCaption,
+  selectPreview,
+} from "../../features/postSlice";
 import { auth, storage, db } from "../../firebase";
 import firebase from "firebase/app";
 import styled from "styled-components";
+import mediaQuery from "styled-media-query";
 import {
   Paper,
   Button,
@@ -15,11 +21,9 @@ import {
   useMediaQuery,
 } from "@material-ui/core";
 import { ArrowDownward, CropOriginal } from "@material-ui/icons";
-import useMedia from "use-media";
 
-// TODO >> iPhoneの画面サイズに合わせてレイアウトが自動的に変わるようにする
-// メディアクエリ ブレークポイント などを使ってcssで指定した方が無難？
-// コンポーネントごとにスタイルの設定ファイルがバラバラになってしまうと、管理できなくなりそうで不安。
+//mediumより小さかったらmediaMobileのプロパティが設定されるようにする
+const mediaMobile = mediaQuery.lessThan("medium");
 
 const theme = createMuiTheme({
   palette: {
@@ -48,7 +52,7 @@ const useStyles = makeStyles((theme: Theme) =>
       width: "100vw",
     },
     button: {
-      width: "150px",
+      width: "120px",
       height: "40px",
       borderRadius: "50px",
       fontSize: "18px",
@@ -57,11 +61,104 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-const upload = {
-  display: "none",
-};
+const Label = styled.div`
+  display: flex;
+  width: 100%;
+  height: 42px;
+  margin: 0 auto;
+  background-color: rgb(221, 202, 175);
+  background-size: 10px 10px;
+  border-bottom: 1px solid hsla(26, 100%, 12%, 0.2);
+  box-sizing: border-box;
+`;
+
+const Title = styled.h2`
+  width: 150px;
+  height: 42px;
+  margin: 0 auto;
+  font-size: 18px;
+  line-height: 42px;
+  text-align: center;
+  color: hsl(0, 0%, 10%);
+  font-weight: bold;
+  letter-spacing: 40px;
+`;
+
+const Title2 = styled(Title)`
+  letter-spacing: 10px;
+`;
+
+const Main = styled.main`
+  display: flex;
+  flex-flow: column;
+  width: 100%;
+  margin: 0 auto;
+  background-color: hsl(0, 0%, 100%);
+`;
+
+const ImageWrap = styled.div`
+  width: 100%;
+  margin: 0 auto;
+  position: relative;
+  :before {
+    content: "";
+    display: block;
+    padding-top: 75%;
+  }
+`;
+
+const PhotoImage = styled.img`
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  object-fit: cover;
+`;
+
+const NoPhotoImage = styled(PhotoImage)`
+  opacity: 0.3;
+`;
+
+const Notes = styled.div`
+  position: absolute;
+  left: 50%;
+  bottom: 20px;
+  ${mediaMobile`
+  bottom: 0px;`}
+  width: 200px;
+  height: 60px;
+  transform: translateX(-50%);
+  text-align: center;
+`;
+
+const ButtonArea = styled.div`
+  display: flex;
+  width: 100%;
+  height: 60px;
+  margin-top: 20px;
+  justify-content: space-around;
+`;
+
+const Textarea = styled.textarea`
+  display: block;
+  width: 90%;
+  height: 100px;
+  margin: 20px auto 0;
+  padding: 10px;
+  border-radius: 10px;
+  border: none;
+  font-size: 1rem;
+  resize: none;
+  background-color: rgba(221, 202, 175, 0.3);
+`;
+
+const InputFile = styled.input`
+  display: none;
+`;
 export default function ImageInput() {
   const user = useSelector(selectUser);
+  const dispatch = useDispatch();
   const [image, setImage] = useState<File | null>();
   const [imageUrl, setImageUrl] = useState<string | undefined>(
     `${process.env.PUBLIC_URL}/noPhoto.png`
@@ -69,6 +166,8 @@ export default function ImageInput() {
   const [caption, setCaption] = useState<string>("");
 
   const classes = useStyles();
+  const matches = useMediaQuery("(min-width:481px");
+
   const handleImage = (e: React.ChangeEvent<HTMLInputElement>) => {
     const FileList: FileList | null = e.target.files;
     if (FileList) {
@@ -92,15 +191,19 @@ export default function ImageInput() {
   };
 
   const clearImage = (e: React.MouseEvent<HTMLElement>) => {
+    e.preventDefault();
     setImageUrl(`${process.env.PUBLIC_URL}/noPhoto.png`);
   };
 
   const handleCaption = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const inputText = e.target.value;
-    if (inputText) {
-      setCaption(inputText);
-      console.log(caption);
-    }
+    //テキストエリアの文字を全消去できるようにsetCaption("")の処理をかけている
+    inputText ? setCaption(inputText) : setCaption("");
+  };
+
+  const clearCaption = (e: React.MouseEvent<HTMLElement>) => {
+    e.preventDefault();
+    setCaption("");
   };
 
   const onUpload = (e: any) => {
@@ -145,83 +248,9 @@ export default function ImageInput() {
     auth.signOut();
   };
 
-  const isWide = useMedia({ minWidth: "481px" });
-  const matches = useMediaQuery("(min-width:481px");
-
-  const Wrapper = styled.div`
-    width: 100vw;
-    height: 100vh;
-  `;
-
-  const Header = styled.header`
-    display: flex;
-    width: ${isWide ? 40 : 100}vw;
-    height: 42px;
-    margin: 0 auto;
-    background-color: rgb(221, 202, 175);
-    background-size: 10px 10px;
-    border-bottom: 1px solid hsla(26, 100%, 12%, 0.2);
-    box-sizing: border-box;
-  `;
-
-  const Title = styled.h2`
-    width: 150px;
-    height: 42px;
-    margin: 0 auto;
-    font-size: 18px;
-    line-height: 42px;
-    text-align: center;
-    color: hsl(0, 0%, 10%);
-    font-weight: bold;
-    letter-spacing: 40px;
-  `;
-
-  const Title2 = styled(Title)`
-    letter-spacing: 10px;
-  `;
-
-  const Main = styled.main`
-    display: flex;
-    flex-flow: column;
-    width: ${isWide ? 40 : 100}vw;
-    margin: 0 auto;
-    background-color: hsl(0, 0%, 100%);
-  `;
-
-  const ImageContainer = styled.div`
-    width: ${isWide ? 40 : 100}vw;
-    position: relative;
-  `;
-
-  const PhotoImage = styled.img`
-    display: block;
-    width: ${isWide ? 35 : 100}vw;
-    object-fit: cover;
-    margin: ${isWide ? 20 : 0}px auto 0;
-    opacity: ${imageUrl === `${process.env.PUBLIC_URL}/noPhoto.png` ? 0.3 : 1};
-  `;
-
-  const Notes = styled.div`
-    position: absolute;
-    left: 50%;
-    bottom: ${isWide ? 20 : 0}px;
-    width: 200px;
-    height: 60px;
-    transform: translateX(-50%);
-    text-align: center;
-  `;
-
-  const ButtonArea = styled.div`
-    display: flex;
-    width: ${isWide ? 40 : 100}vw;
-    height: 60px;
-    margin-top: 20px;
-    justify-content: space-around;
-  `;
-
-  const InputFile = styled.input`
-    display: none;
-  `;
+  const upload = {
+    display: "none",
+  };
 
   const img: HTMLImageElement = new Image()!;
   img.src = `${process.env.PUBLIC_URL}/noPhoto.png`;
@@ -229,18 +258,18 @@ export default function ImageInput() {
   return (
     // themeを適用させるには<ThemeProvider>を使用する
     <ThemeProvider theme={theme}>
-      <Wrapper>
-        <Paper
-          elevation={2}
-          className={matches ? classes.paperA : classes.paperB}
-        >
-          <Header data-testid="header">
+      <Paper
+        elevation={2}
+        className={matches ? classes.paperA : classes.paperB}
+      >
+        <Main>
+          <Label data-testid="header">
             <Title>写真</Title>
-          </Header>
-          <Main>
-            <ImageContainer>
-              <PhotoImage src={imageUrl} alt="uploader" />
-              {imageUrl === `${process.env.PUBLIC_URL}/noPhoto.png` ? (
+          </Label>
+          <ImageWrap>
+            {imageUrl === `${process.env.PUBLIC_URL}/noPhoto.png` ? (
+              <>
+                <NoPhotoImage src={imageUrl} alt="uploader" />
                 <Notes>
                   写真を選んでください。
                   <ArrowDownward
@@ -251,71 +280,99 @@ export default function ImageInput() {
                     }}
                   />
                 </Notes>
-              ) : (
-                ""
-              )}
-            </ImageContainer>
-            <form>
-              <ButtonArea>
-                <InputFile type="file" onChange={handleImage} id="inputFile" />
-                <label htmlFor="inputFile">
-                  <Button
-                    variant="contained"
-                    component="span"
-                    size="large"
-                    startIcon={<CropOriginal />}
-                    color="primary"
-                    className={classes.button}
-                  >
-                    選ぶ
-                  </Button>
-                </label>
-                <button
-                  id="clearFile"
-                  onClick={clearImage}
-                  style={{ display: "none" }}
-                />
-                <label htmlFor="clearFile">
-                  <Button
-                    variant="outlined"
-                    component="span"
-                    size="large"
-                    className={classes.button}
-                    color="default"
-                  >
-                    消す
-                  </Button>
-                </label>
-              </ButtonArea>
-              <Header data-testid="header">
-                <Title2>コメント</Title2>
-              </Header>
-              <li>
-                <textarea
-                  id="textareaForm"
-                  placeholder="コメントを追加"
-                  onChange={handleCaption}
-                  value={caption}
-                ></textarea>
-              </li>
-              <li>
-                <button id="uploadFile" onClick={onUpload} style={upload} />
-                <label htmlFor="uploadFile">
-                  {/* TODO >> Imageステートが空のときは投稿ボタンが押せないようにする */}
-                  <Button
-                    variant="contained"
-                    size="medium"
-                    color="primary"
-                    component="span"
-                  >
-                    投稿する
-                  </Button>
-                </label>
-              </li>
-            </form>
-          </Main>
-        </Paper>
-      </Wrapper>
+              </>
+            ) : (
+              <PhotoImage src={imageUrl} alt="uploader" />
+            )}
+          </ImageWrap>
+          <form>
+            <ButtonArea>
+              <InputFile type="file" onChange={handleImage} id="inputFile" />
+              <label htmlFor="inputFile">
+                <Button
+                  variant="contained"
+                  component="span"
+                  size="large"
+                  startIcon={<CropOriginal />}
+                  color="primary"
+                  className={classes.button}
+                >
+                  選ぶ
+                </Button>
+              </label>
+              <button
+                id="clearFile"
+                onClick={clearImage}
+                style={{ display: "none" }}
+              />
+              <label htmlFor="clearFile">
+                <Button
+                  variant="outlined"
+                  component="span"
+                  size="large"
+                  className={classes.button}
+                  color="default"
+                >
+                  消す
+                </Button>
+              </label>
+            </ButtonArea>
+            <Label data-testid="header">
+              <Title2>コメント</Title2>
+            </Label>
+            <Textarea
+              id="textareaForm"
+              placeholder="タップして入力する"
+              onChange={handleCaption}
+              value={caption}
+            ></Textarea>
+            <ButtonArea>
+              <Button
+                variant="contained"
+                component="span"
+                size="large"
+                color="secondary"
+                className={classes.button}
+                disabled={
+                  imageUrl === `${process.env.PUBLIC_URL}/noPhoto.png`
+                    ? true
+                    : false
+                }
+              >
+                次へ進む
+              </Button>
+              <button
+                id="clearCaption"
+                onClick={clearCaption}
+                style={{ display: "none" }}
+              />
+              <label htmlFor="clearCaption">
+                <Button
+                  variant="outlined"
+                  component="span"
+                  size="large"
+                  className={classes.button}
+                  color="default"
+                >
+                  消す
+                </Button>
+              </label>
+            </ButtonArea>
+            <button id="uploadFile" onClick={onUpload} style={upload} />
+            <label htmlFor="uploadFile">
+              {/* TODO >> Imageステートが空のときは投稿ボタンが押せないようにする */}
+              <Button
+                variant="contained"
+                size="medium"
+                color="primary"
+                component="span"
+              >
+                投稿する
+              </Button>
+            </label>
+          </form>
+        </Main>
+      </Paper>
     </ThemeProvider>
   );
 }
