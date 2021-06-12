@@ -1,6 +1,15 @@
 import React, { useState } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { selectUser } from "../../features/userSlice";
+import {
+  selectImageUrl,
+  selectCaption,
+  HandleImageUrl,
+  ClearImageUrl,
+  HandleCaption,
+  ClearCaption,
+  TogglePreview,
+} from "../../features/postSlice";
 import { auth, storage, db } from "../../firebase";
 import firebase from "firebase/app";
 import styled from "styled-components";
@@ -11,12 +20,11 @@ import {
   createMuiTheme,
   makeStyles,
   createStyles,
+  Avatar,
   Theme,
   ThemeProvider,
   useMediaQuery,
 } from "@material-ui/core";
-
-const mediaMobile = mediaQuery.lessThan("medium");
 
 const theme = createMuiTheme({
   palette: {
@@ -37,12 +45,12 @@ const theme = createMuiTheme({
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
-    paperA: {
-      width: "40vw",
-      margin: "20px auto",
-    },
-    paperB: {
-      width: "100vw",
+    paper: {
+      position: "absolute",
+      width: "100%",
+      height: "100%",
+      top: "0",
+      left: "0",
     },
     button: {
       width: "120px",
@@ -54,23 +62,22 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-const Label = styled.div`
+const Header = styled.div`
   display: flex;
   width: 100%;
-  height: 42px;
+  height: 52px;
   margin: 0 auto;
   background-color: rgb(221, 202, 175);
-  background-size: 10px 10px;
   border-bottom: 1px solid hsla(26, 100%, 12%, 0.2);
   box-sizing: border-box;
 `;
 
 const Title = styled.h2`
-  width: 150px;
-  height: 42px;
+  width: 70%;
+  height: 52px;
   margin: 0 auto;
   font-size: 18px;
-  line-height: 42px;
+  line-height: 52px;
   text-align: center;
   color: hsl(0, 0%, 10%);
   font-weight: bold;
@@ -82,6 +89,40 @@ const Main = styled.main`
   width: 100%;
   margin: 0 auto;
   background-color: hsl(0, 0%, 100%);
+`;
+
+const UserInfo = styled.div`
+  display: flex;
+  width: 100%;
+  height: 60px;
+  margin: 0 auto;
+  background-color: rgb(255, 255, 255);
+  border-bottom: 1px solid hsla(26, 100%, 12%, 0.2);
+  box-sizing: border-box;
+`;
+
+const UserIcon = styled.div`
+  width: 40px;
+  height: 40px;
+  margin: 10px;
+  border-radius: 100%;
+  background-color: hsl(0, 0%, 90%);
+`;
+
+const UserImage = styled.img`
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  border-radius: 100%;
+`;
+
+const UserName = styled.p`
+  width: 10vw;
+  height: 60px;
+  margin: 0;
+
+  line-height: 60px;
 `;
 
 const ImageWrap = styled.div`
@@ -112,14 +153,73 @@ const ButtonArea = styled.div`
   justify-content: space-around;
 `;
 
-const Commentarea = styled.p`
-  width: 90%;
-  height: 100px;
+// todo// Textareaと文字数の調整・フォントの調整
+const CommentArea = styled.p`
+  width: 80%;
+  height: 80px;
   margin: 20px auto 0;
   padding: 10px;
   border-radius: 10px;
   border: none;
   font-size: 1rem;
-  background-color: rgba(221, 202, 175, 0.3);
 `;
 
+export default function ImagePreview() {
+  const user = useSelector(selectUser);
+  const imageUrl = useSelector(selectImageUrl);
+  const caption = useSelector(selectCaption);
+  const dispatch = useDispatch();
+
+  const classes = useStyles();
+
+  const togglePreview = (e: React.MouseEvent<HTMLElement>) => {
+    e.preventDefault();
+    dispatch(TogglePreview());
+  };
+
+  return (
+    <ThemeProvider theme={theme}>
+      {/* ImagePreviewを表示するときのアニメーションを実装する */}
+      <Paper elevation={2} className={classes.paper}>
+        <Main>
+          <Header>
+            <Title>この内容で登録しますか？</Title>
+          </Header>
+          <UserInfo>
+            {/* todo//ユーザーアイコンの画像を取得して、Avatarに読み込む */}
+            <UserIcon>
+              <UserImage />
+            </UserIcon>
+            {/* todo//ユーザーネームをfirestoreから取得して表示する */}
+            <UserName>ユーザーネーム</UserName>
+          </UserInfo>
+          <ImageWrap>
+            {/* リンク切れなどの要因でimageUrlがnoImageとなった場合、Feed画面に戻ることを促すモーダルを表示するようにする。 */}
+            <PhotoImage src={imageUrl} alt="uploader" />
+          </ImageWrap>
+          <CommentArea>{caption}</CommentArea>
+          <ButtonArea>
+            <Button
+              variant="contained"
+              component="span"
+              size="large"
+              color="secondary"
+              className={classes.button}
+            >
+              登録する
+            </Button>
+            <Button
+              variant="outlined"
+              size="large"
+              color="default"
+              className={classes.button}
+              onClick={togglePreview}
+            >
+              戻る
+            </Button>
+          </ButtonArea>
+        </Main>
+      </Paper>
+    </ThemeProvider>
+  );
+}

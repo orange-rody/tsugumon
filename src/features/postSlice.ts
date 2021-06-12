@@ -1,33 +1,49 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "../app/store";
 
+interface PostState {
+  imageUrl: string;
+  caption: string;
+  preview: boolean;
+}
+
+const noImage = `${process.env.PUBLIC_URL}/noPhoto.png`;
+const initialState: PostState = {
+  imageUrl: noImage,
+  caption: "",
+  preview: false,
+};
+
 export const postSlice = createSlice({
   name: "post",
-  initialState: {
-    image:{image: "",imageUrl:`${process.env.PUBLIC_URL}/noPhoto.png`},caption: "",
-    preview: false,
-  },
+  initialState,
   reducers: {
-    HandleImage:(state, action) => {
-      state.image = action.payload;
+    HandleImageUrl: (state, action: PayloadAction<string>) => {
+      state.imageUrl = action.payload;
     },
-    ClearImage:(state) => {
-      state.image = {image:"",imageUrl:`${process.env.PUBLIC_URL}/noPhoto.png`};
+    ClearImageUrl: (state) => {
+      state.imageUrl = noImage;
     },
-    HandleCaption:(state,action) => {
+    HandleCaption: (state, action: PayloadAction<string>) => {
       state.caption = action.payload;
     },
-    ClearCaption:(state) => {
+    ClearCaption: (state) => {
       state.caption = "";
     },
-    TogglePreview:(state)=>{
+    TogglePreview: (state) => {
       state.preview = !state.preview;
-    }
-  }
+    },
+  },
 });
 
-export const {HandleImage, ClearImage,HandleCaption,ClearCaption,TogglePreview} = postSlice.actions;
-export const selectImage = (state: RootState) => state.post.image;
+export const {
+  HandleImageUrl,
+  ClearImageUrl,
+  HandleCaption,
+  ClearCaption,
+  TogglePreview,
+} = postSlice.actions;
+export const selectImageUrl = (state: RootState) => state.post.imageUrl;
 export const selectCaption = (state: RootState) => state.post.caption;
 export const selectPreview = (state: RootState) => state.post.preview;
 export default postSlice.reducer;
