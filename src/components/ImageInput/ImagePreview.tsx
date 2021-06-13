@@ -118,13 +118,12 @@ const UserImage = styled.img`
 `;
 
 const UserName = styled.p`
-  width: 10vw;
+  width: 150px;
   height: 60px;
   margin: 0;
-
   line-height: 60px;
 `;
-
+      
 const ImageWrap = styled.div`
   width: 100%;
   margin: 0 auto;
@@ -153,7 +152,6 @@ const ButtonArea = styled.div`
   justify-content: space-around;
 `;
 
-// todo// Textareaと文字数の調整・フォントの調整
 const CommentArea = styled.p`
   width: 80%;
   height: 80px;
@@ -169,12 +167,48 @@ export default function ImagePreview() {
   const imageUrl = useSelector(selectImageUrl);
   const caption = useSelector(selectCaption);
   const dispatch = useDispatch();
-
   const classes = useStyles();
+  const noImage = `${process.env.PUBLIC_URL}/noPhoto.png`;
 
   const togglePreview = (e: React.MouseEvent<HTMLElement>) => {
     e.preventDefault();
     dispatch(TogglePreview());
+  };
+
+  const upload = (e: React.MouseEvent<HTMLElement>) => {
+    // NOTE>> uploadが呼び出される瞬間、ブラウザの再読み込みがスタートしてしまうので、
+    //        e.preventDefault()で規定の動作をキャンセルします。
+    e.preventDefault();
+    if (imageUrl !== noImage) {
+      // TODO>>image_nameの暗号化
+      const uploadImage = storage
+        .ref()
+        .child("images/")
+        .putString(imageUrl, "data_url");
+
+      uploadImage.on(
+        firebase.storage.TaskEvent.STATE_CHANGED,
+        () => {},
+        (err: any) => {
+          alert(err.message);
+        },
+        () => {
+          //NOTE>> firestoreのルール設定が書き込み不可になっていた場合、エラーになってしまうので注意！
+          db.collection("posts")
+            .add({
+              userName: user.userName,
+              imageUrl: "",
+              caption: caption,
+              timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+            })
+            .then(() => {
+              dispatch(TogglePreview);
+              dispatch(ClearImageUrl);
+              dispatch(ClearCaption);
+            });
+        }
+      );
+    }
   };
 
   return (
@@ -205,6 +239,7 @@ export default function ImagePreview() {
               size="large"
               color="secondary"
               className={classes.button}
+              onClick={upload}
             >
               登録する
             </Button>

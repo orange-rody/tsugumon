@@ -166,6 +166,7 @@ const Textarea = styled.textarea`
   font-size: 1rem;
   resize: none;
   background-color: hsl(0, 0%, 95%);
+  font-family: "Yu Gothic";
 `;
 
 const InputFile = styled.input`
@@ -183,25 +184,34 @@ export default function ImageInput() {
 
   const classes = useStyles();
 
+  // fix:画像を頻繁に変更すると、ユーザーの操作に反応しなくなってしまう問題の解決
+  //     おそらく容量の多い画像データを直接DataUrlに変換していることが原因
+  //     画像サイズのリサイズ機能が必要
   const handleImage = (e: React.ChangeEvent<HTMLInputElement>) => {
     const FileList: FileList = e.target.files!;
-    const file: File = FileList.item(0)!;
+    const file: File | null = FileList.item(0)!;
     // Fileオブジェクトはシリアライズされないため、reduxに保存が不可能。
     // 従って、Fileオブジェクトはlocalステートに保存することとする。
-    setImageFile(file);
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.addEventListener(
-      "load",
-      () => {
-        // 画像ファイルを base64 文字列に変換します
-        // resultはstring,ArrayBuffer,nullの3つの値を取りうるので、as stringを使って
-        // 必ず値が文字列となるようにします
-        // setImageUrl(reader.result as string);
-        dispatch(HandleImageUrl(reader.result as string));
-      },
-      false
-    );
+    function readingData(file: any) {
+      return new Promise((resolve, reject) => {
+        let reader = new FileReader();
+        reader.onload = () => {
+          resolve(reader.result);
+        };
+        reader.onerror = () => {
+          reject(reader.error);
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+    if (file) {
+      setImageFile(file);
+      readingData(file)
+        .then((response) => {
+          dispatch(HandleImageUrl(response as string));
+        })
+        .catch((error) => console.log(error));
+    }
   };
 
   const clearImageUrl = (e: React.MouseEvent<HTMLElement>) => {
@@ -216,44 +226,9 @@ export default function ImageInput() {
     dispatch(inputText ? HandleCaption(inputText) : ClearCaption());
   };
 
-  const onUpload = (e: React.MouseEvent<HTMLElement>) => {
-    // onUploadが呼び出される瞬間、ブラウザの再読み込みがスタートしてしまうので、
-    // e.preventDefault()で規定の動作をキャンセルします。
-    e.preventDefault();
-    if (imageFile) {
-      // TODO>>image_nameの暗号化
-      const uploadImage = storage.ref().child("images/").put(imageFile);
-      uploadImage.on(
-        firebase.storage.TaskEvent.STATE_CHANGED,
-        () => {},
-        (err: any) => {
-          alert(err.message);
-        },
-        () => {
-          // firestoreのルール設定が書き込み不可になっていた場合、エラーになってしまうので注意！
-          db.collection("posts").add({
-            // TODO >> usernameがnull値で登録される問題の解決
-            // もしかしたらテストユーザーの名前を登録していないことが原因かも?
-            userName: user.userName,
-            imageUrl: "",
-            caption: caption,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-          });
-        }
-      );
-    }
-    dispatch(ClearImageUrl);
-    dispatch(ClearCaption);
-    dispatch(TogglePreview);
-  };
-
   const togglePreview = (e: React.MouseEvent<HTMLElement>) => {
     e.preventDefault();
     dispatch(TogglePreview());
-  };
-
-  const upload = {
-    display: "none",
   };
 
   const img: HTMLImageElement = new Image()!;
@@ -287,72 +262,58 @@ export default function ImageInput() {
                 <PhotoImage src={imageUrl} alt="uploader" />
               )}
             </ImageWrap>
-            <form>
-              <ButtonArea>
-                <InputFile type="file" onChange={handleImage} id="inputFile" />
-                <label htmlFor="inputFile">
-                  <Button
-                    variant="contained"
-                    component="span"
-                    size="large"
-                    startIcon={<CropOriginal />}
-                    color="primary"
-                    className={classes.button}
-                  >
-                    選ぶ
-                  </Button>
-                </label>
-                <Button
-                  id="clearFile"
-                  variant="outlined"
-                  color="default"
-                  size="large"
-                  className={classes.button}
-                  onClick={clearImageUrl}
-                >
-                  消す
-                </Button>
-              </ButtonArea>
-              <Textarea
-                id="textareaForm"
-                placeholder="コメントを入力する"
-                onChange={handleCaption}
-                value={caption}
-              ></Textarea>
-              <ButtonArea>
+
+            <ButtonArea>
+              <InputFile type="file" onChange={handleImage} id="inputFile" />
+              <label htmlFor="inputFile">
                 <Button
                   variant="contained"
                   component="span"
                   size="large"
-                  color="secondary"
-                  className={classes.button}
-                  disabled={
-                    imageUrl === `${process.env.PUBLIC_URL}/noPhoto.png`
-                      ? true
-                      : false
-                  }
-                  onClick={togglePreview}
-                >
-                  次へ進む
-                </Button>
-              </ButtonArea>
-              <button id="uploadFile" onClick={onUpload} style={upload} />
-              <label htmlFor="uploadFile">
-                {/* TODO >> Imageステートが空のときは投稿ボタンが押せないようにする */}
-                <Button
-                  variant="contained"
-                  size="medium"
+                  startIcon={<CropOriginal />}
                   color="primary"
-                  component="span"
+                  className={classes.button}
                 >
-                  投稿する
+                  選ぶ
                 </Button>
               </label>
-            </form>
+              <Button
+                id="clearFile"
+                variant="outlined"
+                color="default"
+                size="large"
+                className={classes.button}
+                onClick={clearImageUrl}
+              >
+                消す
+              </Button>
+            </ButtonArea>
+            <Textarea
+              id="textareaForm"
+              placeholder="コメントを入力する"
+              onChange={handleCaption}
+              value={caption}
+            ></Textarea>
+            <ButtonArea>
+              <Button
+                variant="contained"
+                component="span"
+                size="large"
+                color="secondary"
+                className={classes.button}
+                disabled={
+                  imageUrl === `${process.env.PUBLIC_URL}/noPhoto.png`
+                    ? true
+                    : false
+                }
+                onClick={togglePreview}
+              >
+                次へ進む
+              </Button>
+            </ButtonArea>
           </Main>
         </Paper>
-        {!preview ? "" : 
-          <ImagePreview/>}
+        {!preview ? "" : <ImagePreview />}
       </Wrapper>
     </ThemeProvider>
   );
