@@ -224,15 +224,17 @@ export default function CreatePost() {
 
   // FIX >> 同一の画像で「選ぶ」→「消す」を繰り返すと、ユーザーの操作に
   //        反応しなくなってしまう問題を解決しなければならない
-
+  // SOLVED >>  同じファイルを複数回選択すると、onChangeイベントが発火しないことが
+  //            原因と判明した。onClick={(e: any) => (e.target.value = null)}を
+  //            InputFileに追記することで、期待通りに動作するようになった。
   const handleImage = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const FileList: FileList = e.target.files!;
-    const file: File | null = FileList.item(0);
+    let FileList: FileList | null = e.target.files;
+    let file: File | null = FileList!.item(0);
     // NOTE >> Fileオブジェクトはシリアライズされないため、reduxに保存が不可能。
     //         従って、Fileオブジェクトはlocalステートに保存する必要がある。
     function FileRead(file: File) {
       return new Promise((resolve, reject) => {
-        let reader = new FileReader();
+        const reader = new FileReader();
         reader.readAsDataURL(file);
         reader.onload = () => {
           resolve(reader.result);
@@ -292,7 +294,8 @@ export default function CreatePost() {
           alert(err.message);
         },
         () => {
-          //NOTE>> firestoreのルール設定が書き込み不可になっていた場合、エラーになってしまうので注意！
+          //NOTE>> firestoreのルール設定が書き込み不可になっていた場合、
+          //       エラーになってしまうので注意！
           db.collection("posts")
             .add({
               userName: user.userName,
@@ -341,7 +344,12 @@ export default function CreatePost() {
               )}
             </ImageWrap>
             <ButtonArea>
-              <InputFile type="file" onChange={handleImage} id="inputFile" />
+              <InputFile
+                type="file"
+                onChange={handleImage}
+                id="inputFile"
+                onClick={(e: any) => (e.target.value = null)}
+              />
               <label htmlFor="inputFile">
                 <Button
                   variant="contained"
