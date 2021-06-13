@@ -1,13 +1,13 @@
 import React from "react";
 import { auth } from "../firebase";
-import ImageInput from "../components/ImageInput/ImageInput";
+import CreatePost from "./CreatePost/CreatePost";
 const Feed = () => {
   const signOut = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     auth.signOut();
   };
   return (
     <div>
-      <ImageInput />
+      <CreatePost />
     </div>
   );
 };
