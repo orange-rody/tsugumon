@@ -17,6 +17,7 @@ import {
   createStyles,
   Theme,
   ThemeProvider,
+  Slide,
 } from "@material-ui/core";
 import { ArrowDownward, CropOriginal } from "@material-ui/icons";
 
@@ -418,9 +419,7 @@ export default function CreatePost() {
             </ButtonArea>
           </Main>
         </Paper>
-        {!preview ? (
-          ""
-        ) : (
+        <Slide direction="left" in={preview} mountOnEnter unmountOnExit>
           <Paper elevation={2} className={classes.paperForPreview}>
             <Main>
               <Header>
@@ -461,7 +460,7 @@ export default function CreatePost() {
               </ButtonArea>
             </Main>
           </Paper>
-        )}
+        </Slide>
       </Wrapper>
     </ThemeProvider>
   );
