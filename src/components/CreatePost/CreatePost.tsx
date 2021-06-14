@@ -6,7 +6,7 @@ import firebase from "firebase/app";
 import styled from "styled-components";
 // NOTE >> styled-componentをfunctionコンポーネントの中で使用すると、
 //         textareaの入力時に不具合が起きてしまう。そのため、コンポーネントの
-//         外部でメディアクエリの判定をしないといけないが、styled-media-queryを
+//         外部でメディアクエリの判定をしないといけない。styled-media-queryを
 //         使うことで、その問題を解決することができる。
 import mediaQuery from "styled-media-query";
 import {
@@ -20,7 +20,7 @@ import {
 } from "@material-ui/core";
 import { ArrowDownward, CropOriginal } from "@material-ui/icons";
 
-// NOTE >> mediumより小さかったらmediaMobileのプロパティが設定されるようにする
+// NOTE >> mediumより小さかったらmediaMobileのプロパティが設定されるようにする。
 const mediaMobile = mediaQuery.lessThan("medium");
 
 const theme = createMuiTheme({
@@ -187,7 +187,7 @@ const ButtonArea = styled.div`
 const Textarea = styled.textarea`
   display: block;
   width: 80%;
-  height: 80px;
+  height: 100px;
   margin: 20px auto 0;
   padding: 10px;
   border-radius: 10px;
@@ -200,7 +200,7 @@ const Textarea = styled.textarea`
 
 const CommentArea = styled.p`
   width: 80%;
-  height: 80px;
+  height: 100px;
   margin: 20px auto 0;
   padding: 10px;
   border-radius: 10px;
@@ -216,7 +216,6 @@ export default function CreatePost() {
   const user = useSelector(selectUser);
   const noImage = `${process.env.PUBLIC_URL}/noPhoto.png`;
   const [imageUrl, setImageUrl] = useState<string>(noImage);
-  const [imageFile, setImageFile] = useState<File | null>();
   const [caption, setCaption] = useState<string>("");
   const [preview, setPreview] = useState<boolean>(false);
 
@@ -227,6 +226,8 @@ export default function CreatePost() {
   // SOLVED >>  同じファイルを複数回選択すると、onChangeイベントが発火しないことが
   //            原因と判明した。onClick={(e: any) => (e.target.value = null)}を
   //            InputFileに追記することで、期待通りに動作するようになった。
+  //            おそらくonClickのイベントによって、事前に登録していたvalueがリセットされ、
+  //            その後、onChangeイベントが発火するようになっているのではないか
   const handleImage = (e: React.ChangeEvent<HTMLInputElement>) => {
     let FileList: FileList | null = e.target.files;
     let file: File | null = FileList!.item(0);
@@ -247,7 +248,6 @@ export default function CreatePost() {
     // NOTE >> FILEオブジェクトが存在するときのみ、FileReadを実行するように
     //         している。
     if (file) {
-      setImageFile(file);
       FileRead(file)
         .then((response) => {
           setImageUrl(response as string);
@@ -281,36 +281,56 @@ export default function CreatePost() {
     //        e.preventDefault()で規定の動作をキャンセルしている。
     e.preventDefault();
     if (imageUrl !== noImage) {
-      // TODO>>image_nameの暗号化
-      const uploadImage = storage
-        .ref()
-        .child("images/")
-        .putString(imageUrl, "data_url");
-
-      uploadImage.on(
-        firebase.storage.TaskEvent.STATE_CHANGED,
-        () => {},
-        (err: any) => {
-          alert(err.message);
-        },
-        () => {
-          //NOTE>> firestoreのルール設定が書き込み不可になっていた場合、
-          //       エラーになってしまうので注意！
-          db.collection("posts")
-            .add({
-              userName: user.userName,
-              imageUrl: "",
-              caption: caption,
-              timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-            })
-            .then(() => {
-              setPreview(false);
-              setImageUrl(noImage);
-              setImageFile(null);
-              setCaption("");
-            });
-        }
-      );
+      const currentTime = new Date().toString();
+      const S =
+        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+      const N = 16;
+      const randomCharactor = Array.from(
+        // NOTE >> Uint32Array(N)は、32 ビット符号なし整数値がN個並んだ
+        //         配列を表す。
+        // NOTE  >> crypt.getRandomValues(new Uint32Array(N))は、32ビット符号なしの
+        //          整数値の中から、N個分、ランダムな整数を選ぶことを表す。
+        crypto.getRandomValues(new Uint32Array(N))
+      )
+        // NOTE >> .map((n) => S[n % S.length])で、上記で作った16個のランダム整数を
+        //          S.lengthで割り、その余りの数をインデックスとする要素を抜き出している。
+        //          結果、crypto.getRandomValuesを使ったランダムな16桁の文字列が完成する。
+        .map((n) => S[n % S.length])
+        .join("");
+      const fileName = currentTime + randomCharactor;
+      storage
+        .ref(`posts / ${fileName}`)
+        .putString(imageUrl, "data_url")
+        .on(
+          firebase.storage.TaskEvent.STATE_CHANGED,
+          // TODO >> アップロード中にインジケータを表示するようにする。
+          () => {},
+          (err: any) => {
+            alert(err.message);
+          },
+          () => {
+            // NOTE >> getDownloadURL()でstorageから保存した画像のURLを取得する。
+            storage
+              .ref(`posts / ${fileName}`)
+              .getDownloadURL()
+              .then((url) => {
+                // NOTE >> firestoreのルール設定が書き込み不可になっていた場合、
+                //         エラーになってしまうので注意！
+                db.collection("posts")
+                  .add({
+                    userName: user.userName,
+                    imageUrl: url,
+                    caption: caption,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                  })
+                  .then(() => {
+                    setPreview(false);
+                    setImageUrl(noImage);
+                    setCaption("");
+                  });
+              });
+          }
+        );
     }
   };
 
@@ -373,6 +393,10 @@ export default function CreatePost() {
                 消す
               </Button>
             </ButtonArea>
+            {/* TODO >> Textareaの文字数制限を設定する */}
+            {/* TODO >> Textareaの自動スクロール機能をつくる */}
+            {/* TODO >> Textareaの制限を超えた文字を赤く表示する */}
+            {/* TODO >> Enterキーを押したら、改行できるようにする */}
             <Textarea
               id="textareaForm"
               placeholder="コメントを入力する"
@@ -407,12 +431,12 @@ export default function CreatePost() {
                 <UserIcon>
                   <UserImage />
                 </UserIcon>
-                {/* TODO >> ユーザーネームをfirestoreから取得して表示する */}
-                <UserName>ユーザーネーム</UserName>
+                <UserName>{user.userName}</UserName>
               </UserInfo>
               <ImageWrap>
                 <Image src={imageUrl} alt="uploader" />
               </ImageWrap>
+              {/* TODO >> CommentAreaの表示文字をスクロールする機能をつくる */}
               <CommentArea>{caption}</CommentArea>
               <ButtonArea>
                 <Button
