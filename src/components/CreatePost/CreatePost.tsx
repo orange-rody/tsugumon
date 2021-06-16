@@ -319,6 +319,7 @@ export default function CreatePost() {
                 //         エラーになってしまうので注意！
                 db.collection("posts")
                   .add({
+                    uid: user.uid,
                     userName: user.userName,
                     imageUrl: url,
                     caption: caption,
