@@ -340,29 +340,29 @@ export default function CreatePost() {
     // NOTE >> Matrial-UIのthemeを適用させるには<ThemeProvider>を
     //         使用する必要がある
     <ThemeProvider theme={theme}>
-      <Wrapper>
-        <Paper elevation={2} className={classes.paper}>
+      <Wrapper data-testid="wrapper">
+        <Paper elevation={2} className={classes.paper} data-testid="paper">
           <Main>
             <Header data-testid="header">
-              <Title>写真を登録する</Title>
+              <Title data-testid="title">写真を登録する</Title>
             </Header>
-            <ImageWrap>
+            <ImageWrap data-testid="imageWrap">
               {imageUrl === noImage ? (
                 <>
-                  <NoImage src={imageUrl} alt="写真が選択されていません。" />
-                  <Notes>
+                  <NoImage src={imageUrl} data-testid="noImage" alt="写真が選択されていません。" />
+                  <Notes data-testid="notes">
                     写真を選んでください。
                     <ArrowDownward
                       style={{
                         display: "block",
                         margin: "10px auto",
                         height: "18px",
-                      }}
+                      }} data-testid="arrowDownward"
                     />
                   </Notes>
                 </>
               ) : (
-                <Image src={imageUrl} alt="選択した写真のプレビュー" />
+                <Image src={imageUrl} alt="選択した写真のプレビュー" data-testid="image"/>
               )}
             </ImageWrap>
             <ButtonArea>
@@ -371,6 +371,7 @@ export default function CreatePost() {
                 onChange={handleImage}
                 id="inputFile"
                 onClick={(e: any) => (e.target.value = null)}
+                data-testid="inputFile"
               />
               <label htmlFor="inputFile">
                 <Button
@@ -380,6 +381,7 @@ export default function CreatePost() {
                   startIcon={<CropOriginal />}
                   color="primary"
                   className={classes.button}
+                  data-testid="buttonForSelect"
                 >
                   選ぶ
                 </Button>
@@ -391,6 +393,7 @@ export default function CreatePost() {
                 size="large"
                 className={classes.button}
                 onClick={clearDraft}
+                data-testid="buttonForClear"
               >
                 消す
               </Button>
@@ -404,6 +407,7 @@ export default function CreatePost() {
               placeholder="コメントを入力する"
               onChange={handleCaption}
               value={caption}
+              data-testid="textarea"
             ></Textarea>
             <ButtonArea>
               <Button
@@ -414,6 +418,7 @@ export default function CreatePost() {
                 className={classes.button}
                 disabled={imageUrl === noImage ? true : false}
                 onClick={togglePreview}
+                data-testid="togglePreview"
               >
                 次へ進む
               </Button>
@@ -421,23 +426,23 @@ export default function CreatePost() {
           </Main>
         </Paper>
         <Slide direction="left" in={preview} mountOnEnter unmountOnExit>
-          <Paper elevation={2} className={classes.paperForPreview}>
+          <Paper elevation={2} className={classes.paperForPreview} data-testid="paperForPreview">
             <Main>
-              <Header>
-                <Title>この内容で登録しますか？</Title>
+              <Header data-testid="previewHeader">
+                <Title data-testid="previewTitle">この内容で登録しますか？</Title>
               </Header>
               <UserInfo>
                 {/* TODO >> ユーザーアイコンの画像を取得して、Avatarに読み込む */}
                 <UserIcon>
                   <UserImage />
                 </UserIcon>
-                <UserName>{user.userName}</UserName>
+                <UserName data-testId="previewUserName">{user.userName}</UserName>
               </UserInfo>
               <ImageWrap>
-                <Image src={imageUrl} alt="uploader" />
+                <Image src={imageUrl} alt="uploader" data-testid="previewImageUrl"/>
               </ImageWrap>
               {/* TODO >> CommentAreaの表示文字をスクロールする機能をつくる */}
-              <CommentArea>{caption}</CommentArea>
+              <CommentArea data-testid="commentArea">{caption}</CommentArea>
               <ButtonArea>
                 <Button
                   variant="contained"
@@ -446,6 +451,7 @@ export default function CreatePost() {
                   color="secondary"
                   className={classes.button}
                   onClick={upload}
+                  data-testid="buttonForUpload"
                 >
                   登録する
                 </Button>
@@ -455,6 +461,7 @@ export default function CreatePost() {
                   color="default"
                   className={classes.button}
                   onClick={togglePreview}
+                  data-testid="togglePreview"
                 >
                   戻る
                 </Button>
