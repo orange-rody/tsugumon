@@ -1,8 +1,11 @@
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { render, screen, cleanup } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { Provider } from "react-redux";
 import { store } from "../../app/store";
 import CreatePost from "./CreatePost";
+
+afterEach(() => cleanup());
 
 describe("CreatePostが正しくレンダリングされるか", () => {
   it("全ての要素が正しくレンダリングされるか", () => {
@@ -20,7 +23,6 @@ describe("CreatePostが正しくレンダリングされるか", () => {
         <CreatePost />
       </Provider>
     );
-    // screen.debug(screen.getByRole("heading"));
     expect(screen.getByTestId("wrapper")).toBeTruthy();
     expect(screen.getByTestId("paper")).toBeTruthy();
     expect(screen.getByTestId("header")).toBeTruthy();
@@ -42,3 +44,56 @@ describe("CreatePostが正しくレンダリングされるか", () => {
     // expect(screen.getByTestId("togglePreview")).toBeTruthy();
   });
 });
+
+describe("テキストエリアのonChangeイベント", () => {
+  it("テキストエリアのvalueが正しくアップデートされるか", () => {
+    render(
+      <Provider store={store}>
+        <CreatePost />
+      </Provider>
+    );
+    // NOTE >> screen.getByTestId()は、valueプロパティを含まないタイプの
+    //         HTMLElementを返すため、screen.getByTestId("textarea")を
+    //         valueの値を持つHTMLInputElementとして型キャストしてあげる
+    //         必要がある。
+    const textarea = screen.getByTestId("textarea") as HTMLInputElement;
+    userEvent.type(textarea, "test");
+    expect(textarea.value).toBe("test");
+  });
+});
+
+describe("input type = file がonChangeとなったとき、正しくアップデートされるか", () => {
+  it("画像ファイルが未選択のときはデフォルトの画像がプレビューされるか確認する", () => {
+    render(
+      <Provider store={store}>
+        <CreatePost />
+      </Provider>
+    );
+    const noImage = screen.getByTestId("noImage") as HTMLImageElement;
+    expect(noImage.src).toBe("http://localhost/noPhoto.png");
+  });
+});
+
+class FileReaderMock {
+  DONE = FileReader.DONE;
+  EMPTY = FileReader.EMPTY;
+  LOADING = FileReader.LOADING;
+  readyState = 0;
+  error: FileReader["error"] = null;
+  result: FileReader["result"] = null;
+  abort = jest.fn();
+  addEventListener = jest.fn();
+  dispatchEvent = jest.fn();
+  onabort = jest.fn();
+  onerror = jest.fn();
+  onload = jest.fn();
+  onloadend = jest.fn();
+  onloadprogress = jest.fn();
+  onloadstart = jest.fn();
+  onprogress = jest.fn();
+  readAsArrayBuffer = jest.fn();
+  readAsBinaryString = jest.fn();
+  readAsDataURL = jest.fn();
+  readAsText = jest.fn();
+  removeEventListener = jest.fn();
+}

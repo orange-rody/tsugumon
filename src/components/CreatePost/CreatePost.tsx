@@ -229,23 +229,25 @@ export default function CreatePost() {
   //            InputFileに追記することで、期待通りに動作するようになった。
   //            おそらくonClickのイベントによって、事前に登録していたvalueがリセットされ、
   //            その後、onChangeイベントが発火するようになっているのではないか
+
+  function FileRead(file: File) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => {
+        resolve(reader.result);
+      };
+      reader.onerror = () => {
+        reject(reader.error);
+      };
+    });
+  }
+
   const handleImage = (e: React.ChangeEvent<HTMLInputElement>) => {
     let FileList: FileList | null = e.target.files;
     let file: File | null = FileList!.item(0);
     // NOTE >> Fileオブジェクトはシリアライズされないため、reduxに保存が不可能。
     //         従って、Fileオブジェクトはlocalステートに保存する必要がある。
-    function FileRead(file: File) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = () => {
-          resolve(reader.result);
-        };
-        reader.onerror = () => {
-          reject(reader.error);
-        };
-      });
-    }
     // NOTE >> FILEオブジェクトが存在するときのみ、FileReadを実行するように
     //         している。
     if (file) {
@@ -349,7 +351,11 @@ export default function CreatePost() {
             <ImageWrap data-testid="imageWrap">
               {imageUrl === noImage ? (
                 <>
-                  <NoImage src={imageUrl} data-testid="noImage" alt="写真が選択されていません。" />
+                  <NoImage
+                    src={imageUrl}
+                    data-testid="noImage"
+                    alt="写真が選択されていません。"
+                  />
                   <Notes data-testid="notes">
                     写真を選んでください。
                     <ArrowDownward
@@ -357,12 +363,17 @@ export default function CreatePost() {
                         display: "block",
                         margin: "10px auto",
                         height: "18px",
-                      }} data-testid="arrowDownward"
+                      }}
+                      data-testid="arrowDownward"
                     />
                   </Notes>
                 </>
               ) : (
-                <Image src={imageUrl} alt="選択した写真のプレビュー" data-testid="image"/>
+                <Image
+                  src={imageUrl}
+                  alt="選択した写真のプレビュー"
+                  data-testid="image"
+                />
               )}
             </ImageWrap>
             <ButtonArea>
@@ -426,20 +437,32 @@ export default function CreatePost() {
           </Main>
         </Paper>
         <Slide direction="left" in={preview} mountOnEnter unmountOnExit>
-          <Paper elevation={2} className={classes.paperForPreview} data-testid="paperForPreview">
+          <Paper
+            elevation={2}
+            className={classes.paperForPreview}
+            data-testid="paperForPreview"
+          >
             <Main>
               <Header data-testid="previewHeader">
-                <Title data-testid="previewTitle">この内容で登録しますか？</Title>
+                <Title data-testid="previewTitle">
+                  この内容で登録しますか？
+                </Title>
               </Header>
               <UserInfo>
                 {/* TODO >> ユーザーアイコンの画像を取得して、Avatarに読み込む */}
                 <UserIcon>
                   <UserImage />
                 </UserIcon>
-                <UserName data-testId="previewUserName">{user.userName}</UserName>
+                <UserName data-testId="previewUserName">
+                  {user.userName}
+                </UserName>
               </UserInfo>
               <ImageWrap>
-                <Image src={imageUrl} alt="uploader" data-testid="previewImageUrl"/>
+                <Image
+                  src={imageUrl}
+                  alt="uploader"
+                  data-testid="previewImageUrl"
+                />
               </ImageWrap>
               {/* TODO >> CommentAreaの表示文字をスクロールする機能をつくる */}
               <CommentArea data-testid="commentArea">{caption}</CommentArea>
