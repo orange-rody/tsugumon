@@ -209,10 +209,6 @@ const CommentArea = styled.p`
   font-size: 1rem;
 `;
 
-const InputFile = styled.input`
-  display: none;
-`;
-
 export default function CreatePost() {
   const user = useSelector(selectUser);
   const noImage = `${process.env.PUBLIC_URL}/noPhoto.png`;
@@ -377,7 +373,8 @@ export default function CreatePost() {
               )}
             </ImageWrap>
             <ButtonArea>
-              <InputFile
+              <input
+                style={{display:"none"}}
                 type="file"
                 onChange={handleImage}
                 id="inputFile"

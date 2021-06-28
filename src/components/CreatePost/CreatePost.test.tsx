@@ -4,6 +4,7 @@ import userEvent from "@testing-library/user-event";
 import { Provider } from "react-redux";
 import { store } from "../../app/store";
 import CreatePost from "./CreatePost";
+import { handleImage } from "./CreatePost";
 
 afterEach(() => cleanup());
 
@@ -72,28 +73,25 @@ describe("input type = file がonChangeとなったとき、正しくアップ�
     const noImage = screen.getByTestId("noImage") as HTMLImageElement;
     expect(noImage.src).toBe("http://localhost/noPhoto.png");
   });
-});
 
-class FileReaderMock {
-  DONE = FileReader.DONE;
-  EMPTY = FileReader.EMPTY;
-  LOADING = FileReader.LOADING;
-  readyState = 0;
-  error: FileReader["error"] = null;
-  result: FileReader["result"] = null;
-  abort = jest.fn();
-  addEventListener = jest.fn();
-  dispatchEvent = jest.fn();
-  onabort = jest.fn();
-  onerror = jest.fn();
-  onload = jest.fn();
-  onloadend = jest.fn();
-  onloadprogress = jest.fn();
-  onloadstart = jest.fn();
-  onprogress = jest.fn();
-  readAsArrayBuffer = jest.fn();
-  readAsBinaryString = jest.fn();
-  readAsDataURL = jest.fn();
-  readAsText = jest.fn();
-  removeEventListener = jest.fn();
-}
+  it("画像ファイルがonChangeとなったとき、stateの値が正しくアップデートされるか", () => {
+    // NOTE >> ダミーのFileオブジェクトを作成
+    // NOTE >> new Fileの第一引数はバッファデータに関するもの。バッファデータを
+    //         配列に格納して指定する。複数のデータを格納すると、内部で昇順に結合される。
+    //         ArrayBuffer,Blob,Stringなどのデータ形式がしていできるが、その他の型を
+    //         入力すると、自動的に文字列型に変換される。
+    const file = new File(["new order"], "blueMonday.png", {
+      type: "image/png",
+    });
+    render(
+      <Provider store={store}>
+        <CreatePost />
+      </Provider>
+    );
+    const inputFile = screen.getByTestId("inputFile");
+    // NOTE >> upload(element,file)
+    //         uploadの第一引数はアップロードイベントを発火させる要素。
+    //         第二引数はアップロードの対象となるfile。
+    userEvent.upload(inputFile, file) as any;
+  });
+});
