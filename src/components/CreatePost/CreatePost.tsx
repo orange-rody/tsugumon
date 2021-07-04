@@ -3,6 +3,9 @@ import { useSelector } from "react-redux";
 import { selectUser } from "../../features/userSlice";
 import { auth, storage, db } from "../../firebase";
 import firebase from "firebase/app";
+import InputFileButton from "../Parts/InputFileButton";
+import DefaultButton from "../Parts/DefaultButton";
+import SecondaryButton from "../Parts/SecondaryButton";
 import styled from "styled-components";
 // NOTE >> styled-componentをfunctionコンポーネントの中で使用すると、
 //         textareaの入力時に不具合が起きてしまう。そのため、コンポーネントの
@@ -19,7 +22,7 @@ import {
   ThemeProvider,
   Slide,
 } from "@material-ui/core";
-import { ArrowDownward, CropOriginal } from "@material-ui/icons";
+import { ArrowDownward } from "@material-ui/icons";
 
 // NOTE >> mediumより小さかったらmediaMobileのプロパティが設定されるようにする。
 const mediaMobile = mediaQuery.lessThan("medium");
@@ -373,38 +376,16 @@ export default function CreatePost() {
               )}
             </ImageWrap>
             <ButtonArea>
-              <input
-                style={{display:"none"}}
-                type="file"
-                onChange={handleImage}
-                id="inputFile"
-                onClick={(e: any) => (e.target.value = null)}
-                data-testid="inputFile"
-              />
-              <label htmlFor="inputFile">
-                <Button
-                  variant="contained"
-                  component="span"
-                  size="large"
-                  startIcon={<CropOriginal />}
-                  color="primary"
-                  className={classes.button}
-                  data-testid="buttonForSelect"
-                >
-                  選ぶ
-                </Button>
-              </label>
-              <Button
-                id="clearFile"
-                variant="outlined"
-                color="default"
-                size="large"
-                className={classes.button}
+              <InputFileButton onChange={handleImage} />
+              <DefaultButton
+                child="消す"
+                // variant="outlined"
+                // color="default"
+                // size="large"
+                // className={classes.button}
                 onClick={clearDraft}
-                data-testid="buttonForClear"
-              >
-                消す
-              </Button>
+                dataTestId="buttonForClear"
+              />
             </ButtonArea>
             {/* TODO >> Textareaの文字数制限を設定する */}
             {/* TODO >> Textareaの自動スクロール機能をつくる */}
@@ -418,18 +399,17 @@ export default function CreatePost() {
               data-testid="textarea"
             ></Textarea>
             <ButtonArea>
-              <Button
-                variant="contained"
-                component="span"
-                size="large"
-                color="secondary"
-                className={classes.button}
+              <SecondaryButton
+                // variant="contained"
+                // component="span"
+                // size="large"
+                // color="secondary"
+                // className={classes.button}
                 disabled={imageUrl === noImage ? true : false}
                 onClick={togglePreview}
-                data-testid="togglePreview"
-              >
-                次へ進む
-              </Button>
+                dataTestId="togglePreview"
+                child="次へ進む"
+              />
             </ButtonArea>
           </Main>
         </Paper>

@@ -1,4 +1,5 @@
 import React from "react";
+import { act } from "react-dom/test-utils";
 import { render, screen, cleanup } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Provider } from "react-redux";
@@ -18,7 +19,6 @@ describe("CreatePostが正しくレンダリングされるか確認する", () 
       //         react-reduxに登録されている値が見つからないためにエラーが発生していると想定。
       //         ProviderとStoreをインポートし、コンポーネントを＜Provider>でラップしたところ、
       //         問題が解決した。
-
       <Provider store={store}>
         <CreatePost />
       </Provider>
@@ -62,7 +62,7 @@ describe("テキストエリアのonChangeイベントを確認する", () => {
   });
 });
 
-describe("input type = file がonChangeとなったとき、正しくアップデートされるか確認する", () => {
+describe("input type = file がonChangeとなったとき、stateの値が正しくアップデートされるか確認する", () => {
   it("画像ファイルが未選択のときはデフォルトの画像がプレビューされるか確認する", () => {
     render(
       <Provider store={store}>
@@ -73,7 +73,7 @@ describe("input type = file がonChangeとなったとき、正しくアップ�
     expect(noImage.src).toBe("http://localhost/noPhoto.png");
   });
 
-  it("画像ファイルがonChangeとなったとき、stateの値が正しくアップデートされるか確認する", () => {
+  it("画像ファイルを選択したとき、handleImage()が呼び出されるか確認する", () => {
     // NOTE >> ダミーのFileオブジェクトを作成
     // NOTE >> new Fileの第一引数はバッファデータに関するもの。バッファデータを
     //         配列に格納して指定する。複数のデータを格納すると、内部で昇順に結合される。
@@ -82,11 +82,13 @@ describe("input type = file がonChangeとなったとき、正しくアップ�
     const imageFile = new File(["new order"], "blueMonday.png", {
       type: "image/png",
     });
-    render(
-      <Provider store={store}>
-        <CreatePost />
-      </Provider>
-    );
+    act(() => {
+      render(
+        <Provider store={store}>
+          <CreatePost />
+        </Provider>
+      );
+    });
     // FIX >> getByTestId("inputFile")をHTMLElementとして型注釈すると、
     //        expect(inputFile.files![0]).toStrictEqual(imageFile);のところで、
     //        「プロパティ 'files' は型 'HTMLElement' に存在しません。」といった
@@ -95,6 +97,7 @@ describe("input type = file がonChangeとなったとき、正しくアップ�
     //           「screen.getByTestId("inputFile") as HTMLInputElement」と
     //           記載してみたところ、エラーを解決することができた。
     const inputFile = screen.getByTestId("inputFile") as HTMLInputElement;
+
     // NOTE >> upload(element,file)
     //         uploadの第一引数はアップロードイベントを発火させる要素。
     //         第二引数はアップロードの対象となるfile。
@@ -114,3 +117,4 @@ describe("input type = file がonChangeとなったとき、正しくアップ�
     expect(inputFile.files![0]).toStrictEqual(imageFile);
   });
 });
+
