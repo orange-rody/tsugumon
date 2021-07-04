@@ -411,7 +411,7 @@ export default function CreatePost() {
                 <SecondaryButton
                   onClick={upload}
                   dataTestId="buttonForUpload"
-                  disabled={true}
+                  disabled={imageUrl === noImage ? true : false}
                   child="登録する"
                 />
                 <DefaultButton
