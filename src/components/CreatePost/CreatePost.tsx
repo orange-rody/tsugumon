@@ -14,35 +14,15 @@ import styled from "styled-components";
 import mediaQuery from "styled-media-query";
 import {
   Paper,
-  Button,
-  createMuiTheme,
   makeStyles,
   createStyles,
   Theme,
-  ThemeProvider,
   Slide,
 } from "@material-ui/core";
 import { ArrowDownward } from "@material-ui/icons";
 
 // NOTE >> mediumより小さかったらmediaMobileのプロパティが設定されるようにする。
 const mediaMobile = mediaQuery.lessThan("medium");
-
-const theme = createMuiTheme({
-  palette: {
-    primary: {
-      light: "#4fc0ad",
-      main: "#008f7e",
-      dark: "#006152",
-      contrastText: "#fff",
-    },
-    secondary: {
-      light: "#50a0d0",
-      main: "#00729f",
-      dark: "#004770",
-      contrastText: "#fff",
-    },
-  },
-});
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -56,13 +36,6 @@ const useStyles = makeStyles((theme: Theme) =>
       position: "absolute",
       top: "0",
       left: "0",
-    },
-    button: {
-      width: "120px",
-      height: "40px",
-      borderRadius: "50px",
-      fontSize: "18px",
-      fontWeight: "bold",
     },
   })
 );
@@ -340,7 +313,7 @@ export default function CreatePost() {
   return (
     // NOTE >> Matrial-UIのthemeを適用させるには<ThemeProvider>を
     //         使用する必要がある
-    <ThemeProvider theme={theme}>
+    <>
       <Wrapper data-testid="wrapper">
         <Paper elevation={2} className={classes.paper} data-testid="paper">
           <Main>
@@ -379,10 +352,6 @@ export default function CreatePost() {
               <InputFileButton onChange={handleImage} />
               <DefaultButton
                 child="消す"
-                // variant="outlined"
-                // color="default"
-                // size="large"
-                // className={classes.button}
                 onClick={clearDraft}
                 dataTestId="buttonForClear"
               />
@@ -400,11 +369,6 @@ export default function CreatePost() {
             ></Textarea>
             <ButtonArea>
               <SecondaryButton
-                // variant="contained"
-                // component="span"
-                // size="large"
-                // color="secondary"
-                // className={classes.button}
                 disabled={imageUrl === noImage ? true : false}
                 onClick={togglePreview}
                 dataTestId="togglePreview"
@@ -444,32 +408,22 @@ export default function CreatePost() {
               {/* TODO >> CommentAreaの表示文字をスクロールする機能をつくる */}
               <CommentArea data-testid="commentArea">{caption}</CommentArea>
               <ButtonArea>
-                <Button
-                  variant="contained"
-                  component="span"
-                  size="large"
-                  color="secondary"
-                  className={classes.button}
+                <SecondaryButton
                   onClick={upload}
-                  data-testid="buttonForUpload"
-                >
-                  登録する
-                </Button>
-                <Button
-                  variant="outlined"
-                  size="large"
-                  color="default"
-                  className={classes.button}
+                  dataTestId="buttonForUpload"
+                  disabled={true}
+                  child="登録する"
+                />
+                <DefaultButton
                   onClick={togglePreview}
-                  data-testid="togglePreview"
-                >
-                  戻る
-                </Button>
+                  dataTestId="togglePreview"
+                  child="戻る"
+                />
               </ButtonArea>
             </Main>
           </Paper>
         </Slide>
       </Wrapper>
-    </ThemeProvider>
+    </>
   );
 }

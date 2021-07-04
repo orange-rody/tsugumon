@@ -117,4 +117,3 @@ describe("input type = file がonChangeとなったとき、stateの値が正し
     expect(inputFile.files![0]).toStrictEqual(imageFile);
   });
 });
-
