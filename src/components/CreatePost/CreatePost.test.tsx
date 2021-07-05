@@ -130,3 +130,20 @@ describe("「消す」ボタンをクリックしたとき、適正に動作す�
     expect(clearDraft).toHaveBeenCalledTimes(1);
   });
 });
+
+describe("「次へ進む」ボタンが正常に起動するか確認する", () => {
+  it("「次へ進む」ボタンをクリックした際にtogglePreviewが呼び出されるか確認する", () => {
+    const togglePreview = jest.fn();
+    render(
+      <SecondaryButton
+        dataTestId="toggleButton"
+        onClick={togglePreview}
+        disabled={false}
+        child="次へ進む"
+      />
+    );
+    const toggleButton = screen.getByTestId("toggleButton");
+    userEvent.click(toggleButton);
+    expect(togglePreview).toHaveBeenCalledTimes(1);
+  });
+});
