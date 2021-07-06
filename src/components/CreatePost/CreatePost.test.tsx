@@ -146,4 +146,9 @@ describe("「次へ進む」ボタンが正常に起動するか確認する", (
     userEvent.click(toggleButton);
     expect(togglePreview).toHaveBeenCalledTimes(1);
   });
+  it("「次へ進む」ボタンをクリックした際にプレビュー画面の要素がレンダリングされるか確認する", () => {
+    render(
+      <CreatePost/>
+    );
+  });
 });
