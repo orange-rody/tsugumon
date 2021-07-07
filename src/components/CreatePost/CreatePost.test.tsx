@@ -1,4 +1,5 @@
 import React from "react";
+import ReactDOM from "react-dom";
 import { render, screen, cleanup } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Provider } from "react-redux";
@@ -146,9 +147,10 @@ describe("「次へ進む」ボタンが正常に起動するか確認する", (
     userEvent.click(toggleButton);
     expect(togglePreview).toHaveBeenCalledTimes(1);
   });
-  it("「次へ進む」ボタンをクリックした際にプレビュー画面の要素がレンダリングされるか確認する", () => {
-    render(
+
+  it("previewがtrueのとき、プレビュー画面の要素がレンダリングされるか確認する", () => {
+    render(<Provider store={store}>
       <CreatePost/>
-    );
+    </Provider>);
   });
 });

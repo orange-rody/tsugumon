@@ -3,6 +3,7 @@ import { useSelector } from "react-redux";
 import { selectUser } from "../../features/userSlice";
 import { auth, storage, db } from "../../firebase";
 import firebase from "firebase/app";
+import HeaderA from "../Parts/HeaderA";
 import InputFileButton from "../Parts/InputFileButton";
 import DefaultButton from "../Parts/DefaultButton";
 import SecondaryButton from "../Parts/SecondaryButton";
@@ -52,28 +53,6 @@ const Wrapper = styled.div`
   ${mediaMobile`
   margin: 0;`}
   padding: 0;
-`;
-
-const Header = styled.div`
-  display: flex;
-  width: 100%;
-  height: 52px;
-  margin: 0 auto;
-  background-color: hsl(0, 0%, 100%);
-  border-bottom: 1px solid hsla(26, 100%, 12%, 0.2);
-  box-sizing: border-box;
-`;
-
-const Title = styled.h2`
-  width: 100%;
-  height: 52px;
-  margin: 0 auto;
-  font-size: 18px;
-  line-height: 52px;
-  text-align: center;
-  color: hsl(0, 0%, 10%);
-  font-weight: bold;
-  letter-spacing: 2px;
 `;
 
 const Main = styled.main`
@@ -317,9 +296,7 @@ export default function CreatePost() {
       <Wrapper data-testid="wrapper">
         <Paper elevation={2} className={classes.paper} data-testid="paper">
           <Main>
-            <Header data-testid="header">
-              <Title data-testid="title">写真を登録する</Title>
-            </Header>
+            <HeaderA child="写真を登録する" />
             <ImageWrap data-testid="imageWrap">
               {imageUrl === noImage ? (
                 <>
@@ -384,11 +361,7 @@ export default function CreatePost() {
             data-testid="paperForPreview"
           >
             <Main>
-              <Header data-testid="previewHeader">
-                <Title data-testid="previewTitle">
-                  この内容で登録しますか？
-                </Title>
-              </Header>
+              <HeaderA child="この内容で登録しますか？" />
               <UserInfo>
                 {/* TODO >> ユーザーアイコンの画像を取得して、Avatarに読み込む */}
                 <UserIcon>
