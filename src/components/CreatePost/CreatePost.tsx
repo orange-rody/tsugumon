@@ -348,7 +348,7 @@ export default function CreatePost() {
               <SecondaryButton
                 disabled={imageUrl === noImage ? true : false}
                 onClick={togglePreview}
-                dataTestId="togglePreview"
+                dataTestId="previewOn"
                 child="次へ進む"
               />
             </ButtonArea>
@@ -367,7 +367,7 @@ export default function CreatePost() {
                 <UserIcon>
                   <UserImage />
                 </UserIcon>
-                <UserName data-testId="previewUserName">
+                <UserName data-testid="previewUserName">
                   {user.userName}
                 </UserName>
               </UserInfo>
@@ -389,7 +389,7 @@ export default function CreatePost() {
                 />
                 <DefaultButton
                   onClick={togglePreview}
-                  dataTestId="togglePreview"
+                  dataTestId="previewOff"
                   child="戻る"
                 />
               </ButtonArea>

@@ -1,5 +1,4 @@
 import React from "react";
-import ReactDOM from "react-dom";
 import { render, screen, cleanup } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Provider } from "react-redux";
@@ -36,15 +35,7 @@ describe("CreatePostが正しくレンダリングされるか確認する", () 
     expect(screen.getByTestId("buttonForSelect")).toBeTruthy();
     expect(screen.getByTestId("buttonForClear")).toBeTruthy();
     expect(screen.getByTestId("textarea")).toBeTruthy();
-    expect(screen.getByTestId("togglePreview")).toBeTruthy();
-    // expect(screen.getByTestId("paperForPreview")).toBeTruthy();
-    // expect(screen.getByTestId("previewHeader")).toBeTruthy();
-    // expect(screen.getByTestId("previewTitle")).toBeTruthy();
-    // expect(screen.getByTestId("previewUserName")).toBeTruthy();
-    // expect(screen.getByTestId("previewImageUrl")).toBeTruthy();
-    // expect(screen.getByTestId("commentArea")).toBeTruthy();
-    // expect(screen.getByTestId("buttonForUpload")).toBeTruthy();
-    // expect(screen.getByTestId("togglePreview")).toBeTruthy();
+    expect(screen.getByTestId("previewOn")).toBeTruthy();
   });
 });
 
@@ -149,8 +140,47 @@ describe("「次へ進む」ボタンが正常に起動するか確認する", (
   });
 
   it("previewがtrueのとき、プレビュー画面の要素がレンダリングされるか確認する", () => {
-    render(<Provider store={store}>
-      <CreatePost/>
-    </Provider>);
+    render(
+      <Provider store={store}>
+        <CreatePost />
+      </Provider>
+    );
+    const previewOn = screen.getByTestId("previewOn") as HTMLButtonElement;
+    previewOn.style.pointerEvents = "auto";
+    userEvent.click(previewOn);
+    expect(screen.getByTestId("paperForPreview")).toBeTruthy();
+    expect(screen.getByTestId("previewUserName")).toBeTruthy();
+    expect(screen.getByTestId("previewImageUrl")).toBeTruthy();
+    expect(screen.getByTestId("commentArea")).toBeTruthy();
+    expect(screen.getByTestId("buttonForUpload")).toBeTruthy();
+    expect(screen.getByTestId("previewOff")).toBeTruthy();
+  });
+
+  it("「戻る」ボタンをクリックしたとき、togglePreviewが呼び出されるか確認する", () => {
+    const togglePreview = jest.fn();
+    render(
+      <DefaultButton
+        dataTestId="previewOff"
+        onClick={togglePreview}
+        child="戻る"
+      />
+    );
+    const previewOff = screen.getByTestId("previewOff");
+    userEvent.click(previewOff);
+    expect(togglePreview).toHaveBeenCalledTimes(1);
+  });
+  it("「投稿する」ボタンをクリックしたときにuploadが呼び出されるか確認する", () => {
+    const upload = jest.fn();
+    render(
+      <SecondaryButton
+        dataTestId="buttonForUpload"
+        onClick={upload}
+        disabled={false}
+        child="投稿する"
+      />
+    );
+    const buttonForUpload = screen.getByTestId("buttonForUpload");
+    userEvent.click(buttonForUpload);
+    expect(upload).toHaveBeenCalledTimes(1);
   });
 });

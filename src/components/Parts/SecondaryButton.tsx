@@ -39,7 +39,7 @@ const useStyles = makeStyles((thme: Theme) =>
 
 type Props = {
   dataTestId: string;
-  onClick: (e: React.MouseEvent<HTMLElement>) => void;
+  onClick: (e: React.MouseEvent<HTMLButtonElement>) => void;
   disabled: boolean;
   child: string;
 };
@@ -50,7 +50,7 @@ const SecondaryButton = (props: Props) => {
     <ThemeProvider theme={theme}>
       <Button
         data-testid={props.dataTestId}
-        onClick={(e: React.MouseEvent<HTMLElement>) => props.onClick(e)}
+        onClick={(e: React.MouseEvent<HTMLButtonElement>) => props.onClick(e)}
         disabled={props.disabled}
         variant="contained"
         component="span"

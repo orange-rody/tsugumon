@@ -11,9 +11,3 @@ import styled from "styled-components";
 // cleanupを実行するとrender()でレンダリングされた内容をアンマウントすることができる
 afterEach(() => cleanup());
 
-describe("Rendering", () => {
-  it("Should render all the elements correctly", () => {
-    render(<Auth />);
-    screen.debug();
-  });
-});
