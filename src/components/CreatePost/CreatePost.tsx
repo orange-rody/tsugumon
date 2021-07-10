@@ -261,6 +261,7 @@ export default function CreatePost() {
         .on(
           firebase.storage.TaskEvent.STATE_CHANGED,
           // TODO >> アップロード中にインジケータを表示するようにする。
+          // TODO >> アップロード完了後に「投稿が完了しました」のメッセージを表示する。
           () => {},
           (err: any) => {
             alert(err.message);
