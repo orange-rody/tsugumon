@@ -1,25 +1,36 @@
 import React, { useEffect } from "react";
-import styles from "./App.module.scss";
 import { useSelector, useDispatch } from "react-redux";
 import { selectUser, login, logout } from "./features/userSlice";
-import { auth } from "./firebase";
+import { auth, db } from "./firebase";
 import Feed from "./components/Feed";
-import Auth from "./components/Auth";
+import Auth from "./components/Auth/Auth";
 
 const App: React.FC = () => {
   const user = useSelector(selectUser);
   const dispatch = useDispatch();
+  const style = {
+    width: "100vw",
+    height: "100vh",
+  };
 
   useEffect(() => {
     const unSubscribe = auth.onAuthStateChanged((authUser) => {
       if (authUser) {
-        dispatch(
-          login({
-            uid: authUser.uid,
-            photoUrl: authUser.photoURL,
-            displayName: authUser.displayName,
-          })
-        );
+        //firestoreのusersコレクションの中からauthUser.uidに対応するドキュメントを参照する
+        const userRef = db.collection("users").doc(authUser.uid);
+        userRef.get().then((user) => {
+          // userコレクションにアクセスするにはdata()メソッドを使用する
+          // userDataがnullとならないよう、user.data()!といった形で型アサーションを使用する
+          const userData = user.data()!;
+          dispatch(
+            login({
+              uid: authUser.uid,
+              userName: userData.userName,
+              userIcon: userData.userIcon,
+              profile: userData.profile,
+            })
+          );
+        });
       } else {
         dispatch(logout());
       }
@@ -36,13 +47,7 @@ const App: React.FC = () => {
 
   return (
     <>
-      {user.uid ? (
-        <div className={styles.app}>
-          <Feed />
-        </div>
-      ) : (
-        <Auth />
-      )}
+      <div style={style}>{user.uid ? <Feed /> : <Auth />}</div>
     </>
   );
 };
