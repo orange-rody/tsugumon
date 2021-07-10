@@ -4,6 +4,8 @@ import { selectUser } from "../../features/userSlice";
 import { auth, storage, db } from "../../firebase";
 import firebase from "firebase/app";
 import HeaderA from "../Parts/HeaderA";
+import CloseButton from "../Parts/CloseButton";
+import ArrowBackButton from "../Parts/ArrowBackButton";
 import InputFileButton from "../Parts/InputFileButton";
 import DefaultButton from "../Parts/DefaultButton";
 import SecondaryButton from "../Parts/SecondaryButton";
@@ -170,6 +172,7 @@ export default function CreatePost() {
   const [imageUrl, setImageUrl] = useState<string>(noImage);
   const [caption, setCaption] = useState<string>("");
   const [preview, setPreview] = useState<boolean>(false);
+  const [isDone, setIsDone] = useState<boolean>(false);
 
   const classes = useStyles();
 
@@ -296,7 +299,9 @@ export default function CreatePost() {
       <Wrapper data-testid="wrapper">
         <Paper elevation={2} className={classes.paper} data-testid="paper">
           <Main>
-            <HeaderA child="写真を登録する" />
+            <HeaderA child="写真を登録する">
+              <CloseButton onClick={togglePreview} data-testid="closeButton"/>
+            </HeaderA>
             <ImageWrap data-testid="imageWrap">
               {imageUrl === noImage ? (
                 <>
@@ -361,7 +366,9 @@ export default function CreatePost() {
             data-testid="paperForPreview"
           >
             <Main>
-              <HeaderA child="この内容で登録しますか？" />
+              <HeaderA child="この内容で登録しますか？">
+                <ArrowBackButton onClick={togglePreview}/>
+              </HeaderA>
               <UserInfo>
                 {/* TODO >> ユーザーアイコンの画像を取得して、Avatarに読み込む */}
                 <UserIcon>

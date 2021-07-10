@@ -48,8 +48,8 @@ const InputFileButton = (props: Props) => {
         style={{ display: "none" }}
         type="file"
         id="inputFile"
-        onClick={(e:any) => (e.target.value = null)}
-        onChange={(e:React.ChangeEvent<HTMLInputElement>) => props.onChange(e)}
+        onClick={(e: any) => (e.target.value = null)}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => props.onChange(e)}
         data-testid="inputFile"
       />
       <label htmlFor="inputFile">

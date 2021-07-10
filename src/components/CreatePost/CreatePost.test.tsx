@@ -184,3 +184,14 @@ describe("「次へ進む」ボタンが正常に起動するか確認する", (
     expect(upload).toHaveBeenCalledTimes(1);
   });
 });
+
+describe("Closeボタンが正常に稼働するか確認する。", () => {
+  it("closeボタンが適正に描写されるか確認する", () => {
+    render(
+      <Provider store={store}>
+        <CreatePost />
+      </Provider>
+    );
+    expected(screen.getByTestId("closeButton")).toBeTruthy();
+  });
+});

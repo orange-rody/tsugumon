@@ -3,6 +3,7 @@ import styled from "styled-components";
 
 const Header = styled.div`
   display: flex;
+  position: relative;
   width: 100%;
   height: 52px;
   margin: 0 auto;
@@ -25,11 +26,15 @@ const Title = styled.h2`
 
 type Props = {
   child: string;
+  children: JSX.Element;
 };
 
 const HeaderA = (props: Props) => {
   return (
     <Header data-testid="header">
+      <div>
+        {props.children}
+      </div>
       <Title data-testid="title">{props.child}</Title>
     </Header>
   );
