@@ -300,7 +300,7 @@ export default function CreatePost() {
         <Paper elevation={2} className={classes.paper} data-testid="paper">
           <Main>
             <HeaderA child="写真を登録する">
-              <CloseButton onClick={togglePreview} data-testid="closeButton"/>
+              <CloseButton dataTestId="closeButton" onClick={togglePreview} />
             </HeaderA>
             <ImageWrap data-testid="imageWrap">
               {imageUrl === noImage ? (
@@ -367,7 +367,7 @@ export default function CreatePost() {
           >
             <Main>
               <HeaderA child="この内容で登録しますか？">
-                <ArrowBackButton onClick={togglePreview}/>
+                <ArrowBackButton dataTestId="arrowBackButton" onClick={togglePreview} />
               </HeaderA>
               <UserInfo>
                 {/* TODO >> ユーザーアイコンの画像を取得して、Avatarに読み込む */}

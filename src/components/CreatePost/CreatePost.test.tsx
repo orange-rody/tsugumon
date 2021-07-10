@@ -7,6 +7,9 @@ import CreatePost from "./CreatePost";
 import InputFileButton from "../Parts/InputFileButton";
 import DefaultButton from "../Parts/DefaultButton";
 import SecondaryButton from "../Parts/SecondaryButton";
+import HeaderA from "../Parts/HeaderA";
+import CloseButton from "../Parts/CloseButton";
+import ArrowBackButton from "../Parts/ArrowBackButton";
 
 afterEach(() => cleanup());
 
@@ -186,12 +189,45 @@ describe("「次へ進む」ボタンが正常に起動するか確認する", (
 });
 
 describe("Closeボタンが正常に稼働するか確認する。", () => {
-  it("closeボタンが適正に描写されるか確認する", () => {
+  const togglePreview = jest.fn();
+  it("Headerでcloseボタンが適正に描写されるか確認する", () => {
     render(
-      <Provider store={store}>
-        <CreatePost />
-      </Provider>
+      <HeaderA child="写真を登録する">
+        <CloseButton onClick={togglePreview} dataTestId="closeButton" />
+      </HeaderA>
     );
-    expected(screen.getByTestId("closeButton")).toBeTruthy();
+    expect(screen.getByRole("button")).toBeTruthy();
+  });
+  it("closeボタンが押されたら、togglePreviewが呼び出されるか確認する", () => {
+    render(
+      <HeaderA child="写真を登録する">
+        <CloseButton onClick={togglePreview} dataTestId="closeButton" />
+      </HeaderA>
+    );
+    const closeButton = screen.getByRole("button");
+    userEvent.click(closeButton);
+    expect(togglePreview).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("ArrowBackボタンが正常に稼働するか確認する。", () => {
+  const togglePreview = jest.fn();
+  it("HeaderでArrowBackボタンが適正に描写されるか確認する", () => {
+    render(
+      <HeaderA child="写真を登録する">
+        <ArrowBackButton onClick={togglePreview} dataTestId="arrowBackButton" />
+      </HeaderA>
+    );
+    expect(screen.getByRole("button")).toBeTruthy();
+  });
+  it("closeボタンが押されたら、togglePreviewが呼び出されるか確認する", () => {
+    render(
+      <HeaderA child="写真を登録する">
+        <ArrowBackButton onClick={togglePreview} dataTestId="arrowBackButton"/>
+      </HeaderA>
+    );
+    const arrowBackButton = screen.getByRole("button");
+    userEvent.click(arrowBackButton);
+    expect(togglePreview).toHaveBeenCalledTimes(1);
   });
 });

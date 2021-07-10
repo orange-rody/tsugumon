@@ -4,6 +4,7 @@ import { Close } from "@material-ui/icons";
 import { createStyles, makeStyles, Theme } from "@material-ui/core/styles";
 
 type Props = {
+  dataTestId: string;
   onClick: (e: React.MouseEvent<HTMLElement>) => void;
 };
 
@@ -30,6 +31,7 @@ const CloseButton = (props: Props) => {
   return (
     <IconButton
       className={classes.closeButton}
+      data-testid={props.dataTestId}
       onClick={(e: React.MouseEvent<HTMLElement>) => props.onClick(e)}
     >
       <Close className={classes.closeIcon} />

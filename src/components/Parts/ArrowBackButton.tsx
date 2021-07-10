@@ -4,6 +4,7 @@ import { ArrowLeft } from "@material-ui/icons";
 import { createStyles, makeStyles, Theme } from "@material-ui/core/styles";
 
 type Props = {
+  dataTestId: string
   onClick: (e: React.MouseEvent<HTMLElement>) => void;
 };
 
@@ -29,6 +30,7 @@ const ArrowBackButton = (props: Props) => {
   return (
     <IconButton
       className={classes.arrowLeftButton}
+      data-testid={props.dataTestId}
       onClick={(e: React.MouseEvent<HTMLElement>) => props.onClick(e)}
     >
       <ArrowLeft className={classes.arrowLeftIcon} />
