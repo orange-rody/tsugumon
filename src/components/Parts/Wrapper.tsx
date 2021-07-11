@@ -25,7 +25,7 @@ margin: 0;`}
 `;
 
 type Props = {
-  children: any;
+  children: JSX.Element;
 };
 
 const Wrapper = (props: Props) => {
