@@ -11,7 +11,7 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 type Props = {
-  children: JSX.Element[];
+  children: JSX.Element;
 };
 
 const PaperContainer = (props: Props) => {

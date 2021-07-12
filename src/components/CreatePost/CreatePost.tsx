@@ -152,7 +152,6 @@ export default function CreatePost() {
   const [imageUrl, setImageUrl] = useState<string>(noImage);
   const [caption, setCaption] = useState<string>("");
   const [preview, setPreview] = useState<boolean>(false);
-  const [isDone, setIsDone] = useState<boolean>(false);
 
   const classes = useStyles();
 

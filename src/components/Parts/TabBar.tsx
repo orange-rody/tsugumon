@@ -1,64 +1,69 @@
 import React from "react";
-// import {
-//   createStyles,makeStyles,Theme,ThemeProvider
-// } from "@material-ui/icons";
 import styled from "styled-components";
-import {
-  HomeRounded,
-  SearchRounded,
-  AddBoxRounded,
-  NotificationsRounded,
-  PersonRounded,
-} from "@material-ui/icons";
 
-const TabBarContainer = styled.div`
+const TabWrapper = styled.div`
+  position: absolute;
+  botom: 0;
   width: 100%;
   height: 49px;
-  display: flex;
-  flex-flow: row;
   border-top: hsl(0, 0, 80%);
 `;
 
-const TabBar = () => {
+const Label = styled.label`
+  display: flex;
+  width: 100%;
+  height: 100%;
+  flex-flow: row;
+  cursor: pointer;
+`;
+
+const Tab = styled.span`
+  display: block;
+  width: 20%;
+  height: 100%;
+`;
+
+const Icon = styled.p`
+  color: hsl(0, 0, 20%);
+  transition: all 100ms;
+`;
+
+const IconTitle = styled.p`
+  width: 100%;
+  height: 20px;
+  font-size: 12px;
+  color: hsl(0, 0, 20%);
+  transition: all 100ms;
+`;
+
+const Input = styled.input`
+  visibility: hidden;
+  &:checked + ${Icon} {
+    color: #4fc0ad;
+  }
+  + ${IconTitle} {
+    color: #4fc0ad;
+  }
+`;
+
+type Props = {
+  children: JSX.Element;
+  title: string;
+};
+
+const TabBar = (props: Props) => {
   // const [active, setActive] = useState("home");
-  const Home = styled.div`
-    width: 20%;
-    height: 100%;
-  `;
-  const Search = styled(Home)`
-    color: hsl(0, 0, 20%);
-  `;
-
-  const Add = styled(Home)`
-    color: hsl(0, 0, 20%);
-  `;
-
-  const Notification = styled(Home)`
-    color: hsl(0, 0, 20%);
-  `;
-
-  const Profile = styled(Home)`
-    color: hsl(0, 0, 20%);
-  `;
-
   return (
-    <TabBarContainer>
-      <Home>
-        <HomeRounded />
-      </Home>
-      <Search>
-        <SearchRounded />
-      </Search>
-      <Add>
-        <AddBoxRounded />
-      </Add>
-      <Notification>
-        <NotificationsRounded />
-      </Notification>
-      <Profile>
-        <PersonRounded />
-      </Profile>
-    </TabBarContainer>
+    <TabWrapper>
+      <Label>
+        <Input type="radio">
+          <Tab>
+            <Icon>{props.children}</Icon>
+            <IconTitle>{props.title}</IconTitle>
+          </Tab>
+        </Input>
+      </Label>
+    </TabWrapper>
   );
 };
 
