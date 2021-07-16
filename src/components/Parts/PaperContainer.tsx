@@ -6,12 +6,13 @@ const useStyles = makeStyles((theme: Theme) =>
     paper: {
       width: "100%",
       height: "100%",
+      position: "relative",
     },
   })
 );
 
 type Props = {
-  children: JSX.Element[];
+  children: JSX.Element | JSX.Element[] ;
 };
 
 const PaperContainer = (props: Props) => {
