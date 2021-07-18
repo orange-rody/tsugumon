@@ -10,7 +10,7 @@ const MainView = () => {
   return (
       <Wrapper>
         <PaperContainer>
-          <TabBar />
+          <TabBar/>
         </PaperContainer>
       </Wrapper>
     

@@ -1,4 +1,4 @@
-import React, { ReactElement, useState } from "react";
+import React, { useState } from "react";
 import { makeStyles, createStyles } from "@material-ui/core";
 import {
   HomeRounded,
@@ -9,30 +9,59 @@ import {
 } from "@material-ui/icons";
 import styled from "styled-components";
 
-const Tabs = styled.ul`
+const TabData = [
+  { value: "home", title: "ホーム", tabIcon: "HOME" },
+  { value: "search", title: "検索", tabIcon: "SEARCH" },
+  { value: "add", title: "追加", tabIcon: "ADD" },
+  { value: "notification", title: "通知", tabIcon: "NOTIFICATION" },
+  { value: "profile", title: "プロフィール", tabIcon: "PROFILE" },
+];
+const TabBox = styled.label`
   display: flex;
-  width: 100%;
-  height: 52px;
-  position: absolute;
-  bottom: 0;
-  flex-dlow: row;
-  background-color: hsl(0, 0, 100%);
-  bordertop: 1px solid hsl(0, 0, 40%);
-`;
-const Tab = styled.li`
-  display: flex;
-  flex-flow: column;
+  margin: 0;
   width: 20%;
   height: 100%;
   margin: 0;
   padding: 0;
+  flex-flow: column;
   list-style-type: none;
 `;
+
 const TabTitle = styled.p`
   width: 100%;
-  height: 26px;
+  margin: 0;
+  padding: 0;
   text-align: center;
-  font-size: 15px;
+  font-size: 10px;
+  color: hsl(0, 0, 20%);
+`;
+function getTabIcon(icon: string) {
+  const iconStyle = { margin: "4px auto 0", padding: 0, fontSize: "30px" };
+  switch (icon) {
+    case "HOME":
+      return <HomeRounded style={iconStyle} />;
+    case "SEARCH":
+      return <SearchRounded style={iconStyle} />;
+    case "ADD":
+      return <AddBoxRounded style={iconStyle} />;
+    case "NOTIFICATION":
+      return <NotificationsRounded style={iconStyle} />;
+    case "PROFILE":
+      return <PersonRounded style={iconStyle} />;
+  }
+}
+
+const Tabs = styled.ul`
+  display: flex;
+  width: 100%;
+  height: 50px;
+  margin: 0;
+  padding: 0;
+  position: absolute;
+  bottom: 0;
+  flex-flow: row;
+  background-color: hsl(0, 0, 100%);
+  border-top: 1px solid rgb();
 `;
 
 const useStyles = makeStyles(() =>
@@ -40,9 +69,9 @@ const useStyles = makeStyles(() =>
     selected: {
       backgroundColor: "#4fc0ad",
       color: "white",
+      transition: "all 0.3s",
     },
     unselected: {
-      backgroundColor: "hsl(0,0,100%)",
       color: "hsl(0,0,20%)",
     },
   })
@@ -51,112 +80,30 @@ const useStyles = makeStyles(() =>
 const TabBar = () => {
   const [selectedTab, setSelectedTab] = useState("home");
   const classes = useStyles();
+
   return (
     <Tabs>
-      <Tab
-        value="home"
-        onClick={(e: React.MouseEvent) => setSelectedTab("home")}
-        className={
-          selectedTab === "home" ? classes.selected : classes.unselected
-        }
-      >
-        <HomeRounded
-          className={
-            selectedTab === "home" ? classes.selected : classes.unselected
-          }
-        />
-        <TabTitle
-          className={
-            selectedTab === "home" ? classes.selected : classes.unselected
-          }
-        >
-          ホーム
-        </TabTitle>
-      </Tab>
-      <Tab
-        value="search"
-        onClick={(e: React.MouseEvent) => setSelectedTab("search")}
-        className={
-          selectedTab === "search" ? classes.selected : classes.unselected
-        }
-      >
-        <SearchRounded
-          className={
-            selectedTab === "search" ? classes.selected : classes.unselected
-          }
-        />
-        <TabTitle
-          className={
-            selectedTab === "search" ? classes.selected : classes.unselected
-          }
-        >
-          検索
-        </TabTitle>
-      </Tab>
-      <Tab
-        value="add"
-        onClick={(e: React.MouseEvent) => setSelectedTab("add")}
-        className={
-          selectedTab === "add" ? classes.selected : classes.unselected
-        }
-      >
-        <AddBoxRounded
-          className={
-            selectedTab === "add" ? classes.selected : classes.unselected
-          }
-        />
-        <TabTitle
-          className={
-            selectedTab === "add" ? classes.selected : classes.unselected
-          }
-        >
-          追加
-        </TabTitle>
-      </Tab>
-      <Tab
-        value="notification"
-        onClick={(e: React.MouseEvent) => setSelectedTab("notification")}
-        className={
-          selectedTab === "notification" ? classes.selected : classes.unselected
-        }
-      >
-        <NotificationsRounded
-          className={
-            selectedTab === "notification"
-              ? classes.selected
-              : classes.unselected
-          }
-        />
-        <TabTitle
-          className={
-            selectedTab === "notification"
-              ? classes.selected
-              : classes.unselected
-          }
-        >
-          通知
-        </TabTitle>
-      </Tab>
-      <Tab
-        value="profile"
-        onClick={(e: React.MouseEvent) => setSelectedTab("profile")}
-        className={
-          selectedTab === "profile" ? classes.selected : classes.unselected
-        }
-      >
-        <PersonRounded
-          className={
-            selectedTab === "profile" ? classes.selected : classes.unselected
-          }
-        />
-        <TabTitle
-          className={
-            selectedTab === "profile" ? classes.selected : classes.unselected
-          }
-        >
-          プロフィール
-        </TabTitle>
-      </Tab>
+      {TabData.map((data) => {
+        return (
+          <TabBox
+            className={
+              selectedTab === data.value ? classes.selected : classes.unselected
+            }
+          >
+            <input
+              type="radio"
+              name="tab"
+              value={data.value}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                setSelectedTab(data.value);
+              }}
+            />
+            {getTabIcon(data.tabIcon)}
+            <TabTitle>{data.title}</TabTitle>
+          </TabBox>
+        );
+      })}
+      ;
     </Tabs>
   );
 };
