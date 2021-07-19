@@ -3,6 +3,8 @@ import { useSelector } from "react-redux";
 import { selectUser } from "../../features/userSlice";
 import { auth, storage, db } from "../../firebase";
 import firebase from "firebase/app";
+import Wrapper from "../Parts/Wrapper";
+import PaperContainer from "../Parts/PaperContainer";
 import HeaderA from "../Parts/HeaderA";
 import CloseButton from "../Parts/CloseButton";
 import ArrowBackButton from "../Parts/ArrowBackButton";
@@ -275,7 +277,7 @@ export default function CreatePost() {
   return (
     // NOTE >> Matrial-UIのthemeを適用させるには<ThemeProvider>を
     //         使用する必要がある
-    <>
+    <PaperContainer>
       <Main>
         <HeaderA child="写真を登録する">
           <CloseButton dataTestId="closeButton" onClick={togglePreview} />
@@ -377,6 +379,6 @@ export default function CreatePost() {
           </Main>
         </Paper>
       </Slide>
-    </>
+    </PaperContainer>
   );
 }

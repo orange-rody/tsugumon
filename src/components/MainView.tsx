@@ -1,20 +1,137 @@
 import React, { useState } from "react";
-import { auth } from "../firebase";
+import { makeStyles, createStyles, Slide } from "@material-ui/core";
 import CreatePost from "./CreatePost/CreatePost";
-import TabBar from "./Parts/TabBar";
 import Wrapper from "./Parts/Wrapper";
 import PaperContainer from "./Parts/PaperContainer";
+import {
+  HomeRounded,
+  SearchRounded,
+  AddBoxRounded,
+  NotificationsRounded,
+  PersonRounded,
+} from "@material-ui/icons";
+import styled from "styled-components";
 
-const MainView = () => {
+const TabData = [
+  { value: "home", title: "ホーム", tabIcon: "HOME" },
+  { value: "search", title: "検索", tabIcon: "SEARCH" },
+  { value: "add", title: "追加", tabIcon: "ADD" },
+  { value: "notification", title: "通知", tabIcon: "NOTIFICATION" },
+  { value: "profile", title: "プロフィール", tabIcon: "PROFILE" },
+];
+const TabBox = styled.label`
+  display: flex;
+  margin: 0;
+  width: 20%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  flex-flow: column;
+  list-style-type: none;
+`;
+
+const TabTitle = styled.p`
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  text-align: center;
+  font-size: 10px;
+  color: hsl(0, 0, 20%);
+`;
+function getTabIcon(icon: string) {
+  const iconStyle = { margin: "4px auto 0", padding: 0, fontSize: "30px" };
+  switch (icon) {
+    case "HOME":
+      return <HomeRounded style={iconStyle} />;
+    case "SEARCH":
+      return <SearchRounded style={iconStyle} />;
+    case "ADD":
+      return <AddBoxRounded style={iconStyle} />;
+    case "NOTIFICATION":
+      return <NotificationsRounded style={iconStyle} />;
+    case "PROFILE":
+      return <PersonRounded style={iconStyle} />;
+  }
+}
+
+function getTabPanel(tab: string) {
+  switch (tab) {
+    case "home":
+      return <div>home</div>;
+    case "search":
+      return <div>search</div>;
+    case "add":
+      return <CreatePost />;
+    case "notification:":
+      return <div>notification</div>;
+    case "profile":
+      return <div>profile</div>;
+    default:
+      return <div>home</div>;
+  }
+}
+const Tabs = styled.ul`
+  display: flex;
+  width: 100%;
+  height: 50px;
+  margin: 0;
+  padding: 0;
+  position: absolute;
+  bottom: 0;
+  flex-flow: row;
+  background-color: hsl(0, 0, 100%);
+  border-top: 1px solid rgb();
+`;
+
+const useStyles = makeStyles(() =>
+  createStyles({
+    selected: {
+      backgroundColor: "#4fc0ad",
+      color: "white",
+      transition: "all 0.3s",
+    },
+    unselected: {
+      color: "hsl(0,0,20%)",
+    },
+  })
+);
+
+const TabBar = () => {
+  const [selectedTab, setSelectedTab] = useState("home");
+  const classes = useStyles();
 
   return (
-      <Wrapper>
-        <PaperContainer>
-          <TabBar/>
-        </PaperContainer>
-      </Wrapper>
-    
+    <Wrapper>
+      <PaperContainer>
+        <Tabs>
+          {TabData.map((data) => {
+            return (
+              <TabBox
+                className={
+                  selectedTab === data.value
+                    ? classes.selected
+                    : classes.unselected
+                }
+              >
+                <input
+                  type="radio"
+                  name="tab"
+                  style={{ appearance: "none" }}
+                  value={data.value}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    setSelectedTab(data.value);
+                  }}
+                />
+                {getTabIcon(data.tabIcon)}
+                <TabTitle>{data.title}</TabTitle>
+              </TabBox>
+            );
+          })}
+        </Tabs>
+        {getTabPanel(selectedTab)}
+      </PaperContainer>
+    </Wrapper>
   );
 };
 
-export default MainView;
+export default TabBar;
