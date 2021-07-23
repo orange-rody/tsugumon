@@ -32,6 +32,17 @@ const TabBox = styled.label`
   list-style-type: none;
 `;
 
+const TabBoxAdd = styled(TabBox)`
+  "&active":{
+      backgroundColor: "#4fc0ad",
+      color: "white",
+      fontWeight: "bold",
+      transitionProperty: "all",
+      transitionDuration: "0.3s",
+      transitionTimingFunction: "ease",
+  }
+`;
+
 const TabTitle = styled.p`
   width: 100%;
   margin: 0;
@@ -69,6 +80,7 @@ function getTabPanel(tab: string) {
       return <div>home</div>;
   }
 }
+
 const Tabs = styled.ul`
   display: flex;
   width: 100%;
@@ -87,8 +99,9 @@ const useStyles = makeStyles(() =>
     selected: {
       backgroundColor: "#4fc0ad",
       color: "white",
-      transition: "all 0.3s",
-      fontWeight: "bold",
+      transitionProperty: "all",
+      transitionDuration: "0.3s",
+      transitionTimingFunction: "ease",
     },
     unselected: {
       color: "#555555",
@@ -134,7 +147,7 @@ const TabBar = () => {
               </TabBox>
             );
           })}
-          <TabBox
+          <TabBoxAdd
             onClick={(e: React.MouseEvent) => {
               setSelectedAdd(true);
             }}
@@ -148,7 +161,7 @@ const TabBar = () => {
               }}
             />
             <TabTitle>追加</TabTitle>
-          </TabBox>
+          </TabBoxAdd>
           {TabDataRight.map((data) => {
             return (
               <TabBox

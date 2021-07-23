@@ -372,8 +372,8 @@ export default function CreatePost(props: Props) {
         </Main>
       </Slide>
       <Slide direction="left" in={preview} mountOnEnter unmountOnExit>
-        <Paper elevation={2} className={classes.paperForPreview}>
-          <Main>
+        {/* <Paper elevation={2} > */}
+          <Main className={classes.paperForPreview}>
             <HeaderA child="この内容で登録しますか？">
               <ArrowBackButton
                 dataTestId="arrowBackButton"
@@ -410,7 +410,7 @@ export default function CreatePost(props: Props) {
               />
             </ButtonArea>
           </Main>
-        </Paper>
+        {/* </Paper> */}
       </Slide>
     </>
   );
