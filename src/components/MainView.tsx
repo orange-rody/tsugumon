@@ -61,8 +61,6 @@ function getTabPanel(tab: string) {
       return <div>home</div>;
     case "search":
       return <div>search</div>;
-    case "add":
-      return <CreatePost />;
     case "notification:":
       return <div>notification</div>;
     case "profile":
@@ -94,6 +92,12 @@ const useStyles = makeStyles(() =>
     },
     unselected: {
       color: "#555555",
+    },
+    show: {
+      display: "block",
+    },
+    hidden: {
+      display: "hidden",
     },
   })
 );
@@ -169,7 +173,12 @@ const TabBar = () => {
             );
           })}
         </Tabs>
-        {selectedAdd ? <CreatePost /> : <></>}
+        <CreatePost
+          open={selectedAdd}
+          closeAdd={(e: React.MouseEvent<HTMLElement>) => {
+            setSelectedAdd(false);
+          }}
+        />
         {getTabPanel(selectedTab)}
       </PaperContainer>
     </Wrapper>

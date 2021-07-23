@@ -3,10 +3,7 @@ import { useSelector } from "react-redux";
 import { selectUser } from "../../features/userSlice";
 import { auth, storage, db } from "../../firebase";
 import firebase from "firebase/app";
-import Wrapper from "../Parts/Wrapper";
-import PaperContainer from "../Parts/PaperContainer";
 import HeaderA from "../Parts/HeaderA";
-import CloseButton from "../Parts/CloseButton";
 import ArrowBackButton from "../Parts/ArrowBackButton";
 import InputFileButton from "../Parts/InputFileButton";
 import DefaultButton from "../Parts/DefaultButton";
@@ -20,8 +17,9 @@ import {
   createStyles,
   Theme,
   Slide,
+  IconButton,
 } from "@material-ui/core";
-import { ArrowDownward } from "@material-ui/icons";
+import { ArrowDownward, Close } from "@material-ui/icons";
 import mediaQuery from "styled-media-query";
 
 // NOTE >> mediumよりサイズが小さかったらmediaMobileのプロパティが設定されるようにする。
@@ -29,12 +27,32 @@ const mediaMobile = mediaQuery.lessThan("medium");
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
-    paperForPreview: {
+    paperForDraft: {
       width: "100%",
       height: "100%",
       position: "absolute",
       top: "0",
       left: "0",
+    },
+    paperForPreview: {
+      with: "100%",
+      height: "100%",
+      position: "absolute",
+      top: "0",
+      width: "0",
+    },
+    closeButton: {
+      position: "absolute",
+      top: "5px",
+      left: "5px",
+      width: "42px",
+      height: "42px",
+    },
+    closeIcon: {
+      left: "5px",
+      width: "32px",
+      height: "32px",
+      borderRadius: "100%",
     },
   })
 );
@@ -148,7 +166,12 @@ const CommentArea = styled.p`
   font-size: 1rem;
 `;
 
-export default function CreatePost() {
+type Props = {
+  open: boolean;
+  closeAdd: any;
+};
+
+export default function CreatePost(props: Props) {
   const user = useSelector(selectUser);
   const noImage = `${process.env.PUBLIC_URL}/noPhoto.png`;
   const [imageUrl, setImageUrl] = useState<string>(noImage);
@@ -277,67 +300,77 @@ export default function CreatePost() {
   return (
     // NOTE >> Matrial-UIのthemeを適用させるには<ThemeProvider>を
     //         使用する必要がある
-    <PaperContainer>
-      <Main>
-        <HeaderA child="写真を登録する">
-          <CloseButton dataTestId="closeButton" onClick={togglePreview} />
-        </HeaderA>
-        <ImageWrap data-testid="imageWrap">
-          {imageUrl === noImage ? (
-            <>
-              <NoImage
-                src={imageUrl}
-                data-testid="noImage"
-                alt="写真が選択されていません。"
-              />
-              <Notes data-testid="notes">
-                写真を選んでください。
-                <ArrowDownward
-                  style={{
-                    display: "block",
-                    margin: "10px auto",
-                    height: "18px",
-                  }}
-                  data-testid="arrowDownward"
+    <>
+      <Slide in={props.open} direction="up" mountOnEnter unmountOnExit>
+        <Main className={classes.paperForDraft}>
+          <HeaderA child="写真を登録する">
+            <IconButton
+              className={classes.closeButton}
+              data-testid="closeButton"
+              onClick={(e: React.MouseEvent<HTMLElement>) => {
+                props.closeAdd();
+              }}
+            >
+              <Close className={classes.closeIcon} />
+            </IconButton>
+          </HeaderA>
+          <ImageWrap data-testid="imageWrap">
+            {imageUrl === noImage ? (
+              <>
+                <NoImage
+                  src={imageUrl}
+                  data-testid="noImage"
+                  alt="写真が選択されていません。"
                 />
-              </Notes>
-            </>
-          ) : (
-            <Image
-              src={imageUrl}
-              alt="選択した写真のプレビュー"
-              data-testid="image"
+                <Notes data-testid="notes">
+                  写真を選んでください。
+                  <ArrowDownward
+                    style={{
+                      display: "block",
+                      margin: "10px auto",
+                      height: "18px",
+                    }}
+                    data-testid="arrowDownward"
+                  />
+                </Notes>
+              </>
+            ) : (
+              <Image
+                src={imageUrl}
+                alt="選択した写真のプレビュー"
+                data-testid="image"
+              />
+            )}
+          </ImageWrap>
+          <ButtonArea>
+            <InputFileButton onChange={handleImage} />
+            <DefaultButton
+              child="消す"
+              onClick={clearDraft}
+              dataTestId="buttonForClear"
             />
-          )}
-        </ImageWrap>
-        <ButtonArea>
-          <InputFileButton onChange={handleImage} />
-          <DefaultButton
-            child="消す"
-            onClick={clearDraft}
-            dataTestId="buttonForClear"
-          />
-        </ButtonArea>
-        {/* TODO >> Textareaの文字数制限を設定する */}
-        {/* TODO >> Textareaの自動スクロール機能をつくる */}
-        {/* TODO >> Textareaの制限を超えた文字を赤く表示する */}
-        {/* TODO >> Enterキーを押したら、改行できるようにする */}
-        <Textarea
-          id="textareaForm"
-          placeholder="コメントを入力する"
-          onChange={handleCaption}
-          value={caption}
-          data-testid="textarea"
-        ></Textarea>
-        <ButtonArea>
-          <SecondaryButton
-            disabled={imageUrl === noImage ? true : false}
-            onClick={togglePreview}
-            dataTestId="previewOn"
-            child="次へ進む"
-          />
-        </ButtonArea>
-      </Main>
+          </ButtonArea>
+          {/* TODO >> Textareaの文字数制限を設定する */}
+          {/* TODO >> Textareaの自動スクロール機能をつくる */}
+          {/* TODO >> Textareaの制限を超えた文字を赤く表示する */}
+          {/* TODO >> Enterキーを押したら、改行できるようにする */}
+          <Textarea
+            id="textareaForm"
+            placeholder="コメントを入力する"
+            onChange={handleCaption}
+            value={caption}
+            data-testid="textarea"
+          ></Textarea>
+          <ButtonArea>
+            <SecondaryButton
+              disabled={imageUrl === noImage ? true : false}
+              onClick={togglePreview}
+              dataTestId="previewOn"
+              child="次へ進む"
+            />
+          </ButtonArea>
+        </Main>
+      </Slide>
       <Slide direction="left" in={preview} mountOnEnter unmountOnExit>
         <Paper elevation={2} className={classes.paperForPreview}>
           <Main>
@@ -379,6 +412,6 @@ export default function CreatePost() {
           </Main>
         </Paper>
       </Slide>
-    </PaperContainer>
+    </>
   );
 }

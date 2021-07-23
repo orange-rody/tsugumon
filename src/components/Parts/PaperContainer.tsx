@@ -13,6 +13,7 @@ const useStyles = makeStyles((theme: Theme) =>
 
 type Props = {
   children: JSX.Element | JSX.Element[] ;
+  className?: string;
 };
 
 const PaperContainer = (props: Props) => {
