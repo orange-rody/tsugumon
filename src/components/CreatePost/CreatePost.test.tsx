@@ -31,7 +31,6 @@ describe("CreatePostが正しくレンダリングされるか確認する", () 
     expect(screen.getByTestId("main")).toBeTruthy();
     expect(screen.getByTestId("header")).toBeTruthy();
     expect(screen.getByTestId("closeButton")).toBeTruthy();
-    expect(screen.getByTestId("closeIcon")).toBeTruthy();
     expect(screen.getByTestId("imageWrap")).toBeTruthy();
     expect(screen.getByTestId("noImage")).toBeTruthy();
     expect(screen.getByTestId("notes")).toBeTruthy();
@@ -191,24 +190,23 @@ describe("「次へ進む」ボタンが正常に起動するか確認する", (
 });
 
 describe("Closeボタンが正常に稼働するか確認する。", () => {
-  const togglePreview = jest.fn();
   it("Headerでcloseボタンが適正に描写されるか確認する", () => {
     render(
-      <Header child="写真を登録する">
-        <CloseButton onClick={togglePreview} dataTestId="closeButton" />
-      </Header>
+      <Provider store={store}>
+        <CreatePost open={true} closeAdd={closeAdd} />
+      </Provider>
     );
-    expect(screen.getByRole("button")).toBeTruthy();
+    expect(screen.getByTestId("closeButton")).toBeTruthy();
   });
-  it("closeボタンが押されたら、togglePreviewが呼び出されるか確認する", () => {
+  it("closeボタンが押されたら、closeAddが呼び出されるか確認する", () => {
     render(
-      <Header child="写真を登録する">
-        <CloseButton onClick={togglePreview} dataTestId="closeButton" />
-      </Header>
+      <Provider store={store}>
+        <CreatePost open={true} closeAdd={closeAdd} />
+      </Provider>
     );
-    const closeButton = screen.getByRole("button");
+    const closeButton = screen.getByTestId("closeButton");
     userEvent.click(closeButton);
-    expect(togglePreview).toHaveBeenCalledTimes(1);
+    expect(closeAdd).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -221,15 +219,5 @@ describe("ArrowBackボタンが正常に稼働するか確認する。", () => {
       </Header>
     );
     expect(screen.getByRole("button")).toBeTruthy();
-  });
-  it("closeボタンが押されたら、togglePreviewが呼び出されるか確認する", () => {
-    render(
-      <Header child="写真を登録する">
-        <ArrowBackButton onClick={togglePreview} dataTestId="arrowBackButton" />
-      </Header>
-    );
-    const arrowBackButton = screen.getByRole("button");
-    userEvent.click(arrowBackButton);
-    expect(togglePreview).toHaveBeenCalledTimes(1);
   });
 });

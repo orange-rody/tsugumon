@@ -310,7 +310,7 @@ export default function CreatePost(props: Props) {
                 props.closeAdd();
               }}
             >
-              <Close className={classes.closeIcon} data-testid="closeIcon" />
+              <Close className={classes.closeIcon} />
             </IconButton>
           </Header>
           <ImageWrap data-testid="imageWrap">
@@ -372,7 +372,7 @@ export default function CreatePost(props: Props) {
       </Slide>
       <Slide direction="left" in={preview} mountOnEnter unmountOnExit>
         {/* <Paper elevation={2} > */}
-        <Main className={classes.paperForPreview}>
+        <Main className={classes.paperForPreview} data-testid="paperForPreview">
           <Header child="この内容で登録しますか？">
             <ArrowBackButton
               dataTestId="arrowBackButton"
