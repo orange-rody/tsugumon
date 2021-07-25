@@ -132,6 +132,7 @@ const TabBar = () => {
                     ? classes.selected
                     : classes.unselected
                 }
+                key={data.value}
                 data-testid={data.value}
               >
                 <input
@@ -139,6 +140,7 @@ const TabBar = () => {
                   name="tab"
                   style={{ appearance: "none" }}
                   value={data.value}
+                  aria-label={data.value}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                     setSelectedTab(data.value);
                   }}
@@ -173,6 +175,7 @@ const TabBar = () => {
                     : classes.unselected
                 }
                 data-testid={data.value}
+                key={data.value}
               >
                 <input
                   type="radio"
@@ -182,6 +185,7 @@ const TabBar = () => {
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                     setSelectedTab(data.value);
                   }}
+                  aria-label={data.value}
                 />
                 {getTabIcon(data.tabIcon)}
                 <TabTitle>{data.title}</TabTitle>

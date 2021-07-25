@@ -25,3 +25,52 @@ describe("MainViewが正しくレンダリングされるか確認する", () =>
     expect(screen.getByTestId("createPost")).toBeTruthy();
   });
 });
+
+describe("タブバーが正常に動作するか確認する", () => {
+  it("一つのタブを選択したとき、一方のタブの選択が解除されることを検証する", () => {
+    // const setSelectedTab = (e: React.MouseEvent<HTMLElement>) => {
+    //   jest.fn();
+    // };
+    render(
+      <Provider store={store}>
+        <MainView />
+      </Provider>
+    );
+    const home = screen.getByRole("radio", { name: "home" });
+    const search = screen.getByRole("radio", { name: "search" });
+    const add = screen.getByTestId("add");
+    const notification = screen.getByRole("radio", {
+      name: "notification",
+    });
+    const profile = screen.getByRole("radio", { name: "profile" });
+    // NOTE >> homeをクリックしたとき、homeが"checked"に、それ以外が"not.checked"になるか検証する。
+    userEvent.click(home);
+    userEvent.click(add);
+    expect(home).toBeChecked();
+    expect(search).not.toBeChecked();
+    expect(notification).not.toBeChecked();
+    expect(profile).not.toBeChecked();
+    // NOTE >> searchをクリックしたとき、searchが"checked"に、それ以外が"not.checked"になるか検証する。
+    userEvent.click(search);
+    userEvent.click(add);
+    expect(search).toBeChecked();
+    expect(home).not.toBeChecked();
+    expect(notification).not.toBeChecked();
+    expect(profile).not.toBeChecked();
+    // expect(setSelectedTab).toHaveBeenCalledTimes(1);
+    // NOTE >> notificationをクリックしたとき、notificationが"checked"に、それ以外が"not.checked"になるか検証する。
+    userEvent.click(notification);
+    userEvent.click(add);
+    expect(notification).toBeChecked();
+    expect(home).not.toBeChecked();
+    expect(search).not.toBeChecked();
+    expect(profile).not.toBeChecked();
+    // NOTE >> profileをクリックしたとき、peofileが"checked"に、それ以外が"not.checked"になるか検証する。
+    userEvent.click(profile);
+    userEvent.click(add);
+    expect(profile).toBeChecked();
+    expect(home).not.toBeChecked();
+    expect(search).not.toBeChecked();
+    expect(notification).not.toBeChecked();
+  });
+});
