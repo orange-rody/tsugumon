@@ -20,7 +20,7 @@ const theme = createMuiTheme({
   },
 });
 
-const useStyles = makeStyles((thme: Theme) =>
+const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     button: {
       width: "120px",

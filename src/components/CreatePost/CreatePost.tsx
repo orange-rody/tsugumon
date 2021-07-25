@@ -3,59 +3,58 @@ import { useSelector } from "react-redux";
 import { selectUser } from "../../features/userSlice";
 import { auth, storage, db } from "../../firebase";
 import firebase from "firebase/app";
-import HeaderA from "../Parts/HeaderA";
-import CloseButton from "../Parts/CloseButton";
+import Header from "../Parts/Header";
 import ArrowBackButton from "../Parts/ArrowBackButton";
 import InputFileButton from "../Parts/InputFileButton";
 import DefaultButton from "../Parts/DefaultButton";
 import SecondaryButton from "../Parts/SecondaryButton";
 import styled from "styled-components";
 // NOTE >> styled-componentをfunctionコンポーネントの中で使用すると、
-//         textareaの入力時に不具合が起きてしまう。そのため、コンポーネントの
-//         外部でメディアクエリの判定をしないといけない。styled-media-queryを
-//         使うことで、その問題を解決することができる。
-import mediaQuery from "styled-media-query";
+//         textareaの入力時に不具合が起きてしまうので注意が必要。
 import {
-  Paper,
   makeStyles,
   createStyles,
   Theme,
   Slide,
+  IconButton,
 } from "@material-ui/core";
-import { ArrowDownward } from "@material-ui/icons";
+import { ArrowDownward, Close } from "@material-ui/icons";
+import mediaQuery from "styled-media-query";
 
-// NOTE >> mediumより小さかったらmediaMobileのプロパティが設定されるようにする。
+// NOTE >> mediumよりサイズが小さかったらmediaMobileのプロパティが設定されるようにする。
 const mediaMobile = mediaQuery.lessThan("medium");
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
-    paper: {
-      width: "100%",
-      height: "100%",
-    },
-    paperForPreview: {
+    paperForDraft: {
       width: "100%",
       height: "100%",
       position: "absolute",
       top: "0",
       left: "0",
     },
+    paperForPreview: {
+      with: "100%",
+      height: "100%",
+      position: "absolute",
+      top: "0",
+      width: "0",
+    },
+    closeButton: {
+      position: "absolute",
+      top: "5px",
+      left: "5px",
+      width: "42px",
+      height: "42px",
+    },
+    closeIcon: {
+      left: "5px",
+      width: "32px",
+      height: "32px",
+      borderRadius: "100%",
+    },
   })
 );
-
-const Wrapper = styled.div`
-  position: relative;
-  width: 30vw;
-  ${mediaMobile`
-  width: 100vw;`}
-  height: calc(100vh - 40px);
-  ${mediaMobile`
-  height: 100vh`};
-  margin: 20px auto;
-  ${mediaMobile`
-  margin: 0;`}
-  padding: 0;
-`;
 
 const Main = styled.main`
   display: flex;
@@ -166,13 +165,17 @@ const CommentArea = styled.p`
   font-size: 1rem;
 `;
 
-export default function CreatePost() {
+type Props = {
+  open: boolean;
+  closeAdd: any;
+};
+
+export default function CreatePost(props: Props) {
   const user = useSelector(selectUser);
   const noImage = `${process.env.PUBLIC_URL}/noPhoto.png`;
   const [imageUrl, setImageUrl] = useState<string>(noImage);
   const [caption, setCaption] = useState<string>("");
   const [preview, setPreview] = useState<boolean>(false);
-  const [isDone, setIsDone] = useState<boolean>(false);
 
   const classes = useStyles();
 
@@ -296,115 +299,116 @@ export default function CreatePost() {
   return (
     // NOTE >> Matrial-UIのthemeを適用させるには<ThemeProvider>を
     //         使用する必要がある
-    <>
-      <Wrapper data-testid="wrapper">
-        <Paper elevation={2} className={classes.paper} data-testid="paper">
-          <Main>
-            <HeaderA child="写真を登録する">
-              <CloseButton dataTestId="closeButton" onClick={togglePreview} />
-            </HeaderA>
-            <ImageWrap data-testid="imageWrap">
-              {imageUrl === noImage ? (
-                <>
-                  <NoImage
-                    src={imageUrl}
-                    data-testid="noImage"
-                    alt="写真が選択されていません。"
+    <div data-testid="createPost">
+      <Slide in={props.open} direction="up" mountOnEnter unmountOnExit>
+        <Main className={classes.paperForDraft} data-testid="main">
+          <Header child="写真を登録する">
+            <IconButton
+              className={classes.closeButton}
+              data-testid="closeButton"
+              onClick={(e: React.MouseEvent<HTMLElement>) => {
+                props.closeAdd();
+              }}
+            >
+              <Close className={classes.closeIcon} />
+            </IconButton>
+          </Header>
+          <ImageWrap data-testid="imageWrap">
+            {imageUrl === noImage ? (
+              <>
+                <NoImage
+                  src={imageUrl}
+                  data-testid="noImage"
+                  alt="写真が選択されていません。"
+                />
+                <Notes data-testid="notes">
+                  写真を選んでください。
+                  <ArrowDownward
+                    style={{
+                      display: "block",
+                      margin: "10px auto",
+                      height: "18px",
+                    }}
+                    data-testid="arrowDownward"
                   />
-                  <Notes data-testid="notes">
-                    写真を選んでください。
-                    <ArrowDownward
-                      style={{
-                        display: "block",
-                        margin: "10px auto",
-                        height: "18px",
-                      }}
-                      data-testid="arrowDownward"
-                    />
-                  </Notes>
-                </>
-              ) : (
-                <Image
-                  src={imageUrl}
-                  alt="選択した写真のプレビュー"
-                  data-testid="image"
-                />
-              )}
-            </ImageWrap>
-            <ButtonArea>
-              <InputFileButton onChange={handleImage} />
-              <DefaultButton
-                child="消す"
-                onClick={clearDraft}
-                dataTestId="buttonForClear"
+                </Notes>
+              </>
+            ) : (
+              <Image
+                src={imageUrl}
+                alt="選択した写真のプレビュー"
+                data-testid="image"
               />
-            </ButtonArea>
-            {/* TODO >> Textareaの文字数制限を設定する */}
-            {/* TODO >> Textareaの自動スクロール機能をつくる */}
-            {/* TODO >> Textareaの制限を超えた文字を赤く表示する */}
-            {/* TODO >> Enterキーを押したら、改行できるようにする */}
-            <Textarea
-              id="textareaForm"
-              placeholder="コメントを入力する"
-              onChange={handleCaption}
-              value={caption}
-              data-testid="textarea"
-            ></Textarea>
-            <ButtonArea>
-              <SecondaryButton
-                disabled={imageUrl === noImage ? true : false}
-                onClick={togglePreview}
-                dataTestId="previewOn"
-                child="次へ進む"
-              />
-            </ButtonArea>
-          </Main>
-        </Paper>
-        <Slide direction="left" in={preview} mountOnEnter unmountOnExit>
-          <Paper
-            elevation={2}
-            className={classes.paperForPreview}
-            data-testid="paperForPreview"
-          >
-            <Main>
-              <HeaderA child="この内容で登録しますか？">
-                <ArrowBackButton dataTestId="arrowBackButton" onClick={togglePreview} />
-              </HeaderA>
-              <UserInfo>
-                {/* TODO >> ユーザーアイコンの画像を取得して、Avatarに読み込む */}
-                <UserIcon>
-                  <UserImage />
-                </UserIcon>
-                <UserName data-testid="previewUserName">
-                  {user.userName}
-                </UserName>
-              </UserInfo>
-              <ImageWrap>
-                <Image
-                  src={imageUrl}
-                  alt="uploader"
-                  data-testid="previewImageUrl"
-                />
-              </ImageWrap>
-              {/* TODO >> CommentAreaの表示文字をスクロールする機能をつくる */}
-              <CommentArea data-testid="commentArea">{caption}</CommentArea>
-              <ButtonArea>
-                <SecondaryButton
-                  onClick={upload}
-                  dataTestId="buttonForUpload"
-                  disabled={imageUrl === noImage ? true : false}
-                  child="登録する"
-                />
-                <DefaultButton
-                  onClick={togglePreview}
-                  dataTestId="previewOff"
-                  child="戻る"
-                />
-              </ButtonArea>
-            </Main>
-          </Paper>
-        </Slide>
-      </Wrapper>
-    </>
+            )}
+          </ImageWrap>
+          <ButtonArea data-testid="buttonArea">
+            <InputFileButton onChange={handleImage} />
+            <DefaultButton
+              child="消す"
+              onClick={clearDraft}
+              dataTestId="buttonForClear"
+            />
+          </ButtonArea>
+          {/* TODO >> Textareaの文字数制限を設定する */}
+          {/* TODO >> Textareaの自動スクロール機能をつくる */}
+          {/* TODO >> Textareaの制限を超えた文字を赤く表示する */}
+          {/* TODO >> Enterキーを押したら、改行できるようにする */}
+          <Textarea
+            id="textareaForm"
+            placeholder="コメントを入力する"
+            onChange={handleCaption}
+            value={caption}
+            data-testid="textarea"
+          ></Textarea>
+          <ButtonArea>
+            <SecondaryButton
+              disabled={imageUrl === noImage ? true : false}
+              onClick={togglePreview}
+              dataTestId="previewOn"
+              child="次へ進む"
+            />
+          </ButtonArea>
+        </Main>
+      </Slide>
+      <Slide direction="left" in={preview} mountOnEnter unmountOnExit>
+        <Main className={classes.paperForPreview} data-testid="paperForPreview">
+          <Header child="この内容で登録しますか？">
+            <ArrowBackButton
+              dataTestId="arrowBackButton"
+              onClick={togglePreview}
+            />
+          </Header>
+          <UserInfo>
+            {/* TODO >> ユーザーアイコンの画像を取得して、Avatarに読み込む */}
+            <UserIcon>
+              <UserImage />
+            </UserIcon>
+            <UserName data-testid="previewUserName">{user.userName}</UserName>
+          </UserInfo>
+          <ImageWrap>
+            <Image
+              src={imageUrl}
+              alt="uploader"
+              data-testid="previewImageUrl"
+            />
+          </ImageWrap>
+          {/* TODO >> CommentAreaの表示文字をスクロールする機能をつくる */}
+          <CommentArea data-testid="commentArea">{caption}</CommentArea>
+          <ButtonArea>
+            <SecondaryButton
+              onClick={upload}
+              dataTestId="buttonForUpload"
+              disabled={imageUrl === noImage ? true : false}
+              child="登録する"
+            />
+            <DefaultButton
+              onClick={togglePreview}
+              dataTestId="previewOff"
+              child="戻る"
+            />
+          </ButtonArea>
+        </Main>
+      </Slide>
+    </div>
   );
 }

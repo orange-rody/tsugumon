@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { selectUser, login, logout } from "./features/userSlice";
 import { auth, db } from "./firebase";
-import Feed from "./components/Feed";
+import MainView from "./components/MainView";
 import Auth from "./components/Auth/Auth";
 
 const App: React.FC = () => {
@@ -47,7 +47,7 @@ const App: React.FC = () => {
 
   return (
     <>
-      <div style={style}>{user.uid ? <Feed /> : <Auth />}</div>
+      <div style={style}>{user.uid ? <MainView /> : <Auth />}</div>
     </>
   );
 };

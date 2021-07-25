@@ -33,7 +33,7 @@ const ArrowBackButton = (props: Props) => {
       data-testid={props.dataTestId}
       onClick={(e: React.MouseEvent<HTMLElement>) => props.onClick(e)}
     >
-      <ArrowLeft className={classes.arrowLeftIcon} />
+      <ArrowLeft className={classes.arrowLeftIcon} data-testid="arrowLeftIcon"/>
     </IconButton>
   );
 };

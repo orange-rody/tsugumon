@@ -7,12 +7,11 @@ import CreatePost from "./CreatePost";
 import InputFileButton from "../Parts/InputFileButton";
 import DefaultButton from "../Parts/DefaultButton";
 import SecondaryButton from "../Parts/SecondaryButton";
-import HeaderA from "../Parts/HeaderA";
-import CloseButton from "../Parts/CloseButton";
+import Header from "../Parts/Header";
 import ArrowBackButton from "../Parts/ArrowBackButton";
 
 afterEach(() => cleanup());
-
+const closeAdd = jest.fn();
 describe("CreatePostが正しくレンダリングされるか確認する", () => {
   it("全ての要素が正しくレンダリングされるか確認する", () => {
     render(
@@ -25,17 +24,19 @@ describe("CreatePostが正しくレンダリングされるか確認する", () 
       //         ProviderとStoreをインポートし、コンポーネントを＜Provider>でラップしたところ、
       //         問題が解決した。
       <Provider store={store}>
-        <CreatePost />
+        <CreatePost open={true} closeAdd={closeAdd} />
       </Provider>
     );
-    expect(screen.getByTestId("wrapper")).toBeTruthy();
-    expect(screen.getByTestId("paper")).toBeTruthy();
+    // NOTE >> テストコードでは、呼び出し元のコンポーネント内のTestIdで要素を検証する。
+    expect(screen.getByTestId("main")).toBeTruthy();
     expect(screen.getByTestId("header")).toBeTruthy();
-    expect(screen.getByTestId("title")).toBeTruthy();
+    expect(screen.getByTestId("closeButton")).toBeTruthy();
     expect(screen.getByTestId("imageWrap")).toBeTruthy();
+    expect(screen.getByTestId("noImage")).toBeTruthy();
     expect(screen.getByTestId("notes")).toBeTruthy();
+    expect(screen.getByTestId("arrowDownward")).toBeTruthy();
+    expect(screen.getByTestId("buttonArea")).toBeTruthy();
     expect(screen.getByTestId("inputFile")).toBeTruthy();
-    expect(screen.getByTestId("buttonForSelect")).toBeTruthy();
     expect(screen.getByTestId("buttonForClear")).toBeTruthy();
     expect(screen.getByTestId("textarea")).toBeTruthy();
     expect(screen.getByTestId("previewOn")).toBeTruthy();
@@ -46,7 +47,7 @@ describe("テキストエリアのonChangeイベントを確認する", () => {
   it("テキストエリアのvalueが正しくアップデートされるか確認する", () => {
     render(
       <Provider store={store}>
-        <CreatePost />
+        <CreatePost open={true} closeAdd={closeAdd} />
       </Provider>
     );
     // NOTE >> screen.getByTestId()は、valueプロパティを含まないタイプの
@@ -63,7 +64,7 @@ describe("input type = file の値に合わせて適正にプレビューされ�
   it("画像ファイルが未選択のときはデフォルトの画像がプレビューされるか確認する", () => {
     render(
       <Provider store={store}>
-        <CreatePost />
+        <CreatePost open={true} closeAdd={closeAdd} />
       </Provider>
     );
     const noImage = screen.getByTestId("noImage") as HTMLImageElement;
@@ -145,7 +146,7 @@ describe("「次へ進む」ボタンが正常に起動するか確認する", (
   it("previewがtrueのとき、プレビュー画面の要素がレンダリングされるか確認する", () => {
     render(
       <Provider store={store}>
-        <CreatePost />
+        <CreatePost open={true} closeAdd={closeAdd} />
       </Provider>
     );
     const previewOn = screen.getByTestId("previewOn") as HTMLButtonElement;
@@ -189,24 +190,23 @@ describe("「次へ進む」ボタンが正常に起動するか確認する", (
 });
 
 describe("Closeボタンが正常に稼働するか確認する。", () => {
-  const togglePreview = jest.fn();
   it("Headerでcloseボタンが適正に描写されるか確認する", () => {
     render(
-      <HeaderA child="写真を登録する">
-        <CloseButton onClick={togglePreview} dataTestId="closeButton" />
-      </HeaderA>
+      <Provider store={store}>
+        <CreatePost open={true} closeAdd={closeAdd} />
+      </Provider>
     );
-    expect(screen.getByRole("button")).toBeTruthy();
+    expect(screen.getByTestId("closeButton")).toBeTruthy();
   });
-  it("closeボタンが押されたら、togglePreviewが呼び出されるか確認する", () => {
+  it("closeボタンが押されたら、closeAddが呼び出されるか確認する", () => {
     render(
-      <HeaderA child="写真を登録する">
-        <CloseButton onClick={togglePreview} dataTestId="closeButton" />
-      </HeaderA>
+      <Provider store={store}>
+        <CreatePost open={true} closeAdd={closeAdd} />
+      </Provider>
     );
-    const closeButton = screen.getByRole("button");
+    const closeButton = screen.getByTestId("closeButton");
     userEvent.click(closeButton);
-    expect(togglePreview).toHaveBeenCalledTimes(1);
+    expect(closeAdd).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -214,20 +214,10 @@ describe("ArrowBackボタンが正常に稼働するか確認する。", () => {
   const togglePreview = jest.fn();
   it("HeaderでArrowBackボタンが適正に描写されるか確認する", () => {
     render(
-      <HeaderA child="写真を登録する">
+      <Header child="写真を登録する">
         <ArrowBackButton onClick={togglePreview} dataTestId="arrowBackButton" />
-      </HeaderA>
+      </Header>
     );
     expect(screen.getByRole("button")).toBeTruthy();
-  });
-  it("closeボタンが押されたら、togglePreviewが呼び出されるか確認する", () => {
-    render(
-      <HeaderA child="写真を登録する">
-        <ArrowBackButton onClick={togglePreview} dataTestId="arrowBackButton"/>
-      </HeaderA>
-    );
-    const arrowBackButton = screen.getByRole("button");
-    userEvent.click(arrowBackButton);
-    expect(togglePreview).toHaveBeenCalledTimes(1);
   });
 });
