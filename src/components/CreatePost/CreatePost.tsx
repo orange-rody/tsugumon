@@ -299,7 +299,7 @@ export default function CreatePost(props: Props) {
   return (
     // NOTE >> Matrial-UIのthemeを適用させるには<ThemeProvider>を
     //         使用する必要がある
-    <>
+    <div data-testid="createPost">
       <Slide in={props.open} direction="up" mountOnEnter unmountOnExit>
         <Main className={classes.paperForDraft} data-testid="main">
           <Header child="写真を登録する">
@@ -371,7 +371,6 @@ export default function CreatePost(props: Props) {
         </Main>
       </Slide>
       <Slide direction="left" in={preview} mountOnEnter unmountOnExit>
-        {/* <Paper elevation={2} > */}
         <Main className={classes.paperForPreview} data-testid="paperForPreview">
           <Header child="この内容で登録しますか？">
             <ArrowBackButton
@@ -409,8 +408,7 @@ export default function CreatePost(props: Props) {
             />
           </ButtonArea>
         </Main>
-        {/* </Paper> */}
       </Slide>
-    </>
+    </div>
   );
 }

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { makeStyles, createStyles, Slide } from "@material-ui/core";
+import { makeStyles, createStyles } from "@material-ui/core";
 import CreatePost from "./CreatePost/CreatePost";
 import Wrapper from "./Parts/Wrapper";
 import PaperContainer from "./Parts/PaperContainer";
@@ -121,9 +121,9 @@ const TabBar = () => {
   const classes = useStyles();
 
   return (
-    <Wrapper>
+    <Wrapper data-testid="wrapper">
       <PaperContainer>
-        <Tabs>
+        <Tabs data-testid="tabs">
           {TabDataLeft.map((data) => {
             return (
               <TabBox
@@ -132,6 +132,7 @@ const TabBar = () => {
                     ? classes.selected
                     : classes.unselected
                 }
+                data-testid={data.value}
               >
                 <input
                   type="radio"
@@ -151,6 +152,7 @@ const TabBar = () => {
             onClick={(e: React.MouseEvent) => {
               setSelectedAdd(true);
             }}
+            data-testid="add"
           >
             <AddBoxRounded
               style={{
@@ -170,6 +172,7 @@ const TabBar = () => {
                     ? classes.selected
                     : classes.unselected
                 }
+                data-testid={data.value}
               >
                 <input
                   type="radio"
