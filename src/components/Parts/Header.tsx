@@ -1,9 +1,8 @@
 import React from "react";
 import styled from "styled-components";
 
-const Header = styled.div`
+const Wrapper = styled.div`
   display: flex;
-  position: relative;
   width: 100%;
   height: 52px;
   margin: 0 auto;
@@ -29,15 +28,13 @@ type Props = {
   children: JSX.Element;
 };
 
-const HeaderA = (props: Props) => {
+const Header = (props: Props) => {
   return (
-    <Header data-testid="header">
-      <div>
-        {props.children}
-      </div>
+    <Wrapper data-testid="header">
+      <div>{props.children}</div>
       <Title data-testid="title">{props.child}</Title>
-    </Header>
+    </Wrapper>
   );
 };
 
-export default HeaderA;
+export default Header;

@@ -39,6 +39,7 @@ const useStyles = makeStyles((theme: Theme) =>
       position: "absolute",
       top: "0",
       width: "0",
+      zIndex: 3,
     },
     closeButton: {
       position: "absolute",
@@ -46,6 +47,7 @@ const useStyles = makeStyles((theme: Theme) =>
       left: "5px",
       width: "42px",
       height: "42px",
+      backgroundColor: "#fff",
     },
     closeIcon: {
       left: "5px",
@@ -309,6 +311,7 @@ export default function CreatePost(props: Props) {
               onClick={(e: React.MouseEvent<HTMLElement>) => {
                 props.closeAdd();
               }}
+              style={{ zIndex: 2 }}
             >
               <Close className={classes.closeIcon} />
             </IconButton>
@@ -376,6 +379,7 @@ export default function CreatePost(props: Props) {
             <ArrowBackButton
               dataTestId="arrowBackButton"
               onClick={togglePreview}
+              zIndex={3}
             />
           </Header>
           <UserInfo>

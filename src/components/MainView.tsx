@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { makeStyles, createStyles } from "@material-ui/core";
 import CreatePost from "./CreatePost/CreatePost";
+import Profile from "./Profile/Profile";
 import Wrapper from "./Parts/Wrapper";
 import PaperContainer from "./Parts/PaperContainer";
 import {
@@ -72,10 +73,10 @@ function getTabPanel(tab: string) {
       return <div>home</div>;
     case "search":
       return <div>search</div>;
-    case "notification:":
+    case "notification":
       return <div>notification</div>;
     case "profile":
-      return <div>profile</div>;
+      return <Profile />;
     default:
       return <div>home</div>;
   }
