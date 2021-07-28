@@ -51,8 +51,8 @@ const TabTitle = styled.p`
   text-align: center;
   font-size: 10px;
 `;
+const iconStyle = { margin: "4px auto 0", padding: 0, fontSize: "30px" };
 function getTabIcon(icon: string) {
-  const iconStyle = { margin: "4px auto 0", padding: 0, fontSize: "30px" };
   switch (icon) {
     case "HOME":
       return <HomeRounded style={iconStyle} />;
@@ -156,15 +156,9 @@ const TabBar = () => {
               setSelectedAdd(true);
             }}
             data-testid="add"
+            style={{color:"#555",marginTop: "2px"}}
           >
-            <AddBoxRounded
-              style={{
-                margin: "4px auto 0",
-                padding: 0,
-                fontSize: "30px",
-                color: "#555555",
-              }}
-            />
+            <AddBoxRounded style={iconStyle} />
             <TabTitle>追加</TabTitle>
           </TabBoxAdd>
           {TabDataRight.map((data) => {

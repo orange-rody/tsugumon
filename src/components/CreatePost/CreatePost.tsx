@@ -4,21 +4,15 @@ import { selectUser } from "../../features/userSlice";
 import { auth, storage, db } from "../../firebase";
 import firebase from "firebase/app";
 import Header from "../Parts/Header";
-import ArrowBackButton from "../Parts/ArrowBackButton";
 import InputFileButton from "../Parts/InputFileButton";
 import DefaultButton from "../Parts/DefaultButton";
 import SecondaryButton from "../Parts/SecondaryButton";
+import IconButton from "../Parts/IconButton";
 import styled from "styled-components";
 // NOTE >> styled-componentをfunctionコンポーネントの中で使用すると、
 //         textareaの入力時に不具合が起きてしまうので注意が必要。
-import {
-  makeStyles,
-  createStyles,
-  Theme,
-  Slide,
-  IconButton,
-} from "@material-ui/core";
-import { ArrowDownward, Close } from "@material-ui/icons";
+import { makeStyles, createStyles, Theme, Slide } from "@material-ui/core";
+import { ArrowDownward, Close, NavigateBefore } from "@material-ui/icons";
 import mediaQuery from "styled-media-query";
 
 // NOTE >> mediumよりサイズが小さかったらmediaMobileのプロパティが設定されるようにする。
@@ -32,6 +26,7 @@ const useStyles = makeStyles((theme: Theme) =>
       position: "absolute",
       top: "0",
       left: "0",
+      zIndex: 2,
     },
     paperForPreview: {
       with: "100%",
@@ -41,18 +36,10 @@ const useStyles = makeStyles((theme: Theme) =>
       width: "0",
       zIndex: 3,
     },
-    closeButton: {
-      position: "absolute",
-      top: "5px",
-      left: "5px",
-      width: "42px",
-      height: "42px",
-      backgroundColor: "#fff",
-    },
-    closeIcon: {
+    icon: {
       left: "5px",
       width: "32px",
-      height: "32px",
+      height: "42px",
       borderRadius: "100%",
     },
   })
@@ -306,14 +293,12 @@ export default function CreatePost(props: Props) {
         <Main className={classes.paperForDraft} data-testid="main">
           <Header child="写真を登録する">
             <IconButton
-              className={classes.closeButton}
-              data-testid="closeButton"
+              dataTestId="closeButton"
               onClick={(e: React.MouseEvent<HTMLElement>) => {
                 props.closeAdd();
               }}
-              style={{ zIndex: 2 }}
             >
-              <Close className={classes.closeIcon} />
+              <Close className={classes.icon} />
             </IconButton>
           </Header>
           <ImageWrap data-testid="imageWrap">
@@ -376,11 +361,9 @@ export default function CreatePost(props: Props) {
       <Slide direction="left" in={preview} mountOnEnter unmountOnExit>
         <Main className={classes.paperForPreview} data-testid="paperForPreview">
           <Header child="この内容で登録しますか？">
-            <ArrowBackButton
-              dataTestId="arrowBackButton"
-              onClick={togglePreview}
-              zIndex={3}
-            />
+            <IconButton onClick={togglePreview} dataTestId="navigateBeforeButton">
+              <NavigateBefore className={classes.icon} data-testid="navigateBeforeIcon" />
+            </IconButton>
           </Header>
           <UserInfo>
             {/* TODO >> ユーザーアイコンの画像を取得して、Avatarに読み込む */}

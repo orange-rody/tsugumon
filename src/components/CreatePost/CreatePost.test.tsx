@@ -7,8 +7,9 @@ import CreatePost from "./CreatePost";
 import InputFileButton from "../Parts/InputFileButton";
 import DefaultButton from "../Parts/DefaultButton";
 import SecondaryButton from "../Parts/SecondaryButton";
+import IconButton from "../Parts/IconButton";
 import Header from "../Parts/Header";
-import ArrowBackButton from "../Parts/ArrowBackButton";
+import NavigateBefore from "@material-ui/icons";
 
 afterEach(() => cleanup());
 const closeAdd = jest.fn();
@@ -207,17 +208,5 @@ describe("Closeボタンが正常に稼働するか確認する。", () => {
     const closeButton = screen.getByTestId("closeButton");
     userEvent.click(closeButton);
     expect(closeAdd).toHaveBeenCalledTimes(1);
-  });
-});
-
-describe("ArrowBackボタンが正常に稼働するか確認する。", () => {
-  const togglePreview = jest.fn();
-  it("HeaderでArrowBackボタンが適正に描写されるか確認する", () => {
-    render(
-      <Header child="写真を登録する">
-        <ArrowBackButton onClick={togglePreview} dataTestId="arrowBackButton" />
-      </Header>
-    );
-    expect(screen.getByRole("button")).toBeTruthy();
   });
 });
