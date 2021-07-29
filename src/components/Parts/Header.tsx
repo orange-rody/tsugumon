@@ -7,8 +7,8 @@ const Wrapper = styled.div`
   height: 52px;
   margin: 0 auto;
   background-color: hsl(0, 0%, 100%);
-  border-bottom: 1px solid hsla(26, 100%, 12%, 0.2);
   box-sizing: border-box;
+  border-bottom: 1px solid hsla(26, 100%, 12%, 0.2);
 `;
 
 const Title = styled.h2`

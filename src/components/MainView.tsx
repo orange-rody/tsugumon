@@ -4,6 +4,7 @@ import CreatePost from "./CreatePost/CreatePost";
 import Profile from "./Profile/Profile";
 import Wrapper from "./Parts/Wrapper";
 import PaperContainer from "./Parts/PaperContainer";
+import mediaQuery from "styled-media-query";
 import {
   HomeRounded,
   SearchRounded,
@@ -92,6 +93,7 @@ const Tabs = styled.ul`
   bottom: 0;
   flex-flow: row;
   background-color: hsl(0, 0, 100%);
+  box-sizing: boreder-box;
   border-top: 1px solid silver;
 `;
 
@@ -156,7 +158,7 @@ const TabBar = () => {
               setSelectedAdd(true);
             }}
             data-testid="add"
-            style={{color:"#555",marginTop: "2px"}}
+            style={{ color: "#555", marginTop: "2px" }}
           >
             <AddBoxRounded style={iconStyle} />
             <TabTitle>追加</TabTitle>

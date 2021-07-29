@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import { selectUser } from "../../features/userSlice";
-// import { storage, db } from "../../firebase";
+import { storage, db } from "../../firebase";
 // import firebase from "firebase/app";
 import Header from "../Parts/Header";
 // import ArrowBackButton from "../Parts/ArrowBackButton";
@@ -27,13 +27,58 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
+const Main = styled.main`
+  width: 100%;
+  height: calc(100% - 103px);
+  background-color: yellow;
+`;
+
+const UserNameSection = styled.div`
+  display: flex;
+  width: 100%;
+  height: 120px;
+  flex-flow: row;
+  background-color: blue;
+`;
+
+const UserIconArea = styled.div`
+  width: 150px;
+  height: 100%;
+  background-color: skyblue;
+`;
+
+const UserIcon = styled.div`
+  width: 100px;
+  height: 100px;
+  margin: 10px auto;
+  border-radius: 100%;
+  background-color: white;
+`;
+
+const UserNameArea = styled.div`
+  display: flex;
+  width: calc(100% - 80px);
+  height: 100%;
+  flex-flow: column;
+  background-color: yellowgreen;
+`;
+
+const UserName = styled.p`
+  width: 100%;
+  height: 50px;
+  font-size: 2rem;
+  color: #555;
+`;
+
 const Profile = () => {
   const user = useSelector(selectUser);
+  const userIconRef = storage.ref("userIcons").child(user.uid);
+
   const [buttonPushed, setButtonPushed] = useState(false);
   const userName = user.userName;
   const classes = useStyles();
   return (
-    <main style={{ zIndex: 1 }}>
+    <>
       <Header child={userName}>
         <IconButton
           onClick={(e: React.MouseEvent<HTMLElement>) =>
@@ -44,8 +89,18 @@ const Profile = () => {
           <Settings className={classes.settingIcon} />
         </IconButton>
       </Header>
+      <Main>
+        <UserNameSection>
+          <UserIconArea>
+            <UserIcon></UserIcon>
+          </UserIconArea>
+          <UserNameArea>
+            <UserName></UserName>
+          </UserNameArea>
+        </UserNameSection>
+      </Main>
       {buttonPushed ? <p>ボタンが押されました！</p> : null}
-    </main>
+    </>
   );
 };
 
