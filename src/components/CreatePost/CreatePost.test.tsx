@@ -6,7 +6,7 @@ import { store } from "../../app/store";
 import CreatePost from "./CreatePost";
 import InputFileButton from "../Parts/InputFileButton";
 import DefaultButton from "../Parts/DefaultButton";
-import SecondaryButton from "../Parts/SecondaryButton";
+import ColorButton from "../Parts/ColorButton";
 import IconButton from "../Parts/IconButton";
 import Header from "../Parts/Header";
 import NavigateBefore from "@material-ui/icons";
@@ -132,11 +132,12 @@ describe("「次へ進む」ボタンが正常に起動するか確認する", (
   it("「次へ進む」ボタンをクリックした際にtogglePreviewが呼び出されるか確認する", () => {
     const togglePreview = jest.fn();
     render(
-      <SecondaryButton
+      <ColorButton
         dataTestId="toggleButton"
         onClick={togglePreview}
         disabled={false}
         child="次へ進む"
+        color="secondary"
       />
     );
     const toggleButton = screen.getByTestId("toggleButton");
@@ -177,11 +178,12 @@ describe("「次へ進む」ボタンが正常に起動するか確認する", (
   it("「投稿する」ボタンをクリックしたときにuploadが呼び出されるか確認する", () => {
     const upload = jest.fn();
     render(
-      <SecondaryButton
+      <ColorButton
         dataTestId="buttonForUpload"
         onClick={upload}
         disabled={false}
         child="投稿する"
+        color="secondary"
       />
     );
     const buttonForUpload = screen.getByTestId("buttonForUpload");

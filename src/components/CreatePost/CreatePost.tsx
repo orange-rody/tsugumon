@@ -6,7 +6,7 @@ import firebase from "firebase/app";
 import Header from "../Parts/Header";
 import InputFileButton from "../Parts/InputFileButton";
 import DefaultButton from "../Parts/DefaultButton";
-import SecondaryButton from "../Parts/SecondaryButton";
+import ColorButton from "../Parts/ColorButton";
 import IconButton from "../Parts/IconButton";
 import styled from "styled-components";
 // NOTE >> styled-componentをfunctionコンポーネントの中で使用すると、
@@ -349,11 +349,12 @@ export default function CreatePost(props: Props) {
             data-testid="textarea"
           ></Textarea>
           <ButtonArea>
-            <SecondaryButton
+            <ColorButton
               disabled={imageUrl === noImage ? true : false}
               onClick={togglePreview}
               dataTestId="previewOn"
               child="次へ進む"
+              color="secondary"
             />
           </ButtonArea>
         </Main>
@@ -361,8 +362,14 @@ export default function CreatePost(props: Props) {
       <Slide direction="left" in={preview} mountOnEnter unmountOnExit>
         <Main className={classes.paperForPreview} data-testid="paperForPreview">
           <Header child="この内容で登録しますか？">
-            <IconButton onClick={togglePreview} dataTestId="navigateBeforeButton">
-              <NavigateBefore className={classes.icon} data-testid="navigateBeforeIcon" />
+            <IconButton
+              onClick={togglePreview}
+              dataTestId="navigateBeforeButton"
+            >
+              <NavigateBefore
+                className={classes.icon}
+                data-testid="navigateBeforeIcon"
+              />
             </IconButton>
           </Header>
           <UserInfo>
@@ -382,11 +389,12 @@ export default function CreatePost(props: Props) {
           {/* TODO >> CommentAreaの表示文字をスクロールする機能をつくる */}
           <CommentArea data-testid="commentArea">{caption}</CommentArea>
           <ButtonArea>
-            <SecondaryButton
+            <ColorButton
               onClick={upload}
               dataTestId="buttonForUpload"
               disabled={imageUrl === noImage ? true : false}
               child="登録する"
+              color="secondary"
             />
             <DefaultButton
               onClick={togglePreview}

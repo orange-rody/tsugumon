@@ -14,6 +14,8 @@ import {
 } from "@material-ui/icons";
 import styled from "styled-components";
 
+const mediaMobile=mediaQuery.lessThan("medium");
+
 const TabDataLeft = [
   { value: "home", title: "ホーム", tabIcon: "HOME" },
   { value: "search", title: "検索", tabIcon: "SEARCH" },
@@ -85,12 +87,18 @@ function getTabPanel(tab: string) {
 
 const Tabs = styled.ul`
   display: flex;
-  width: 100%;
+  position: fixed;
+  width: 30vw;
+  ${mediaMobile`
+    width: 100%;
+  `};
   height: 50px;
   margin: 0;
   padding: 0;
-  position: absolute;
-  bottom: 0;
+  bottom: 20px;
+  ${mediaMobile`
+    bottom: 0
+  `};
   flex-flow: row;
   background-color: hsl(0, 0, 100%);
   box-sizing: boreder-box;

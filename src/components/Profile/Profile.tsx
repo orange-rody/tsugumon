@@ -8,6 +8,7 @@ import Header from "../Parts/Header";
 // import DefaultButton from "../Parts/DefaultButton";
 // import SecondaryButton from "../Parts/SecondaryButton";
 import IconButton from "../Parts/IconButton";
+import ColorButton from "../Parts/ColorButton";
 import styled from "styled-components";
 import { makeStyles, createStyles, Theme, Slide } from "@material-ui/core";
 
@@ -36,38 +37,40 @@ const Main = styled.main`
 const UserNameSection = styled.div`
   display: flex;
   width: 100%;
-  height: 120px;
+  height: 180px;
   flex-flow: row;
   background-color: blue;
 `;
 
 const UserIconArea = styled.div`
-  width: 150px;
-  height: 100%;
+  width: 180px;
+  height: 180px;
   background-color: skyblue;
 `;
 
 const UserIcon = styled.div`
-  width: 100px;
-  height: 100px;
-  margin: 10px auto;
+  width: 120px;
+  height: 120px;
+  margin: 30px auto;
   border-radius: 100%;
   background-color: white;
 `;
 
 const UserNameArea = styled.div`
   display: flex;
-  width: calc(100% - 80px);
+  width: calc(100% - 180px);
   height: 100%;
   flex-flow: column;
   background-color: yellowgreen;
 `;
 
 const UserName = styled.p`
-  width: 100%;
+  width: calc(100% - 40px);
   height: 50px;
+  margin: 20px;
   font-size: 2rem;
   color: #555;
+  background-color: pink;
 `;
 
 const Profile = () => {
@@ -92,10 +95,19 @@ const Profile = () => {
       <Main>
         <UserNameSection>
           <UserIconArea>
-            <UserIcon></UserIcon>
+            <UserIcon />
           </UserIconArea>
           <UserNameArea>
             <UserName></UserName>
+            <ColorButton
+              dataTestId="profileEdit"
+              onClick={(e: React.MouseEvent) => {
+                console.log("ボタンが押されました！");
+              }}
+              color="primary"
+              child="プロフィールを編集する"
+              style={{ width: "250px", marginLeft: "20px" }}
+            />
           </UserNameArea>
         </UserNameSection>
       </Main>

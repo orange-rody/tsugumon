@@ -1,9 +1,15 @@
 import React from "react";
 import styled from "styled-components";
+import mediaQuery from "styled-media-query";
+
+const mediaMobile = mediaQuery.lessThan("medium");
 
 const Wrapper = styled.div`
   display: flex;
-  width: 100%;
+  // position: fixed;
+  width: 30vw; 
+  ${mediaMobile`
+width: 100vw`};
   height: 52px;
   margin: 0 auto;
   background-color: hsl(0, 0%, 100%);
