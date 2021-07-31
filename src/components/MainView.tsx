@@ -90,7 +90,7 @@ const Tabs = styled.ul`
   position: fixed;
   width: 30vw;
   ${mediaMobile`
-    width: 100%;
+    width: 100vw;
   `};
   height: 50px;
   margin: 0;
