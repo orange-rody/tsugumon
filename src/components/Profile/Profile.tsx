@@ -1,26 +1,27 @@
-import React, { ReactElement, useState } from "react";
+import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import { selectUser } from "../../features/userSlice";
 import { storage, db } from "../../firebase";
-// import firebase from "firebase/app";
 import Header from "../Parts/Header";
-// import ArrowBackButton from "../Parts/ArrowBackButton";
-// import DefaultButton from "../Parts/DefaultButton";
-// import SecondaryButton from "../Parts/SecondaryButton";
 import IconButton from "../Parts/IconButton";
+import InputFileButton from "../Parts/InputFileButton";
 import ColorButton from "../Parts/ColorButton";
 import styled from "styled-components";
-import { makeStyles, createStyles, Theme, Slide } from "@material-ui/core";
-
-import { Settings, Person } from "@material-ui/icons";
+import { makeStyles, createStyles, Theme } from "@material-ui/core";
+import { Settings, NavigateBefore } from "@material-ui/icons";
 import mediaQuery from "styled-media-query";
-import { setConstantValue } from "typescript";
 
 const mediaMobile = mediaQuery.lessThan("medium");
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     settingIcon: {
+      left: "5px",
+      width: "32px",
+      height: "42px",
+      borderRadius: "100%",
+    },
+    icon: {
       left: "5px",
       width: "32px",
       height: "42px",
@@ -97,61 +98,63 @@ const UserName = styled.p`
 
 const Profile = () => {
   const user = useSelector(selectUser);
+  const [editProfile, setEditProfile] = useState(false);
   const noUserIcon = `${process.env.PUBLIC_URL}/noUserIcon.png`;
-  const [buttonPushed, setButtonPushed] = useState(false);
-  const [userIconURL, setUserIconURL] = useState<string>(noUserIcon);
   const userName = user.userName;
   const classes = useStyles();
 
-  function getUserIconURL() {
-    storage
-      .ref("userIcons")
-      .child(`${user.uid} / userIcon.JPG`)
-      .getDownloadURL()
-      .then((url) => {
-        setUserIconURL(url);
-      });
-  }
   return (
-    <div onLoad={getUserIconURL}>
-      <Header child={userName}>
-        <IconButton
-          onClick={(e: React.MouseEvent<HTMLElement>) =>
-            setButtonPushed(!buttonPushed)
-          }
-          dataTestId="settings"
-        >
-          <Settings className={classes.settingIcon} />
-        </IconButton>
-      </Header>
-      <Main>
-        <UserNameSection>
-          <UserIconArea>
-            <UserIcon src={userIconURL} />
-          </UserIconArea>
-          <UserNameArea>
-            <UserName>
-              {user.userName}
-            </UserName>
-            <ColorButton
-              dataTestId="profileEditButton"
-              onClick={(e: React.MouseEvent<HTMLButtonElement>) =>
-                console.log(userName)
+    <>
+      {!editProfile ? (
+        <div>
+          <Header child={userName}>
+            <IconButton
+              onClick={(e: React.MouseEvent<HTMLElement>) =>
+                console.log(user.userName)
               }
-              child="編集する"
-              color="primary"
-              style={{
-                position: "absolute",
-                bottom: "0",
-                left: "5%",
-                width: "60%",
-              }}
-            ></ColorButton>
-          </UserNameArea>
-        </UserNameSection>
-      </Main>
-      {buttonPushed ? <p>ボタンが押されました！</p> : null}
-    </div>
+              dataTestId="settings"
+            >
+              <Settings className={classes.settingIcon} />
+            </IconButton>
+          </Header>
+          <Main>
+            <UserNameSection>
+              <UserIconArea>
+                <UserIcon />
+              </UserIconArea>
+              <UserNameArea>
+                <UserName>{user.userName}</UserName>
+                <ColorButton
+                  dataTestId="profileEditButton"
+                  onClick={(e: React.MouseEvent<HTMLButtonElement>) =>
+                    setEditProfile(true)
+                  }
+                  child="編集する"
+                  color="primary"
+                  style={{
+                    position: "absolute",
+                    bottom: "0",
+                    left: "5%",
+                    width: "60%",
+                  }}
+                ></ColorButton>
+              </UserNameArea>
+            </UserNameSection>
+          </Main>
+        </div>
+      ) : (
+        <Header child="プロフィールを編集する">
+          <IconButton
+            dataTestId="navigateBeforeButton"
+            onClick={(e: React.MouseEvent) => {
+              setEditProfile(false);
+            }}
+          >
+            <NavigateBefore className={classes.icon}/>
+          </IconButton>
+        </Header>
+      )}
+    </>
   );
 };
 
