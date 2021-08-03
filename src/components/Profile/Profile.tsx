@@ -98,10 +98,38 @@ const UserName = styled.p`
 
 const Profile = () => {
   const user = useSelector(selectUser);
-  const [editProfile, setEditProfile] = useState(false);
-  const noUserIcon = `${process.env.PUBLIC_URL}/noUserIcon.png`;
   const userName = user.userName;
+  const noUserIcon = `${process.env.PUBLIC_URL}/noUserIcon.png`;
+  const [editProfile, setEditProfile] = useState<boolean>(false);
+  const [userIconUrl, setUserIconUrl] = useState<string>(noUserIcon);
   const classes = useStyles();
+
+  function FileRead(file: File) {
+    const reader = new FileReader();
+    return new Promise((resolve, reject) => {
+      reader.readAsDataURL(file);
+      reader.onload = () => {
+        resolve(reader.result);
+      };
+      reader.onerror = () => {
+        reject(reader.error);
+      };
+    });
+  }
+
+  const handleImage = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const fileList: FileList | null = e.target.files;
+    const file: File | null = fileList!.item(0);
+    if (file) {
+      FileRead(file)
+        .then((response) => {
+          setUserIconUrl(response as string);
+        })
+        .catch((error) => {
+          alert(error);
+        });
+    }
+  };
 
   return (
     <>
@@ -122,37 +150,46 @@ const Profile = () => {
               <UserIconArea>
                 <UserIcon />
               </UserIconArea>
-              <UserNameArea>
-                <UserName>{user.userName}</UserName>
-                <ColorButton
-                  dataTestId="profileEditButton"
-                  onClick={(e: React.MouseEvent<HTMLButtonElement>) =>
-                    setEditProfile(true)
-                  }
-                  child="編集する"
-                  color="primary"
-                  style={{
-                    position: "absolute",
-                    bottom: "0",
-                    left: "5%",
-                    width: "60%",
-                  }}
-                ></ColorButton>
-              </UserNameArea>
+              <UserName>{user.userName}</UserName>
+              <ColorButton
+                dataTestId="profileEditButton"
+                onClick={(e: React.MouseEvent<HTMLButtonElement>) =>
+                  setEditProfile(true)
+                }
+                child="編集する"
+                color="primary"
+                style={{
+                  position: "absolute",
+                  bottom: "0",
+                  left: "5%",
+                  width: "60%",
+                }}
+              ></ColorButton>
             </UserNameSection>
           </Main>
         </div>
       ) : (
-        <Header child="プロフィールを編集する">
-          <IconButton
-            dataTestId="navigateBeforeButton"
-            onClick={(e: React.MouseEvent) => {
-              setEditProfile(false);
-            }}
-          >
-            <NavigateBefore className={classes.icon}/>
-          </IconButton>
-        </Header>
+        <div>
+          <Header child="プロフィールを編集する">
+            <IconButton
+              dataTestId="navigateBeforeButton"
+              onClick={(e: React.MouseEvent) => {
+                setEditProfile(false);
+              }}
+            >
+              <NavigateBefore className={classes.icon} />
+            </IconButton>
+          </Header>
+          <UserNameSection>
+            <UserIconArea>
+              <UserIcon src={userIconUrl} />
+            </UserIconArea>
+            <UserNameArea>
+              <UserName>{user.userName}</UserName>
+              <InputFileButton onChange={handleImage} />
+            </UserNameArea>
+          </UserNameSection>
+        </div>
       )}
     </>
   );

@@ -177,8 +177,8 @@ export default function CreatePost(props: Props) {
   //            その後、onChangeイベントが発火するようになっているのではないか
 
   function FileRead(file: File) {
+    const reader = new FileReader();
     return new Promise((resolve, reject) => {
-      const reader = new FileReader();
       reader.readAsDataURL(file);
       reader.onload = () => {
         resolve(reader.result);
@@ -190,8 +190,8 @@ export default function CreatePost(props: Props) {
   }
 
   const handleImage = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let FileList: FileList | null = e.target.files;
-    let file: File | null = FileList!.item(0);
+    const fileList: FileList | null = e.target.files;
+    const file: File | null = fileList!.item(0);
     // NOTE >> Fileオブジェクトはシリアライズされないため、reduxに保存が不可能。
     //         従って、Fileオブジェクトはlocalステートに保存する必要がある。
     // NOTE >> FILEオブジェクトが存在するときのみ、FileReadを実行するように
