@@ -45,6 +45,7 @@ const UserNameSection = styled.div`
   width: 100%;
   padding-top: 40%;
   flex-flow: row;
+  // background-color: blue;
 `;
 
 const UserIconArea = styled.div`
@@ -54,16 +55,18 @@ const UserIconArea = styled.div`
   left 0%;
   transform: translateY(-50%);
   padding-top: 30%;
+  // background-color: yellowgreen;
 `;
 
 const UserIcon = styled.img`
-  width: 75%;
+  width: 70%;
+  height: 70%;
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   border-radius: 100%;
-  background-color: #ccc;
+  // background-color: #ccc;
 `;
 
 const UserNameArea = styled.div`
@@ -148,23 +151,26 @@ const Profile = () => {
           <Main>
             <UserNameSection>
               <UserIconArea>
-                <UserIcon />
+                <UserIcon src={userIconUrl} />
               </UserIconArea>
-              <UserName>{user.userName}</UserName>
-              <ColorButton
-                dataTestId="profileEditButton"
-                onClick={(e: React.MouseEvent<HTMLButtonElement>) =>
-                  setEditProfile(true)
-                }
-                child="編集する"
-                color="primary"
-                style={{
-                  position: "absolute",
-                  bottom: "0",
-                  left: "5%",
-                  width: "60%",
-                }}
-              ></ColorButton>
+              <UserNameArea>
+                <UserName>{user.userName}</UserName>
+                <ColorButton
+                  dataTestId="profileEditButton"
+                  onClick={(e: React.MouseEvent<HTMLButtonElement>) =>
+                    setEditProfile(true)
+                  }
+                  child="プロフィールの編集"
+                  color="primary"
+                  style={{
+                    position: "absolute",
+                    bottom: "0",
+                    left: "5%",
+                    width: "85%",
+                    fontSize: "1rem",
+                  }}
+                ></ColorButton>
+              </UserNameArea>
             </UserNameSection>
           </Main>
         </div>
@@ -180,15 +186,26 @@ const Profile = () => {
               <NavigateBefore className={classes.icon} />
             </IconButton>
           </Header>
-          <UserNameSection>
-            <UserIconArea>
-              <UserIcon src={userIconUrl} />
-            </UserIconArea>
-            <UserNameArea>
-              <UserName>{user.userName}</UserName>
-              <InputFileButton onChange={handleImage} />
-            </UserNameArea>
-          </UserNameSection>
+          <Main>
+            <UserNameSection>
+              <UserIconArea>
+                <UserIcon src={userIconUrl} />
+              </UserIconArea>
+              <UserNameArea>
+                <UserName>{user.userName}</UserName>
+                <InputFileButton
+                  onChange={handleImage}
+                  child="写真を選ぶ"
+                  style={{
+                    position: "absolute",
+                    left: "5%",
+                    bottom: "0",
+                    width: "200px",
+                  }}
+                />
+              </UserNameArea>
+            </UserNameSection>
+          </Main>
         </div>
       )}
     </>

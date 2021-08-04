@@ -56,7 +56,7 @@ const SecondaryButton = (props: Props) => {
         disabled={props.disabled}
         variant="contained"
         component="span"
-        size="large"
+        size="medium"
         color={props.color}
         style={props.style}
         className={classes.button}

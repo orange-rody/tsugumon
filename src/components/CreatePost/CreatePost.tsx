@@ -330,7 +330,7 @@ export default function CreatePost(props: Props) {
             )}
           </ImageWrap>
           <ButtonArea data-testid="buttonArea">
-            <InputFileButton onChange={handleImage} />
+            <InputFileButton onChange={handleImage} child="選ぶ" />
             <DefaultButton
               child="消す"
               onClick={clearDraft}
@@ -375,7 +375,7 @@ export default function CreatePost(props: Props) {
           <UserInfo>
             {/* TODO >> ユーザーアイコンの画像を取得して、Avatarに読み込む */}
             <UserIcon>
-              <UserImage />
+              <UserImage src={user.userIcon} />
             </UserIcon>
             <UserName data-testid="previewUserName">{user.userName}</UserName>
           </UserInfo>
