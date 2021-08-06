@@ -52,7 +52,7 @@ const UserIconArea = styled.div`
   width: 30%;
   position: absolute;
   top: 50%;
-  left 0%;
+  left 10px;
   transform: translateY(-50%);
   padding-top: 30%;
   // background-color: yellowgreen;
@@ -99,12 +99,51 @@ const UserName = styled.p`
   // background-color: pink;
 `;
 
+const InputFormSection = styled.form`
+  display: flex;
+  width: 85%;
+  margin: 0 auto;
+  height: 600px;
+  flex-flow: column;
+`;
+
+const Label = styled.label`
+  margin-bottom: 20px;
+`;
+
+const Input = styled.input`
+  display: inline;
+  width: 90%;
+  height: 20px;
+  margin-top: 5px;
+  padding: 10px;
+  border-radius: 10px;
+  border: none;
+  font-size: 1rem;
+  resize: none;
+  background-color: hsl(0, 0%, 95%);
+  font-family: "Yu Gothic";
+`;
+const Textarea = styled.textarea`
+  display: block;
+  width: 90%;
+  height: 100px;
+  padding: 10px;
+  border-radius: 10px;
+  border: none;
+  font-size: 1rem;
+  resize: none;
+  background-color: hsl(0, 0%, 95%);
+  font-family: "Yu Gothic";
+`;
+
 const Profile = () => {
   const user = useSelector(selectUser);
   const userName = user.userName;
+  const userIcon = user.userIcon;
   const noUserIcon = `${process.env.PUBLIC_URL}/noUserIcon.png`;
   const [editProfile, setEditProfile] = useState<boolean>(false);
-  const [userIconUrl, setUserIconUrl] = useState<string>(noUserIcon);
+  const [userIconUrl, setUserIconUrl] = useState<string>(userIcon);
   const classes = useStyles();
 
   function FileRead(file: File) {
@@ -151,7 +190,7 @@ const Profile = () => {
           <Main>
             <UserNameSection>
               <UserIconArea>
-                <UserIcon src={userIconUrl} />
+                <UserIcon src={user.userIcon} />
               </UserIconArea>
               <UserNameArea>
                 <UserName>{user.userName}</UserName>
@@ -166,7 +205,7 @@ const Profile = () => {
                     position: "absolute",
                     bottom: "0",
                     left: "5%",
-                    width: "85%",
+                    width: "200px",
                     fontSize: "1rem",
                   }}
                 ></ColorButton>
@@ -198,13 +237,41 @@ const Profile = () => {
                   child="写真を選ぶ"
                   style={{
                     position: "absolute",
+                    width: "180px",
                     left: "5%",
                     bottom: "0",
-                    width: "200px",
+                    fontSize: "1rem",
                   }}
                 />
               </UserNameArea>
             </UserNameSection>
+            <InputFormSection>
+             <Label>
+                ユーザーネーム
+                <Input
+                  data-testId="userNameInput"
+                  placeholder="あなたの名前"
+                ></Input>
+              </Label>
+              <Label>
+                都道府県
+                <Input
+                  data-testId="userNameInput"
+                  placeholder="あなたの住んでいる都道府県"
+                ></Input>
+              </Label>
+              <Label>
+                お仕事
+                <Input
+                  data-testId="userNameInput"
+                  placeholder="あなたの現在のお仕事"
+                ></Input>
+              </Label>
+              <Label>
+                紹介文
+                <Textarea placeholder="あなた自身のことを紹介してみましょう。"></Textarea>
+              </Label>
+            </InputFormSection>
           </Main>
         </div>
       )}

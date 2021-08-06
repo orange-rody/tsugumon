@@ -215,7 +215,7 @@ export default function CreatePost(props: Props) {
     const inputText = e.target.value;
     // NOTE >> 入力文字が1文字もない場合は、テキストエリアが空白となるよう、
     //         setCaption("")で初期化を行なっている。
-    // NOTE >> もしClearCaptionを実行しなかったら、ユーザーがいくら操作しても、
+    // NOTE >> もしsetCaption("")を実行しなかったら、ユーザーがいくら操作しても、
     //         テキストエリアの最後の1文字を消去することができなくなる。
     inputText ? setCaption(inputText) : setCaption("");
   };
@@ -235,8 +235,7 @@ export default function CreatePost(props: Props) {
         "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
       const N = 16;
       const randomCharactor = Array.from(
-        // NOTE >> Uint32Array(N)は、32 ビット符号なし整数値がN個並んだ
-        //         配列を表す。
+        // NOTE >> Uint32Array()は、32 ビット符号なし整数値が並んだ配列を表す。
         // NOTE  >> crypt.getRandomValues(new Uint32Array(N))は、32ビット符号なしの
         //          整数値の中から、N個分、ランダムな整数を選ぶことを表す。
         crypto.getRandomValues(new Uint32Array(N))
