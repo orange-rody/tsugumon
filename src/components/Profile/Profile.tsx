@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import { selectUser } from "../../features/userSlice";
 import { storage, db } from "../../firebase";
+import firebase from "firebase/app";
 import Header from "../Parts/Header";
 import IconButton from "../Parts/IconButton";
 import InputFileButton from "../Parts/InputFileButton";
@@ -120,6 +121,7 @@ const Textarea = styled.textarea`
 
 const Profile = () => {
   const user = useSelector(selectUser);
+  const uid = user.uid;
   const userName = user.userName;
   const userIcon = user.userIcon;
   const prefecture = user.prefecture;
@@ -181,11 +183,55 @@ const Profile = () => {
         break;
     }
   };
+
   const handleTextarea = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     e.preventDefault();
     const inputText = e.target.value;
     if (inputText) {
       setEditedIntroduction(inputText);
+    }
+  };
+
+  const submitChanges = (e: React.MouseEvent<HTMLElement>) => {
+    e.preventDefault();
+    if (editedUserIcon !== userIcon) {
+      const currentTime = new Date().toString();
+      const S =
+        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+      const N = 16;
+      const randomChara = Array.from(crypto.getRandomValues(new Uint32Array(N)))
+        .map((n) => S[n % S.length])
+        .join("");
+      const fileName = currentTime + randomChara;
+      storage
+        .ref(`userIcon / ${fileName}`)
+        .putString(editedUserIcon, "data_url")
+        .on(
+          firebase.storage.TaskEvent.STATE_CHANGED,
+          () => {},
+          (err: any) => {
+            alert(err.message);
+          },
+          () => {
+            storage
+              .ref(`userIcon / ${fileName}`)
+              .getDownloadURL()
+              .then((url) => {
+                if (editedUserName) {
+                  db.collection("users").doc(uid).set({
+                    userName: editedUserName,
+                    userIcon: editedUserIcon,
+                    prefecture: editedPrefecture,
+                    job: editedJob,
+                    introduction: editedIntroduction,
+                  });
+                }
+              })
+              .then(() => {
+                setEditProfile(false);
+              });
+          }
+        );
     }
   };
 
@@ -307,7 +353,7 @@ const Profile = () => {
               <ColorButton
                 dataTestId="SubmitButton"
                 onClick={(e: React.MouseEvent<HTMLButtonElement>) =>
-                  setEditProfile(true)
+                  submitChanges(e)
                 }
                 child="この内容で登録する"
                 color="primary"

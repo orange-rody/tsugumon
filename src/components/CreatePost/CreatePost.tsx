@@ -235,9 +235,9 @@ export default function CreatePost(props: Props) {
         "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
       const N = 16;
       const randomCharactor = Array.from(
-        // NOTE >> Uint32Array()は、32 ビット符号なし整数値が並んだ配列を表す。
+        // NOTE >> Uint32Array()は、32 ビット符号なし整数値が並んだ配列を格納する箱を表す。
         // NOTE  >> crypt.getRandomValues(new Uint32Array(N))は、32ビット符号なしの
-        //          整数値の中から、N個分、ランダムな整数を選ぶことを表す。
+        //          整数値の中から、N個分、ランダムな整数を作成することを表す。
         crypto.getRandomValues(new Uint32Array(N))
       )
         // NOTE >> .map((n) => S[n % S.length])で、上記で作った16個のランダム整数を
