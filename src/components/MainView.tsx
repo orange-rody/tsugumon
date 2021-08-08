@@ -14,7 +14,7 @@ import {
 } from "@material-ui/icons";
 import styled from "styled-components";
 
-const mediaMobile=mediaQuery.lessThan("medium");
+const mediaMobile = mediaQuery.lessThan("medium");
 
 const TabDataLeft = [
   { value: "home", title: "ホーム", tabIcon: "HOME" },
@@ -100,9 +100,10 @@ const Tabs = styled.ul`
     bottom: 0
   `};
   flex-flow: row;
-  background-color: hsl(0, 0, 100%);
+  background-color: #fff;
   box-sizing: boreder-box;
   border-top: 1px solid silver;
+  z-index: 999;
 `;
 
 const useStyles = makeStyles(() =>

@@ -27,7 +27,9 @@ const App: React.FC = () => {
               uid: authUser.uid,
               userName: userData.userName,
               userIcon: userData.userIcon,
-              profile: userData.profile,
+              prefecture: userData.prefecture,
+              job: userData.job,
+              introduction: userData.introduction,
             })
           );
         });

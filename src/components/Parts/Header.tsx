@@ -6,8 +6,8 @@ const mediaMobile = mediaQuery.lessThan("medium");
 
 const Wrapper = styled.div`
   display: flex;
-  // position: fixed;
-  width: 30vw; 
+  position: fixed;
+  width: 30vw;
   ${mediaMobile`
 width: 100vw`};
   height: 52px;
@@ -32,14 +32,17 @@ const Title = styled.h2`
 type Props = {
   child: string;
   children: JSX.Element;
+  style?: React.CSSProperties | undefined;
 };
 
 const Header = (props: Props) => {
   return (
-    <Wrapper data-testid="header">
-      <div>{props.children}</div>
-      <Title data-testid="title">{props.child}</Title>
-    </Wrapper>
+    <>
+      <Wrapper data-testid="header" style={props.style}>
+        <div>{props.children}</div>
+        <Title data-testid="title">{props.child}</Title>
+      </Wrapper>
+    </>
   );
 };
 

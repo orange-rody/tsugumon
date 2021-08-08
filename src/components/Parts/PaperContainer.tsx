@@ -12,14 +12,14 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 type Props = {
-  children: JSX.Element | JSX.Element[] ;
+  children: JSX.Element | JSX.Element[];
   className?: string;
 };
 
 const PaperContainer = (props: Props) => {
   const classes = useStyles();
   return (
-    <Paper elevation={2} className={classes.paper}>
+    <Paper elevation={2} className={classes.paper} style={{ overflow: "auto" }}>
       {props.children}
     </Paper>
   );

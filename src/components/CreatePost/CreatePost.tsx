@@ -26,7 +26,7 @@ const useStyles = makeStyles((theme: Theme) =>
       position: "absolute",
       top: "0",
       left: "0",
-      zIndex: 2,
+      zIndex: 998,
     },
     paperForPreview: {
       with: "100%",
@@ -34,7 +34,7 @@ const useStyles = makeStyles((theme: Theme) =>
       position: "absolute",
       top: "0",
       width: "0",
-      zIndex: 3,
+      zIndex: 999,
     },
     icon: {
       left: "5px",
@@ -56,7 +56,7 @@ const Main = styled.main`
 const UserInfo = styled.div`
   display: flex;
   width: 100%;
-  height: 60px;
+  height: 52px;
   margin: 0 auto;
   background-color: hsl(0, 0%, 100%);
   border-bottom: 1px solid hsla(26, 100%, 12%, 0.2);
@@ -290,7 +290,7 @@ export default function CreatePost(props: Props) {
     <div data-testid="createPost">
       <Slide in={props.open} direction="up" mountOnEnter unmountOnExit>
         <Main className={classes.paperForDraft} data-testid="main">
-          <Header child="写真を登録する">
+          <Header child="写真を登録する" style={{ zIndex: 6 }}>
             <IconButton
               dataTestId="closeButton"
               onClick={(e: React.MouseEvent<HTMLElement>) => {

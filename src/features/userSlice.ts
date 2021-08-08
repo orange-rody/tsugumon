@@ -1,18 +1,31 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "../app/store";
 
-
 export const userSlice = createSlice({
   name: "user",
   initialState: {
-    user: {uid:"", userName:"", userIcon:"", profile:""}
+    user: {
+      uid: "",
+      userName: "",
+      userIcon: "",
+      prefecture: "",
+      job: "",
+      introduction: "",
+    },
   },
   reducers: {
     login: (state, action) => {
       state.user = action.payload;
     },
     logout: (state) => {
-      state.user = {uid:"", userName:"", userIcon:"", profile:""};
+      state.user = {
+        uid: "",
+        userName: "",
+        userIcon: "",
+        prefecture: "",
+        job: "",
+        introduction: "",
+      };
     },
   },
 });

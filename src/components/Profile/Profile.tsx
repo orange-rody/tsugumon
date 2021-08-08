@@ -36,75 +36,56 @@ const Main = styled.main`
     width: 100vw
   `};
   height: calc(100% - 103px);
-  // background-color: yellow;
 `;
 
 const UserNameSection = styled.div`
+  color: rgba(0, 0, 0, 0.87);
   display: flex;
   position: relative;
-  width: 100%;
-  padding-top: 40%;
+  width: 90%;
+  height: 130px;
+  margin: 0 auto;
   flex-flow: row;
   // background-color: blue;
 `;
 
-const UserIconArea = styled.div`
-  width: 30%;
-  position: absolute;
-  top: 50%;
-  left 10px;
-  transform: translateY(-50%);
-  padding-top: 30%;
-  // background-color: yellowgreen;
-`;
-
 const UserIcon = styled.img`
-  width: 70%;
-  height: 70%;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  width: 80px;
+  height: 80px;
+  margin: 20px 10px 10px 10px;
   border-radius: 100%;
-  // background-color: #ccc;
 `;
 
 const UserNameArea = styled.div`
-  display: flex;
-  width: 70%;
-  position: absolute;
-  padding-top: 30%;
-  top: 50%;
-  transform: translateY(-50%);
-  right: 0;
-  flex-flow: column;
+  font-size: 16px;
+  width: calc(100% - 10px);
   // background-color: orange;
 `;
 
 const UserName = styled.p`
   display: -webkit-box;
-  -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
-  width: 90%;
-  position: absolute;
-  margin: 0;
-  top: 0%;
-  left: 5%;
-  font-size: 1.4rem;
-  ${mediaMobile`
-    font-size: 1.2rem
-  `};
+  -webkit-box-orient: vertical;
+  width: 95%;
+  height: 60px;
+  margin-top: 10px;
+  font-size: 1.2rem;
   overflow: hidden;
   color: #555;
   // background-color: pink;
+  margin-bottom: 0px;
+  ${mediaMobile`
+    font-size: 1.2rem
+  `};
 `;
 
 const InputFormSection = styled.form`
   display: flex;
   width: 85%;
   margin: 0 auto;
-  height: 600px;
+  height: 520px;
   flex-flow: column;
+  font-size: 0.8rem;
 `;
 
 const Label = styled.label`
@@ -141,9 +122,18 @@ const Profile = () => {
   const user = useSelector(selectUser);
   const userName = user.userName;
   const userIcon = user.userIcon;
+  const prefecture = user.prefecture;
+  const job = user.job;
+  const introduction = user.introduction;
   const noUserIcon = `${process.env.PUBLIC_URL}/noUserIcon.png`;
   const [editProfile, setEditProfile] = useState<boolean>(false);
-  const [userIconUrl, setUserIconUrl] = useState<string>(userIcon);
+  const [editedUserIcon, setEditedUserIcon] = useState<string>(userIcon);
+  const [editedUserName, setEditedUserName] = useState<string>(userName);
+  const [editedPrefecture, setEditedPrefecture] = useState<string>(prefecture);
+  const [editedJob, setEditedJob] = useState<string>(job);
+  const [editedIntroduction, setEditedIntroduction] =
+    useState<string>(introduction);
+
   const classes = useStyles();
 
   function FileRead(file: File) {
@@ -160,16 +150,42 @@ const Profile = () => {
   }
 
   const handleImage = (e: React.ChangeEvent<HTMLInputElement>) => {
+    e.preventDefault();
     const fileList: FileList | null = e.target.files;
     const file: File | null = fileList!.item(0);
     if (file) {
       FileRead(file)
         .then((response) => {
-          setUserIconUrl(response as string);
+          setEditedUserIcon(response as string);
         })
         .catch((error) => {
           alert(error);
         });
+    }
+  };
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    setStateType: string
+  ) => {
+    e.preventDefault();
+    const inputText = e.target.value;
+    switch (setStateType) {
+      case "userName":
+        inputText ? setEditedUserName(inputText) : setEditedUserName("");
+        break;
+      case "prefecture":
+        setEditedPrefecture(inputText);
+        break;
+      case "job":
+        setEditedJob(inputText);
+        break;
+    }
+  };
+  const handleTextarea = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    e.preventDefault();
+    const inputText = e.target.value;
+    if (inputText) {
+      setEditedIntroduction(inputText);
     }
   };
 
@@ -177,7 +193,7 @@ const Profile = () => {
     <>
       {!editProfile ? (
         <div>
-          <Header child={userName}>
+          <Header child={userName} style={{ zIndex: 3 }}>
             <IconButton
               onClick={(e: React.MouseEvent<HTMLElement>) =>
                 console.log(user.userName)
@@ -187,11 +203,12 @@ const Profile = () => {
               <Settings className={classes.settingIcon} />
             </IconButton>
           </Header>
+          <div style={{ width: "100%", height: "52px", margin: "0px" }} />
           <Main>
             <UserNameSection>
-              <UserIconArea>
-                <UserIcon src={user.userIcon} />
-              </UserIconArea>
+              <UserIcon
+                src={user.userIcon === "" ? noUserIcon : user.userIcon}
+              />
               <UserNameArea>
                 <UserName>{user.userName}</UserName>
                 <ColorButton
@@ -199,14 +216,11 @@ const Profile = () => {
                   onClick={(e: React.MouseEvent<HTMLButtonElement>) =>
                     setEditProfile(true)
                   }
-                  child="プロフィールの編集"
+                  child="編集する"
                   color="primary"
                   style={{
-                    position: "absolute",
-                    bottom: "0",
-                    left: "5%",
-                    width: "200px",
-                    fontSize: "1rem",
+                    left: "10px",
+                    width: "150px",
                   }}
                 ></ColorButton>
               </UserNameArea>
@@ -215,7 +229,7 @@ const Profile = () => {
         </div>
       ) : (
         <div>
-          <Header child="プロフィールを編集する">
+          <Header child="プロフィールを編集する" style={{ zIndex: 3 }}>
             <IconButton
               dataTestId="navigateBeforeButton"
               onClick={(e: React.MouseEvent) => {
@@ -225,39 +239,47 @@ const Profile = () => {
               <NavigateBefore className={classes.icon} />
             </IconButton>
           </Header>
+          <div style={{ width: "100%", height: "52px", margin: "0px" }} />
           <Main>
             <UserNameSection>
-              <UserIconArea>
-                <UserIcon src={userIconUrl} />
-              </UserIconArea>
+              <UserIcon
+                src={editedUserIcon === "" ? noUserIcon : editedUserIcon}
+              />
               <UserNameArea>
                 <UserName>{user.userName}</UserName>
                 <InputFileButton
                   onChange={handleImage}
                   child="写真を選ぶ"
                   style={{
-                    position: "absolute",
-                    width: "180px",
-                    left: "5%",
-                    bottom: "0",
+                    width: "160px",
+                    left: "10px",
                     fontSize: "1rem",
                   }}
                 />
               </UserNameArea>
             </UserNameSection>
             <InputFormSection>
-             <Label>
+              <Label>
                 ユーザーネーム
                 <Input
                   data-testId="userNameInput"
-                  placeholder="あなたの名前"
-                ></Input>
+                  placeholder="あなたの名前(必須)"
+                  value={editedUserName}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    handleChange(e, "userName");
+                  }}
+                  required
+                />
               </Label>
               <Label>
                 都道府県
                 <Input
                   data-testId="userNameInput"
                   placeholder="あなたの住んでいる都道府県"
+                  value={editedPrefecture}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    handleChange(e, "prefecture");
+                  }}
                 ></Input>
               </Label>
               <Label>
@@ -265,12 +287,35 @@ const Profile = () => {
                 <Input
                   data-testId="userNameInput"
                   placeholder="あなたの現在のお仕事"
+                  value={editedJob}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    handleChange(e, "job");
+                  }}
                 ></Input>
               </Label>
               <Label>
                 紹介文
-                <Textarea placeholder="あなた自身のことを紹介してみましょう。"></Textarea>
+                <Textarea
+                  placeholder="あなた自身のことを紹介してみましょう。"
+                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
+                    handleTextarea(e);
+                  }}
+                >
+                  {editedIntroduction}
+                </Textarea>
               </Label>
+              <ColorButton
+                dataTestId="SubmitButton"
+                onClick={(e: React.MouseEvent<HTMLButtonElement>) =>
+                  setEditProfile(true)
+                }
+                child="この内容で登録する"
+                color="primary"
+                style={{
+                  width: "200px",
+                  margin: "0 auto",
+                }}
+              />
             </InputFormSection>
           </Main>
         </div>
