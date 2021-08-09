@@ -165,21 +165,20 @@ const Profile = () => {
         });
     }
   };
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    setStateType: string
-  ) => {
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     e.preventDefault();
     const inputText = e.target.value;
-    switch (setStateType) {
+    const name = e.target.name;
+    switch (name) {
       case "userName":
         inputText ? setEditedUserName(inputText) : setEditedUserName("");
         break;
       case "prefecture":
-        setEditedPrefecture(inputText);
+        inputText ? setEditedPrefecture(inputText) : setEditedPrefecture("");
         break;
       case "job":
-        setEditedJob(inputText);
+        inputText ? setEditedJob(inputText) : setEditedJob("");
         break;
     }
   };
@@ -187,59 +186,52 @@ const Profile = () => {
   const handleTextarea = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     e.preventDefault();
     const inputText = e.target.value;
-    if (inputText) {
-      setEditedIntroduction(inputText);
-    }
+    inputText ? setEditedIntroduction(inputText) : setEditedIntroduction("");
   };
 
   const submitChanges = (e: React.MouseEvent<HTMLElement>) => {
     e.preventDefault();
-    if (editedUserIcon !== userIcon) {
-      const currentTime = new Date().toString();
-      const S =
-        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-      const N = 16;
-      const randomChara = Array.from(crypto.getRandomValues(new Uint32Array(N)))
-        .map((n) => S[n % S.length])
-        .join("");
-      const fileName = currentTime + randomChara;
-      storage
-        .ref(`userIcon / ${fileName}`)
-        .putString(editedUserIcon, "data_url")
-        .on(
-          firebase.storage.TaskEvent.STATE_CHANGED,
-          () => {},
-          (err: any) => {
-            alert(err.message);
-          },
-          () => {
-            storage
-              .ref(`userIcon / ${fileName}`)
-              .getDownloadURL()
-              .then((url) => {
-                if (editedUserName) {
-                  db.collection("users").doc(uid).set({
-                    userName: editedUserName,
-                    userIcon: editedUserIcon,
-                    prefecture: editedPrefecture,
-                    job: editedJob,
-                    introduction: editedIntroduction,
-                  });
-                }
-              })
-              .then(() => {
-                setEditProfile(false);
-              });
-          }
-        );
-    }
+    db.collection("users").doc(uid).set({
+      userName: editedUserName,
+      prefecture: editedPrefecture,
+      job: editedJob,
+      introduction: editedIntroduction,
+    });
+    storage
+      .ref(`userIcons / ${uid}`)
+      .putString(editedUserIcon, "data_url")
+      .on(
+        firebase.storage.TaskEvent.STATE_CHANGED,
+        () => {},
+        (err: any) => {
+          alert(err.message);
+        },
+        () => {
+          storage
+            .ref(`userIcons / ${uid}`)
+            .getDownloadURL()
+            .then((url) => {
+              db.collection("users")
+                .doc(uid)
+                .set({
+                  userIcon: url,
+                })
+                .then(() => {
+                  setEditProfile(false);
+                });
+            });
+        }
+      );
   };
 
   return (
     <>
       {!editProfile ? (
         <div>
-          <Header child={userName} style={{ zIndex: 3 }}>
+          <Header
+            child={userName === "" ? userName : "匿名ユーザー"}
+            style={{ zIndex: 3 }}
+          >
             <IconButton
               onClick={(e: React.MouseEvent<HTMLElement>) =>
                 console.log(user.userName)
@@ -253,7 +245,7 @@ const Profile = () => {
           <Main>
             <UserNameSection>
               <UserIcon
-                src={user.userIcon === "" ? noUserIcon : user.userIcon}
+                src={user.userIcon === "" ? user.userIcon : noUserIcon}
               />
               <UserNameArea>
                 <UserName>{user.userName}</UserName>
@@ -292,7 +284,9 @@ const Profile = () => {
                 src={editedUserIcon === "" ? noUserIcon : editedUserIcon}
               />
               <UserNameArea>
-                <UserName>{user.userName}</UserName>
+                <UserName>
+                  {user.userName === "" ? "匿名のユーザー" : user.userName}
+                </UserName>
                 <InputFileButton
                   onChange={handleImage}
                   child="写真を選ぶ"
@@ -308,34 +302,36 @@ const Profile = () => {
               <Label>
                 ユーザーネーム
                 <Input
-                  data-testId="userNameInput"
+                  data-testid="userNameInput"
                   placeholder="あなたの名前(必須)"
                   value={editedUserName}
+                  name="userName"
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    handleChange(e, "userName");
+                    handleChange(e);
                   }}
-                  required
                 />
               </Label>
               <Label>
                 都道府県
                 <Input
-                  data-testId="userNameInput"
+                  data-testid="userNameInput"
                   placeholder="あなたの住んでいる都道府県"
                   value={editedPrefecture}
+                  name="prefecture"
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    handleChange(e, "prefecture");
+                    handleChange(e);
                   }}
                 ></Input>
               </Label>
               <Label>
                 お仕事
                 <Input
-                  data-testId="userNameInput"
+                  data-testid="userNameInput"
                   placeholder="あなたの現在のお仕事"
                   value={editedJob}
+                  name="job"
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    handleChange(e, "job");
+                    handleChange(e);
                   }}
                 ></Input>
               </Label>
@@ -346,9 +342,8 @@ const Profile = () => {
                   onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
                     handleTextarea(e);
                   }}
-                >
-                  {editedIntroduction}
-                </Textarea>
+                  value={editedIntroduction}
+                ></Textarea>
               </Label>
               <ColorButton
                 dataTestId="SubmitButton"
