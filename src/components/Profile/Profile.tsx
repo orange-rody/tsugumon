@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { useSelector } from "react-redux";
-import { selectUser } from "../../features/userSlice";
+import { useSelector, useDispatch } from "react-redux";
+import { selectUser, update } from "../../features/userSlice";
 import { storage, db } from "../../firebase";
 import firebase from "firebase/app";
 import Header from "../Parts/Header";
@@ -120,6 +120,7 @@ const Textarea = styled.textarea`
 `;
 
 const Profile = () => {
+  const dispatch = useDispatch();
   const user = useSelector(selectUser);
   const uid = user.uid;
   const userName = user.userName;
@@ -135,6 +136,7 @@ const Profile = () => {
   const [editedJob, setEditedJob] = useState<string>(job);
   const [editedIntroduction, setEditedIntroduction] =
     useState<string>(introduction);
+  const [registeredUserIcon,setRegisteredUserIcon] = useState<string>(userIcon);
 
   const classes = useStyles();
 
@@ -197,31 +199,35 @@ const Profile = () => {
       job: editedJob,
       introduction: editedIntroduction,
     });
-    storage
-      .ref(`userIcons / ${uid}`)
-      .putString(editedUserIcon, "data_url")
-      .on(
-        firebase.storage.TaskEvent.STATE_CHANGED,
-        () => {},
-        (err: any) => {
-          alert(err.message);
-        },
-        () => {
-          storage
-            .ref(`userIcons / ${uid}`)
-            .getDownloadURL()
-            .then((url) => {
-              db.collection("users")
-                .doc(uid)
-                .set({
-                  userIcon: url,
-                })
-                .then(() => {
-                  setEditProfile(false);
-                });
-            });
-        }
-      );
+    if (editedUserIcon !== userIcon) {
+      storage
+        .ref(`userIcons / ${uid}`)
+        .putString(editedUserIcon, "data_url")
+        .on(
+          firebase.storage.TaskEvent.STATE_CHANGED,
+          () => {},
+          (err: any) => {
+            alert(err.message);
+          },
+          () => {
+            storage
+              .ref(`userIcons / ${uid}`)
+              .getDownloadURL()
+              .then((url) => {
+                db.collection("users").doc(uid).set(
+                  {
+                    userIcon: url,
+                  },
+                  { merge: true }
+                );
+                setRegisteredUserIcon(url);
+              })
+              .then(() => {
+                setEditProfile(false);
+              });
+          }
+        );
+    }
   };
 
   return (
@@ -245,7 +251,7 @@ const Profile = () => {
           <Main>
             <UserNameSection>
               <UserIcon
-                src={user.userIcon === "" ? user.userIcon : noUserIcon}
+                src={user.userIcon === "" ? noUserIcon : registeredUserIcon}
               />
               <UserNameArea>
                 <UserName>{user.userName}</UserName>
