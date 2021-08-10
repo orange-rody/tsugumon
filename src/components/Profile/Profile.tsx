@@ -136,7 +136,8 @@ const Profile = () => {
   const [editedJob, setEditedJob] = useState<string>(job);
   const [editedIntroduction, setEditedIntroduction] =
     useState<string>(introduction);
-  const [registeredUserIcon,setRegisteredUserIcon] = useState<string>(userIcon);
+  const [registeredUserIcon, setRegisteredUserIcon] =
+    useState<string>(userIcon);
 
   const classes = useStyles();
 
@@ -193,12 +194,15 @@ const Profile = () => {
 
   const submitChanges = (e: React.MouseEvent<HTMLElement>) => {
     e.preventDefault();
-    db.collection("users").doc(uid).set({
-      userName: editedUserName,
-      prefecture: editedPrefecture,
-      job: editedJob,
-      introduction: editedIntroduction,
-    });
+    db.collection("users").doc(uid).set(
+      {
+        userName: editedUserName,
+        prefecture: editedPrefecture,
+        job: editedJob,
+        introduction: editedIntroduction,
+      },
+      { merge: true }
+    );
     if (editedUserIcon !== userIcon) {
       storage
         .ref(`userIcons / ${uid}`)
@@ -223,10 +227,57 @@ const Profile = () => {
                 setRegisteredUserIcon(url);
               })
               .then(() => {
-                setEditProfile(false);
+                db.collection("users")
+                  .doc(uid)
+                  .get()
+                  .then((user) => {
+                    const userIcon = user.data()!.userIcon;
+                    dispatch(
+                      update({
+                        uid: uid,
+                        userName: editedUserName,
+                        userIcon: userIcon,
+                        prefecture: editedPrefecture,
+                        job: editedJob,
+                        introduction: editedIntroduction,
+                      })
+                    );
+                    setEditProfile(false);
+                  });
               });
           }
         );
+    } else {
+      db.collection("users").doc(uid).get().then((user)=>{
+        const userIcon = user.data()!.userIcon;
+        if(userIcon){
+          dispatch(
+            update({
+              uid: uid,
+              userName: editedUserName,
+              userIcon: userIcon,
+              prefecture: editedPrefecture,
+              job: editedJob,
+              introduction: editedIntroduction,
+            })
+          );
+        }else{
+          db.collection("users").doc(uid).set({
+            userIcon: ""
+          },{merge: true});
+          dispatch(
+            update({
+              uid: uid,
+              userName: editedUserName,
+              userIcon: userIcon,
+              prefecture: editedPrefecture,
+              job: editedJob,
+              introduction: editedIntroduction,
+            })
+          )
+        }
+      })
+      setEditProfile(false);
     }
   };
 
@@ -235,7 +286,7 @@ const Profile = () => {
       {!editProfile ? (
         <div>
           <Header
-            child={userName === "" ? userName : "匿名ユーザー"}
+            child={userName ? userName : "匿名のユーザー"}
             style={{ zIndex: 3 }}
           >
             <IconButton
@@ -254,7 +305,7 @@ const Profile = () => {
                 src={user.userIcon === "" ? noUserIcon : registeredUserIcon}
               />
               <UserNameArea>
-                <UserName>{user.userName}</UserName>
+                <UserName>{userName ? userName: "匿名のユーザー"}</UserName>
                 <ColorButton
                   dataTestId="profileEditButton"
                   onClick={(e: React.MouseEvent<HTMLButtonElement>) =>
@@ -291,7 +342,7 @@ const Profile = () => {
               />
               <UserNameArea>
                 <UserName>
-                  {user.userName === "" ? "匿名のユーザー" : user.userName}
+                  {userName ? userName:"匿名のユーザー"}
                 </UserName>
                 <InputFileButton
                   onChange={handleImage}

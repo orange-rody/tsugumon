@@ -21,7 +21,7 @@ const Title = styled.h2`
   width: 100%;
   height: 52px;
   margin: 0 auto;
-  font-size: 18px;
+  font-size: 16px;
   line-height: 52px;
   text-align: center;
   color: hsl(0, 0%, 10%);
@@ -40,7 +40,9 @@ const Header = (props: Props) => {
     <>
       <Wrapper data-testid="header" style={props.style}>
         <div>{props.children}</div>
-        <Title data-testid="title">{props.child}</Title>
+        <Title data-testid="title">
+          {props.child}
+        </Title>
       </Wrapper>
     </>
   );

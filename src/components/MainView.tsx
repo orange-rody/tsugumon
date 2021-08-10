@@ -103,7 +103,7 @@ const Tabs = styled.ul`
   background-color: #fff;
   box-sizing: boreder-box;
   border-top: 1px solid silver;
-  z-index: 999;
+  z-index: 6;
 `;
 
 const useStyles = makeStyles(() =>

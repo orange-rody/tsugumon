@@ -57,9 +57,8 @@ const UserInfo = styled.div`
   display: flex;
   width: 100%;
   height: 52px;
-  margin: 0 auto;
+  margin: 10px auto 0px;
   background-color: hsl(0, 0%, 100%);
-  border-bottom: 1px solid hsla(26, 100%, 12%, 0.2);
   box-sizing: border-box;
 `;
 
@@ -290,7 +289,7 @@ export default function CreatePost(props: Props) {
     <div data-testid="createPost">
       <Slide in={props.open} direction="up" mountOnEnter unmountOnExit>
         <Main className={classes.paperForDraft} data-testid="main">
-          <Header child="写真を登録する" style={{ zIndex: 6 }}>
+          <Header child="写真を登録する" style={{ zIndex: 999 }}>
             <IconButton
               dataTestId="closeButton"
               onClick={(e: React.MouseEvent<HTMLElement>) => {
@@ -300,6 +299,7 @@ export default function CreatePost(props: Props) {
               <Close className={classes.icon} />
             </IconButton>
           </Header>
+          <div style={{ height: "52px" }} />
           <ImageWrap data-testid="imageWrap">
             {imageUrl === noImage ? (
               <>
@@ -360,7 +360,7 @@ export default function CreatePost(props: Props) {
       </Slide>
       <Slide direction="left" in={preview} mountOnEnter unmountOnExit>
         <Main className={classes.paperForPreview} data-testid="paperForPreview">
-          <Header child="この内容で登録しますか？">
+          <Header child="この内容で登録しますか？" style={{ zIndex: 999 }}>
             <IconButton
               onClick={togglePreview}
               dataTestId="navigateBeforeButton"
@@ -371,13 +371,7 @@ export default function CreatePost(props: Props) {
               />
             </IconButton>
           </Header>
-          <UserInfo>
-            {/* TODO >> ユーザーアイコンの画像を取得して、Avatarに読み込む */}
-            <UserIcon>
-              <UserImage src={user.userIcon} />
-            </UserIcon>
-            <UserName data-testid="previewUserName">{user.userName}</UserName>
-          </UserInfo>
+          <div style={{ height: "52px" }} />
           <ImageWrap>
             <Image
               src={imageUrl}
@@ -385,6 +379,13 @@ export default function CreatePost(props: Props) {
               data-testid="previewImageUrl"
             />
           </ImageWrap>
+          <UserInfo>
+            {/* TODO >> ユーザーアイコンの画像を取得して、Avatarに読み込む */}
+            <UserIcon>
+              <UserImage src={user.userIcon} />
+            </UserIcon>
+            <UserName data-testid="previewUserName">{user.userName}</UserName>
+          </UserInfo>
           {/* TODO >> CommentAreaの表示文字をスクロールする機能をつくる */}
           <CommentArea data-testid="commentArea">{caption}</CommentArea>
           <ButtonArea>
