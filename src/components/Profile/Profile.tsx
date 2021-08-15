@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { selectUser, update } from "../../features/userSlice";
 import { storage, db } from "../../firebase";
@@ -48,6 +48,27 @@ const UserNameSection = styled.div`
   margin: 0 auto;
   flex-flow: row;
   // background-color: blue;
+`;
+const IntroductionSection = styled.div`
+  position: relative;
+  width: 100%;
+  height: 150px;
+  border-top: 1px solid silver;
+  border-bottom: 1px solid silver;
+  margin-top: 15px;
+`;
+
+const Introduction = styled(UserNameSection)`
+  position: relative;
+  width: 25rem;
+  ${mediaMobile`
+    width: 85%;
+  `}
+  padding: 5px;
+  height: 120px;
+  margin: 10px auto;
+  overflow: auto;
+  }
 `;
 
 const UserIcon = styled.img`
@@ -136,8 +157,33 @@ const Profile = () => {
   const [editedJob, setEditedJob] = useState<string>(job);
   const [editedIntroduction, setEditedIntroduction] =
     useState<string>(introduction);
-  const [registeredUserIcon, setRegisteredUserIcon] =
-    useState<string>(userIcon);
+  const [post, setPost] = useState([
+    {
+      id: "",
+      caption: "",
+      imageUrl: "",
+      timestamp: null,
+      userName: "",
+    },
+  ]);
+
+  useEffect(() => {
+    db.collection("posts")
+      .where("uid", "==", uid)
+      .orderBy("timestamp", "desc")
+      .onSnapshot((snapshot) => {
+        setPost(
+          snapshot.docs.map((doc) => ({
+            id: doc.id,
+            caption: doc.data().caption,
+            imageUrl: doc.data().imageUrl,
+            timestamp: doc.data().timestamp,
+            userName: doc.data().userName,
+            uid: doc.data().uid,
+          }))
+        );
+      });
+  }, [uid]);
 
   const classes = useStyles();
 
@@ -224,7 +270,6 @@ const Profile = () => {
                   },
                   { merge: true }
                 );
-                setRegisteredUserIcon(url);
               })
               .then(() => {
                 db.collection("users")
@@ -248,35 +293,41 @@ const Profile = () => {
           }
         );
     } else {
-      db.collection("users").doc(uid).get().then((user)=>{
-        const userIcon = user.data()!.userIcon;
-        if(userIcon){
-          dispatch(
-            update({
-              uid: uid,
-              userName: editedUserName,
-              userIcon: userIcon,
-              prefecture: editedPrefecture,
-              job: editedJob,
-              introduction: editedIntroduction,
-            })
-          );
-        }else{
-          db.collection("users").doc(uid).set({
-            userIcon: ""
-          },{merge: true});
-          dispatch(
-            update({
-              uid: uid,
-              userName: editedUserName,
-              userIcon: userIcon,
-              prefecture: editedPrefecture,
-              job: editedJob,
-              introduction: editedIntroduction,
-            })
-          )
-        }
-      })
+      db.collection("users")
+        .doc(uid)
+        .get()
+        .then((user) => {
+          const userIcon = user.data()!.userIcon;
+          if (userIcon) {
+            dispatch(
+              update({
+                uid: uid,
+                userName: editedUserName,
+                userIcon: userIcon,
+                prefecture: editedPrefecture,
+                job: editedJob,
+                introduction: editedIntroduction,
+              })
+            );
+          } else {
+            db.collection("users").doc(uid).set(
+              {
+                userIcon: "",
+              },
+              { merge: true }
+            );
+            dispatch(
+              update({
+                uid: uid,
+                userName: editedUserName,
+                userIcon: userIcon,
+                prefecture: editedPrefecture,
+                job: editedJob,
+                introduction: editedIntroduction,
+              })
+            );
+          }
+        });
       setEditProfile(false);
     }
   };
@@ -302,10 +353,10 @@ const Profile = () => {
           <Main>
             <UserNameSection>
               <UserIcon
-                src={user.userIcon === "" ? noUserIcon : registeredUserIcon}
+                src={user.userIcon === "" ? noUserIcon : user.userIcon}
               />
               <UserNameArea>
-                <UserName>{userName ? userName: "匿名のユーザー"}</UserName>
+                <UserName>{userName ? userName : "匿名のユーザー"}</UserName>
                 <ColorButton
                   dataTestId="profileEditButton"
                   onClick={(e: React.MouseEvent<HTMLButtonElement>) =>
@@ -320,6 +371,13 @@ const Profile = () => {
                 ></ColorButton>
               </UserNameArea>
             </UserNameSection>
+
+            <IntroductionSection>
+              <Introduction>{introduction}</Introduction>
+            </IntroductionSection>
+            {post.map((doc, index) => (
+              <div key={index}>{doc.userName}</div>
+            ))}
           </Main>
         </div>
       ) : (
@@ -341,9 +399,7 @@ const Profile = () => {
                 src={editedUserIcon === "" ? noUserIcon : editedUserIcon}
               />
               <UserNameArea>
-                <UserName>
-                  {userName ? userName:"匿名のユーザー"}
-                </UserName>
+                <UserName>{userName ? userName : "匿名のユーザー"}</UserName>
                 <InputFileButton
                   onChange={handleImage}
                   child="写真を選ぶ"
