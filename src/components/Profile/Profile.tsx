@@ -11,6 +11,7 @@ import styled from "styled-components";
 import { makeStyles, createStyles, Theme } from "@material-ui/core";
 import { Settings, NavigateBefore } from "@material-ui/icons";
 import mediaQuery from "styled-media-query";
+import { url } from "node:inspector";
 
 const mediaMobile = mediaQuery.lessThan("medium");
 
@@ -62,7 +63,7 @@ const Introduction = styled(UserNameSection)`
   position: relative;
   width: 25rem;
   ${mediaMobile`
-    width: 85%;
+    width: 90%;
   `}
   padding: 5px;
   height: 120px;
@@ -140,6 +141,16 @@ const Textarea = styled.textarea`
   font-family: "Yu Gothic";
 `;
 
+const PhotoItem = styled.li`
+  width: 100px;
+  height: 100px;
+  float: left;
+  border: none;
+  margin: 10px;
+  background-color: pink;
+  list-style: none;
+`;
+
 const Profile = () => {
   const dispatch = useDispatch();
   const user = useSelector(selectUser);
@@ -166,6 +177,13 @@ const Profile = () => {
       userName: "",
     },
   ]);
+  const [postArray, setPostArray] = useState([[{
+    id: "",
+    caption: "",
+    imageUrl: "",
+    timestamp: null,
+    userName: "",
+  }]]);
 
   useEffect(() => {
     db.collection("posts")
@@ -184,6 +202,14 @@ const Profile = () => {
         );
       });
   }, [uid]);
+
+  useEffect(() => {
+    const length = Math.ceil(post.length / 3);
+    const slicedArray = new Array(length)
+      .fill(0)
+      .map((_, i) => post.slice(i * 3, (i + 1) * 3));
+    setPostArray(slicedArray);
+  }, [post]);
 
   const classes = useStyles();
 
