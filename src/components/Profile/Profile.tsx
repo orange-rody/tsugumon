@@ -1,18 +1,24 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { selectUser, update } from "../../features/userSlice";
-import { storage, db } from "../../firebase";
+import { db, storage } from "../../firebase";
 import firebase from "firebase/app";
 import Header from "../Parts/Header";
 import IconButton from "../Parts/IconButton";
 import InputFileButton from "../Parts/InputFileButton";
 import ColorButton from "../Parts/ColorButton";
+import GridList from "./GridList";
 import styled from "styled-components";
-import { makeStyles, createStyles, Theme } from "@material-ui/core";
-import { Settings, NavigateBefore } from "@material-ui/icons";
+import { makeStyles, createStyles, Theme, Grid } from "@material-ui/core";
+import {
+  Settings,
+  NavigateBefore,
+  ViewComfy,
+  ViewDay,
+  LocalOffer,
+  DateRange,
+} from "@material-ui/icons";
 import mediaQuery from "styled-media-query";
-import { url } from "node:inspector";
-
 const mediaMobile = mediaQuery.lessThan("medium");
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -29,8 +35,36 @@ const useStyles = makeStyles((theme: Theme) =>
       height: "42px",
       borderRadius: "100%",
     },
+    selected: {
+      color: "#50a0d0",
+      transitionProperty: "all",
+      transitionDuration: "0.3s",
+      transitionTimingFunction: "ease",
+    },
+    unselected: {
+      color: "#ccc",
+    },
   })
 );
+const iconStyle = { margin: "4px auto 0", padding: 0, fontSize: "25px" };
+const DisplayTypeData = [
+  { value: "grid", title: "小さく表示", icon: "GRID" },
+  { value: "single", title: "大きく表示", icon: "SINGLE" },
+  { value: "tag", title: "タグ", icon: "TAG" },
+  { value: "calendar", title: "カレンダー", icon: "CALENDAR" },
+];
+function getDisplayTypeIcon(icon: string) {
+  switch (icon) {
+    case "GRID":
+      return <ViewComfy style={iconStyle} />;
+    case "SINGLE":
+      return <ViewDay style={iconStyle} />;
+    case "TAG":
+      return <LocalOffer style={iconStyle} />;
+    case "CALENDAR":
+      return <DateRange style={iconStyle} />;
+  }
+}
 
 const Main = styled.main`
   width: 30vw;
@@ -45,7 +79,7 @@ const UserNameSection = styled.div`
   display: flex;
   position: relative;
   width: 90%;
-  height: 130px;
+  height: 120px;
   margin: 0 auto;
   flex-flow: row;
   // background-color: blue;
@@ -68,7 +102,7 @@ const Introduction = styled(UserNameSection)`
   padding: 5px;
   height: 120px;
   margin: 10px auto;
-  overflow: auto;
+  overflow: hidden;
   }
 `;
 
@@ -141,14 +175,32 @@ const Textarea = styled.textarea`
   font-family: "Yu Gothic";
 `;
 
-const PhotoItem = styled.li`
-  width: 100px;
-  height: 100px;
-  float: left;
-  border: none;
-  margin: 10px;
-  background-color: pink;
-  list-style: none;
+const DisplayTypeList = styled.ul`
+  display: flex;
+  width: 100%;
+  height: 50px;
+  margin: 0;
+  padding: 0;
+  flex-direction: row;
+  border-bottom: 1px solid silver;
+`;
+
+const DisplayType = styled.label`
+  display: flex;
+  width: 25%;
+  height: 60px;
+  margin: 0;
+  flex-direction: column;
+  box-sizing: border-box;
+`;
+
+const DisplayTypeName = styled.p`
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  text-align: center;
+  font-size: 0.6rem;
 `;
 
 const Profile = () => {
@@ -161,6 +213,7 @@ const Profile = () => {
   const job = user.job;
   const introduction = user.introduction;
   const noUserIcon = `${process.env.PUBLIC_URL}/noUserIcon.png`;
+  const [selectedType, setSelectedType] = useState<string>("grid");
   const [editProfile, setEditProfile] = useState<boolean>(false);
   const [editedUserIcon, setEditedUserIcon] = useState<string>(userIcon);
   const [editedUserName, setEditedUserName] = useState<string>(userName);
@@ -168,48 +221,6 @@ const Profile = () => {
   const [editedJob, setEditedJob] = useState<string>(job);
   const [editedIntroduction, setEditedIntroduction] =
     useState<string>(introduction);
-  const [post, setPost] = useState([
-    {
-      id: "",
-      caption: "",
-      imageUrl: "",
-      timestamp: null,
-      userName: "",
-    },
-  ]);
-  const [postArray, setPostArray] = useState([[{
-    id: "",
-    caption: "",
-    imageUrl: "",
-    timestamp: null,
-    userName: "",
-  }]]);
-
-  useEffect(() => {
-    db.collection("posts")
-      .where("uid", "==", uid)
-      .orderBy("timestamp", "desc")
-      .onSnapshot((snapshot) => {
-        setPost(
-          snapshot.docs.map((doc) => ({
-            id: doc.id,
-            caption: doc.data().caption,
-            imageUrl: doc.data().imageUrl,
-            timestamp: doc.data().timestamp,
-            userName: doc.data().userName,
-            uid: doc.data().uid,
-          }))
-        );
-      });
-  }, [uid]);
-
-  useEffect(() => {
-    const length = Math.ceil(post.length / 3);
-    const slicedArray = new Array(length)
-      .fill(0)
-      .map((_, i) => post.slice(i * 3, (i + 1) * 3));
-    setPostArray(slicedArray);
-  }, [post]);
 
   const classes = useStyles();
 
@@ -397,13 +408,38 @@ const Profile = () => {
                 ></ColorButton>
               </UserNameArea>
             </UserNameSection>
-
             <IntroductionSection>
               <Introduction>{introduction}</Introduction>
             </IntroductionSection>
-            {post.map((doc, index) => (
-              <div key={index}>{doc.userName}</div>
-            ))}
+            <DisplayTypeList>
+              {DisplayTypeData.map((data) => {
+                return (
+                  <DisplayType
+                    className={
+                      selectedType === data.value
+                        ? classes.selected
+                        : classes.unselected
+                    }
+                    key={data.value}
+                    data-testid={data.value}
+                  >
+                    {getDisplayTypeIcon(data.icon)}
+                    <input
+                      type="radio"
+                      name="type"
+                      style={{ appearance: "none" }}
+                      value={data.value}
+                      aria-label={data.value}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                        setSelectedType(data.value);
+                      }}
+                    />
+                    <DisplayTypeName>{data.title}</DisplayTypeName>
+                  </DisplayType>
+                );
+              })}
+            </DisplayTypeList>
+            {selectedType === "grid" ? <GridList /> : <div></div>}
           </Main>
         </div>
       ) : (
