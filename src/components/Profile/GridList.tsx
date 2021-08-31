@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { selectUser } from "../../features/userSlice";
-import { db, storage } from "../../firebase";
+import { selectPost, load } from "../../features/postSlice";
+import { db } from "../../firebase";
+import InfinitScroll from "react-infinite-scroller";
 import styled from "styled-components";
 import mediaQuery from "styled-media-query";
+
 const mediaMobile = mediaQuery.lessThan("medium");
 
 const Main = styled.main`
@@ -46,41 +49,41 @@ const PhotoImage = styled.img`
   object-fit: cover;
 `;
 
-const Grid = () => {
+const Grid: React.FC = () => {
   const user = useSelector(selectUser);
+  const post = useSelector(selectPost);
+  const dispatch = useDispatch();
   const uid = user.uid;
-  const userName = user.userName;
-  const userIcon = user.userIcon;
-  const noUserIcon = `${process.env.PUBLIC_URL}/noUserIcon.png`;
-  const [posts, setPosts] = useState<
-    {
-      id: string;
-      caption: string;
-      imageUrl: string;
-      timestamp: any;
-      userName: string;
-    }[]
-  >([{ id: "", caption: "", imageUrl: "", timestamp: null, userName: "" }]);
+  const currentTime = new Date().getTime();
 
-  useEffect(() => {
+  // NOTE >> 過去の投稿（20件）を読み込む関数を定義する。
+  const postLoader = (currentTime: number) => {
     db.collection("posts")
       .where("uid", "==", uid)
       .orderBy("timestamp", "desc")
+      // .startAfter(currentTime)
+      .limit(20)
       .onSnapshot((snapshot) => {
-        setPosts(
-          snapshot.docs.map((doc) => ({
-            id: doc.id,
-            caption: doc.data().caption,
-            imageUrl: doc.data().imageUrl,
-            timestamp: doc.data().timestamp,
-            userName: doc.data().userName,
-            uid: doc.data().uid,
-          }))
+        dispatch(
+          load(
+            snapshot.docs.map((doc) => ({
+              id: doc.id,
+              caption: doc.data().caption,
+              imageUrl: doc.data().imageUrl,
+              timestamp: doc.data().timestamp.seconds,
+              userName: doc.data().userName,
+              uid: doc.data().uid,
+            }))
+          )
         );
       });
-  }, [uid]);
+  };
 
-  const lastLine = posts.length % 3;
+  useEffect(() => {
+    postLoader(currentTime);
+  });
+
+  const lastLine = post.length % 3;
   function justifyLastLine() {
     switch (lastLine) {
       case 0:
@@ -101,10 +104,10 @@ const Grid = () => {
     <>
       <Main>
         <PhotoList>
-          {posts.map((post, index) => {
+          {post.map((item, index) => {
             return (
               <PhotoItem style={{ backgroundColor: "gray" }} key={index}>
-                <PhotoImage src={post.imageUrl} />
+                <PhotoImage src={item.imageUrl} />
               </PhotoItem>
             );
           })}

@@ -9,7 +9,7 @@ import InputFileButton from "../Parts/InputFileButton";
 import ColorButton from "../Parts/ColorButton";
 import GridList from "./GridList";
 import styled from "styled-components";
-import { makeStyles, createStyles, Theme, Grid } from "@material-ui/core";
+import { makeStyles, createStyles, Theme} from "@material-ui/core";
 import {
   Settings,
   NavigateBefore,
