@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { selectUser } from "../../features/userSlice";
 import { selectPost, load } from "../../features/postSlice";
@@ -61,8 +61,8 @@ const Grid: React.FC = () => {
     db.collection("posts")
       .where("uid", "==", uid)
       .orderBy("timestamp", "desc")
-      // .startAfter(currentTime)
-      .limit(20)
+      .startAfter(currentTime)
+      .limit(5)
       .onSnapshot((snapshot) => {
         dispatch(
           load(
@@ -70,7 +70,7 @@ const Grid: React.FC = () => {
               id: doc.id,
               caption: doc.data().caption,
               imageUrl: doc.data().imageUrl,
-              timestamp: doc.data().timestamp.seconds,
+              timestamp: doc.data().timestamp,
               userName: doc.data().userName,
               uid: doc.data().uid,
             }))

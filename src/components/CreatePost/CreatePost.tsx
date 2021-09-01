@@ -264,21 +264,14 @@ export default function CreatePost(props: Props) {
               .then((url) => {
                 // NOTE >> firestoreのルール設定が書き込み不可になっていた場合、
                 //         エラーになってしまうので注意！
-                db.collection("posts").add({
-                  uid: user.uid,
-                  userName: user.userName,
-                  imageUrl: url,
-                  caption: caption,
-                  timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-                });
-                // NOTE >> プロフィール画面にユーザーが投稿した画像の一覧が表示されるよう、
-                //         usersコレクションのドキュメントにもstorageのurlの情報を記録する。
-                db.collection("users")
-                  .doc(user.uid)
-                  .collection("postedImage")
+                db.collection("posts")
                   .add({
+                    uid: user.uid,
+                    userName: user.userName,
                     imageUrl: url,
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                    caption: caption,
+                    // timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                    timestamp: new Date().getTime(),
                   })
                   .then(() => {
                     setPreview(false);
