@@ -316,8 +316,8 @@ const Auth: React.FC = () => {
                 onClick={async () => {
                   try {
                     await signInEmail();
-                  } catch (err) {
-                    alert(err.message);
+                  } catch (error) {
+                    alert(error.message);
                   }
                 }}
               >

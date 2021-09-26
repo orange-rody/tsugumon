@@ -66,6 +66,11 @@ function getDisplayTypeIcon(icon: string) {
   }
 }
 
+const Wrapper = styled.div`
+  width: 100%;
+  height: 100%;
+`;
+
 const Main = styled.main`
   width: 30vw;
   ${mediaMobile`
@@ -372,7 +377,7 @@ const Profile = () => {
   return (
     <>
       {!editProfile ? (
-        <div>
+        <Wrapper>
           <Header
             child={userName ? userName : "匿名のユーザー"}
             style={{ zIndex: 3 }}
@@ -441,9 +446,9 @@ const Profile = () => {
             </DisplayTypeList>
             {selectedType === "grid" ? <GridList /> : <div></div>}
           </Main>
-        </div>
+        </Wrapper>
       ) : (
-        <div>
+        <Wrapper>
           <Header child="プロフィールを編集する" style={{ zIndex: 3 }}>
             <IconButton
               dataTestId="navigateBeforeButton"
@@ -534,7 +539,7 @@ const Profile = () => {
               />
             </InputFormSection>
           </Main>
-        </div>
+        </Wrapper>
       )}
     </>
   );
