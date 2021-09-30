@@ -1,4 +1,4 @@
-import React, { useState, useEffect,useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useSelector } from "react-redux";
 import { selectUser } from "../../features/userSlice";
 import { db } from "../../firebase";
@@ -76,6 +76,7 @@ const Grid: React.FC = () => {
       .limit(15)
       .onSnapshot((snapshot) => {
         handleSnapshot(snapshot);
+        console.log("postLoaderが実行されました");
       });
   };
 
@@ -86,11 +87,13 @@ const Grid: React.FC = () => {
   // NOTE >> 初回の読み込みを行う関数を定義する。
   const initialLoad = () => {
     // NOTE >> 変数「unsubscribe」に関数unsubscribeを追加し、実行する
-    // QUESTION >> onSnapshot()は一度実行したら、バックグラウンドでずっと監視と更新処理を続ける事に
-    //             なるのだろうか？だとしたら、previousPostLoaderが起動するたび、onSnapshot()の
-    //             バックグラウンド処理が増え続けていくことになるのであって、計算の負荷が急増してしまう。
-    //             だから、previousPostLoader()をunsubscribesの配列に格納し、forEach()を使って、
-    //             onSnapshot()の解除をループしているのだろうか？
+    // QUESTION >> onSnapshot()は一度実行したら、バックグラウンドでずっと監視と
+    //             更新処理を続ける事になるのだろうか？だとしたら、
+    //             previousPostLoaderが起動するたび、onSnapshot()の
+    //             バックグラウンド処理が増え続けていくことになるのであって、
+    //             計算の負荷が急増してしまう。
+    //             だから、previousPostLoader()をunsubscribesの配列に格納し、
+    //             forEach()を使って、onSnapshot()の解除をループしているのではないか？
     postLoader(currentTime);
     unsubscribes.current.push(unsubscribe);
   };
@@ -108,32 +111,35 @@ const Grid: React.FC = () => {
   const clear = () => {
     unsubscribes.current.forEach((unsubscribe) => {
       unsubscribe();
+      console.log("clearが実行されました。");
     });
   };
 
-  // NOTE >> added,removed,modifiedのそれぞれの変更種類に応じて、処理を切り分けるようにする。
+  // NOTE >> added,removed,modifiedのそれぞれの変更種類に応じて、
+  //         処理を切り分けるようにする。
   function handleSnapshot(snapshot: any) {
     let added: Post[] = [];
     let removed: Post[] = [];
     let modified: Post[] = [];
-    console.log(snapshot.docChanges());
+    console.log("handleSnapshot was Called.");
     snapshot.docChanges().forEach((change: any) => {
       const post = {
-        // NOTE >> ドキュメントのIDはdoc.idで取得し、フィールドの値はスプレッド構文により、doc.data()を展開することで取得している。
+        // NOTE >> ドキュメントのIDはdoc.idで取得し、フィールドの値は
+        //         スプレッド構文により、doc.data()を展開することで取得している。
         id: change.doc.id,
         ...change.doc.data(),
       } as Post;
       console.log(post);
       if (change.type === "added") {
-        // NOTE >> onSnapshot()で「added」されるドキュメントは最新のものから並ぶ必要があるため、
-        //         push()ではなく、unshift()を使用する。
-        console.log(added);
-        added.unshift(post);
-        console.log(added);
+        // NOTE >> onSnapshot()で「added」されるドキュメントは最新のものから
+        //         並ぶ必要があるため、push()を使用する。
+        added.push(post);
       } else if (change.type === "removed") {
-        removed.unshift(post);
+        removed.push(post);
+        console.log(removed);
       } else if (change.type === "modified") {
-        modified.unshift(post);
+        modified.push(post);
+        console.log(modified);
       }
     });
     if (added.length > 0) {
@@ -143,30 +149,47 @@ const Grid: React.FC = () => {
       return;
     }
     if (modified.length > 0) {
-      setPosts(
-        posts.map((before: any) => {
+      // const newPosts:Post[] = [];
+      // posts.forEach((prev) => {
+      //   const after = modified.find((find) => find.id === prev.id);
+      //   if (after) {
+      //     console.log(after);
+      //     newPosts.push(after);
+      //   } else {
+      //     console.log(prev);
+      //     newPosts.push(prev);
+      //   }
+      // });
+      // setPosts(newPosts);
+      setPosts(prev => {
+        return prev.map((before: Post) => {
           const after: Post | undefined = modified.find(
             (find) => find.id === before.id
           );
           if (after) {
+            console.log(after);
             return after;
           } else {
+            console.log(before);
             return before;
           }
-        })
-      );
+        });
+      });
+      // console.log(posts);
     }
   }
 
   const [oldestPost, setOldestPost] = useState<Post>();
   // NOTE >> コレクション「posts」の中でtimestampの値が最小のドキュメント(最も古い投稿)のidを取得する。
   function getOldestPost() {
+    console.log("getOldestPost was Called.");
     db.collection("posts")
       .where("uid", "==", uid)
       .orderBy("timestamp", "desc")
       .limitToLast(1)
       .get()
       .then((querySnapshot) => {
+        console.log("get");
         if (querySnapshot.docs.length > 0) {
           setOldestPost({
             id: querySnapshot.docs[0].id,
@@ -184,6 +207,7 @@ const Grid: React.FC = () => {
   // NOTE >> コンポーネントのライフサイクルに応じた処理をuseEffect()で指定する。
   useEffect(() => {
     initialLoad();
+    console.log(posts);
     // NOTE >> Unmountの際に、onSnapshot()の監視・更新処理を解除するようにする。
     return () => {
       clear();
@@ -192,7 +216,7 @@ const Grid: React.FC = () => {
 
   useEffect(() => {
     getOldestPost();
-  });
+  }, []);
 
   const hasMore = oldestPost
     ? // NOTE >> 現在、読み込みが完了しているpostsの中にoldestPostと同じidを持つpostが含まれていたら、
