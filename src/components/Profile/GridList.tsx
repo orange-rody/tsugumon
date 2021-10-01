@@ -63,8 +63,9 @@ const Grid: React.FC = () => {
   const user = useSelector(selectUser);
   const uid = user.uid;
   const currentTime: number = new Date().getTime();
-
   const [posts, setPosts] = useState<Post[]>([]);
+  const [oldestPost, setOldestPost] = useState<Post>();
+  const [hasMore, setHasMore] = useState(false);
   const unsubscribes = useRef<Unsubscribe[]>([]);
 
   // NOTE >> 過去の投稿（5件）を読み込む関数を定義する。
@@ -149,19 +150,7 @@ const Grid: React.FC = () => {
       return;
     }
     if (modified.length > 0) {
-      // const newPosts:Post[] = [];
-      // posts.forEach((prev) => {
-      //   const after = modified.find((find) => find.id === prev.id);
-      //   if (after) {
-      //     console.log(after);
-      //     newPosts.push(after);
-      //   } else {
-      //     console.log(prev);
-      //     newPosts.push(prev);
-      //   }
-      // });
-      // setPosts(newPosts);
-      setPosts(prev => {
+      setPosts((prev) => {
         return prev.map((before: Post) => {
           const after: Post | undefined = modified.find(
             (find) => find.id === before.id
@@ -175,11 +164,10 @@ const Grid: React.FC = () => {
           }
         });
       });
-      // console.log(posts);
+      console.log(posts);
     }
   }
 
-  const [oldestPost, setOldestPost] = useState<Post>();
   // NOTE >> コレクション「posts」の中でtimestampの値が最小のドキュメント(最も古い投稿)のidを取得する。
   function getOldestPost() {
     console.log("getOldestPost was Called.");
@@ -189,7 +177,6 @@ const Grid: React.FC = () => {
       .limitToLast(1)
       .get()
       .then((querySnapshot) => {
-        console.log("get");
         if (querySnapshot.docs.length > 0) {
           setOldestPost({
             id: querySnapshot.docs[0].id,
@@ -198,6 +185,15 @@ const Grid: React.FC = () => {
             timestamp: querySnapshot.docs[0].data().timestamp,
             userName: querySnapshot.docs[0].data().userName,
           });
+          // NOTE >> 現在、読み込みが完了しているpostsの中にquerySnapshot.docs[0]と同じ
+          //         idを持つpostが含まれていたら、false(追加読み込みを中止)を、含まれて
+          //         いなかったらtrue(追加読み込みを許可)を返す。
+          setHasMore(
+            !Boolean(
+              posts.find((post: Post) => post.id === querySnapshot.docs[0].id)
+            )
+          );
+          console.log("setHasMore is executed.");
         } else {
           return;
         }
@@ -217,12 +213,6 @@ const Grid: React.FC = () => {
   useEffect(() => {
     getOldestPost();
   }, []);
-
-  const hasMore = oldestPost
-    ? // NOTE >> 現在、読み込みが完了しているpostsの中にoldestPostと同じidを持つpostが含まれていたら、
-      //         false(追加読み込みを中止)を、含まれていなかったらtrue(追加読み込みを許可)を返す。
-      !Boolean(posts.find((post: Post) => post.id === oldestPost.id))
-    : false;
 
   const lastLine = posts.length % 3;
   function justifyLastLine() {
@@ -244,7 +234,7 @@ const Grid: React.FC = () => {
   return (
     <>
       <Main>
-        <InfiniteScroll hasMore={false} loadMore={additionalLoad}>
+        <InfiniteScroll hasMore={hasMore} loadMore={additionalLoad}>
           <PhotoList>
             {posts.map((post, index) => {
               return (
