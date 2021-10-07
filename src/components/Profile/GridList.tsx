@@ -64,12 +64,27 @@ const Grid: React.FC = () => {
   const uid = user.uid;
   const currentTime: number = new Date().getTime();
   const [posts, setPosts] = useState<Post[]>([]);
-  const [oldestPost, setOldestPost] = useState<Post>();
+  const [oldestPostId, setOldestPostId] = useState("");
   const [hasMore, setHasMore] = useState(false);
   const unsubscribes = useRef<Unsubscribe[]>([]);
 
+  // NOTE >> コレクション「posts」の中でtimestampの値が最小のドキュメント(最も古い投稿)のidを取得する。
+  function getOldestPostId() {
+    db.collection("posts")
+      .where("uid", "==", uid)
+      .orderBy("timestamp", "desc")
+      .limitToLast(1)
+      .get()
+      .then((snapshot) => {
+        if (snapshot) {
+          setOldestPostId(snapshot.docs[0].id);
+        }
+      });
+  }
+
   // NOTE >> 過去の投稿（5件）を読み込む関数を定義する。
-  const postLoader = (time: number) => {
+  const postLoader = async(time: number) => {
+    await getOldestPostId();
     db.collection("posts")
       .where("uid", "==", uid)
       .orderBy("timestamp", "desc")
@@ -99,13 +114,14 @@ const Grid: React.FC = () => {
     unsubscribes.current.push(unsubscribe);
   };
 
-  // NOTE >> スクロール時に投稿（5件）を追加で読み込む関数を定義する。
+  // NOTE >> スクロール時に投稿（15件）を追加で読み込む関数を定義する。
   const additionalLoad = () => {
     if (posts.length > 0) {
       const lastPostedTime = posts[posts.length - 1].timestamp;
       postLoader(lastPostedTime);
       unsubscribes.current.push(unsubscribe);
     }
+    console.log("additionalLoadが実行されました。");
   };
 
   // NOTE >> onSnapshot()の監視・更新を解除するための関数を定義する。
@@ -168,41 +184,41 @@ const Grid: React.FC = () => {
     }
   }
 
-  // NOTE >> コレクション「posts」の中でtimestampの値が最小のドキュメント(最も古い投稿)のidを取得する。
-  function getOldestPost() {
-    console.log("getOldestPost was Called.");
-    db.collection("posts")
-      .where("uid", "==", uid)
-      .orderBy("timestamp", "desc")
-      .limitToLast(1)
-      .get()
-      .then((querySnapshot) => {
-        if (querySnapshot.docs.length > 0) {
-          setOldestPost({
-            id: querySnapshot.docs[0].id,
-            caption: querySnapshot.docs[0].data().caption,
-            imageUrl: querySnapshot.docs[0].data().imageUrl,
-            timestamp: querySnapshot.docs[0].data().timestamp,
-            userName: querySnapshot.docs[0].data().userName,
-          });
-          // NOTE >> 現在、読み込みが完了しているpostsの中にquerySnapshot.docs[0]と同じ
-          //         idを持つpostが含まれていたら、false(追加読み込みを中止)を、含まれて
-          //         いなかったらtrue(追加読み込みを許可)を返す。
-          setHasMore(
-            !Boolean(
-              posts.find((post: Post) => post.id === querySnapshot.docs[0].id)
-            )
-          );
-          console.log("setHasMore is executed.");
-        } else {
-          return;
-        }
-      });
-  }
+  // async function checkHasMore() {
+  //   await initialLoad();
+  //   console.log("checkHasMore has been Called.");
+  //   db.collection("posts")
+  //     .where("uid", "==", uid)
+  //     .orderBy("timestamp", "desc")
+  //     .limitToLast(1)
+  //     .get()
+  //     .then((querySnapshot) => {
+  //       if (querySnapshot.docs.length > 0) {
+  //         console.log({
+  //           id: querySnapshot.docs[0].id,
+  //           caption: querySnapshot.docs[0].data().caption,
+  //           imageUrl: querySnapshot.docs[0].data().imageUrl,
+  //           timestamp: querySnapshot.docs[0].data().timestamp,
+  //           userName: querySnapshot.docs[0].data().userName,
+  //         });
+  //         // NOTE >> 現在、読み込みが完了しているpostsの中にquerySnapshot.docs[0]と同じ
+  //         //         idを持つpostが含まれていたら、false(追加読み込みを中止)を、含まれて
+  //         //         いなかったらtrue(追加読み込みを許可)を返す。
+  //         setHasMore(
+  //           !Boolean(
+  //             posts.find((post: Post) => post.id === querySnapshot.docs[0].id)
+  //           )
+  //         );
+  //         console.log(`setHasMoreが実行されました。setHasMoreの結果は${hasMore}でした。`);
+  //       } else {
+  //         return;
+  //       }
+  //     });
+  // }
 
   // NOTE >> コンポーネントのライフサイクルに応じた処理をuseEffect()で指定する。
   useEffect(() => {
-    initialLoad();
+    checkHasMore();
     console.log(posts);
     // NOTE >> Unmountの際に、onSnapshot()の監視・更新処理を解除するようにする。
     return () => {
@@ -210,9 +226,9 @@ const Grid: React.FC = () => {
     };
   }, []);
 
-  useEffect(() => {
-    getOldestPost();
-  }, []);
+  // useEffect(() => {
+  //   checkHasMore();
+  // }, []);
 
   const lastLine = posts.length % 3;
   function justifyLastLine() {
