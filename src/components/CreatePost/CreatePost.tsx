@@ -334,6 +334,7 @@ export default function CreatePost(props: Props) {
             <DefaultButton
               child="消す"
               onClick={clearDraft}
+              wide={false}
               dataTestId="buttonForClear"
             />
           </ButtonArea>
@@ -399,8 +400,9 @@ export default function CreatePost(props: Props) {
             />
             <DefaultButton
               onClick={togglePreview}
-              dataTestId="previewOff"
               child="戻る"
+              wide={false}
+              dataTestId="previewOff"
             />
           </ButtonArea>
         </Main>

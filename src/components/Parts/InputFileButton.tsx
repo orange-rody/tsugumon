@@ -39,6 +39,7 @@ type Props = {
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   child?: string;
   style?: any;
+  ref?: any;
 };
 
 // NOTE >> Input type="file"専用のボタンを作成

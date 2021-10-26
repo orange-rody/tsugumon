@@ -27,8 +27,15 @@ const theme = createMuiTheme({
 
 const useStyles = makeStyles((thme: Theme) =>
   createStyles({
-    button: {
+    narrow: {
       width: "120px",
+      height: "40px",
+      borderRadius: "50px",
+      fontSize: "18px",
+      fontWeight: "bold",
+    },
+    wide: {
+      width: "200px",
       height: "40px",
       borderRadius: "50px",
       fontSize: "18px",
@@ -41,6 +48,7 @@ type Props = {
   dataTestId: string;
   onClick: (e: React.MouseEvent<HTMLElement>) => void;
   child: string;
+  wide:boolean;
 };
 const DefaultButton = (props: Props) => {
   const classes = useStyles();
@@ -52,7 +60,7 @@ const DefaultButton = (props: Props) => {
         variant="outlined"
         color="default"
         size="large"
-        className={classes.button}
+        className={props.wide ? classes.wide : classes.narrow}
       >
         {props.child}
       </Button>

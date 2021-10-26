@@ -50,6 +50,13 @@ const PhotoImage = styled.img`
   object-fit: cover;
 `;
 
+const ButtonArea = styled.div`
+  width: 200px;
+  height: 40px;
+  margin: 0 auto;
+  padding: 0;
+`;
+
 const Grid: React.FC = () => {
   interface Post {
     id: string;
@@ -167,13 +174,33 @@ const Grid: React.FC = () => {
   function nextLoad() {
     setLoading(true);
     if (posts.length > 0) {
-      if (posts.find((find) => find.id === oldestPostId)) {
-        setLoading(false);
-        console.log("You are up to date!");
-      } else {
-        const lastPostedTime = posts[posts.length - 1].timestamp;
-        postLoader(lastPostedTime).then(() => setLoading(false));
-      }
+      const lastPostedTime = posts[posts.length - 1].timestamp;
+      postLoader(lastPostedTime).then(() => setLoading(false));
+    }
+  }
+
+  function showLoadButton() {
+    if (posts.find((find) => find.id === oldestPostId)) {
+      return (
+        <ButtonArea>
+          <p>最後まで読み込みました！</p>
+        </ButtonArea>
+      );
+    } else {
+      return (
+        <ButtonArea>
+          {loading ? (
+            <p>Loading...</p>
+          ) : (
+            <DefaultButton
+              child="更に読み込む"
+              onClick={nextLoad}
+              dataTestId="buttonForLoading"
+              wide={true}
+            />
+          )}
+        </ButtonArea>
+      );
     }
   }
 
@@ -184,39 +211,6 @@ const Grid: React.FC = () => {
       console.log("clearが実行されました。");
     });
   };
-
-  // async function checkHasMore() {
-  //   await initialLoad();
-  //   console.log("checkHasMore has been Called.");
-  //   db.collection("posts")
-  //     .where("uid", "==", uid)
-  //     .orderBy("timestamp", "desc")
-  //     .limitToLast(1)
-  //     .get()
-  //     .then((querySnapshot) => {
-  //       if (querySnapshot.docs.length > 0) {
-  //         console.log({
-  //           id: querySnapshot.docs[0].id,
-  //           caption: querySnapshot.docs[0].data().caption,
-  //           imageUrl: querySnapshot.docs[0].data().imageUrl,
-  //           timestamp: querySnapshot.docs[0].data().timestamp,
-  //           userName: querySnapshot.docs[0].data().userName,
-  //         });
-  //         // NOTE >> 現在、読み込みが完了しているpostsの中にquerySnapshot.docs[0]と同じ
-  //         //         idを持つpostが含まれていたら、false(追加読み込みを中止)を、含まれて
-  //         //         いなかったらtrue(追加読み込みを許可)を返す。
-  //         setHasMore(
-  //           posts.find((post: Post) => post.id === querySnapshot.docs[0].id) ===
-  //             undefined
-  //         );
-  //         console.log(
-  //           `setHasMoreが実行されました。setHasMoreの結果は${hasMore}でした。`
-  //         );
-  //       } else {
-  //         return;
-  //       }
-  //     });
-  // }
 
   // NOTE >> コンポーネントのライフサイクルに応じた処理をuseEffect()で指定する。
   useEffect(() => {
@@ -257,17 +251,7 @@ const Grid: React.FC = () => {
             );
           })}
           {justifyLastLine()}
-          <div>
-            {loading ? (
-              <p>Loading...</p>
-            ) : (
-              <DefaultButton
-                child="読み込む"
-                onClick={nextLoad}
-                dataTestId="buttonForLoading"
-              />
-            )}
-          </div>
+          {showLoadButton()}
         </PhotoList>
       </Main>
     </>
