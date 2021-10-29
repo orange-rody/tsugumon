@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import { selectUser } from "../../features/userSlice";
+import { db } from "../../firebase";
 import EditProfile from "./EditProfile";
 import Header from "../Parts/Header";
 import IconButton from "../Parts/IconButton";
@@ -38,13 +39,16 @@ const useStyles = makeStyles((theme: Theme) =>
     },
   })
 );
+
 const iconStyle = { margin: "4px auto 0", padding: 0, fontSize: "25px" };
+
 const DisplayTypeData = [
   { value: "grid", title: "小さく表示", icon: "GRID" },
   { value: "single", title: "大きく表示", icon: "SINGLE" },
   { value: "tag", title: "タグ", icon: "TAG" },
   { value: "calendar", title: "カレンダー", icon: "CALENDAR" },
 ];
+
 function getDisplayTypeIcon(icon: string) {
   switch (icon) {
     case "GRID":
@@ -157,11 +161,93 @@ const DisplayTypeName = styled.p`
   font-size: 0.6rem;
 `;
 
-const Profile = () => {
+const Profile: React.FC = () => {
+  interface Post {
+    id: string;
+    caption: string;
+    imageUrl: string;
+    timestamp: number;
+    userName: string;
+  }
+
   const user = useSelector(selectUser);
   const { uid, userName, userIcon, prefecture, job, introduction } = user;
   const [selectedType, setSelectedType] = useState<string>("grid");
   const [editProfile, setEditProfile] = useState<boolean>(false);
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [oldestPostId, setOldestPostId] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  function getOldestPostId() {
+    db.collection("posts")
+      .where("uid", "==", uid)
+      .orderBy("timestamp", "desc")
+      .limitToLast(1)
+      .get()
+      .then((snapshot) => {
+        if (snapshot) {
+          setOldestPostId(snapshot.docs[0].id);
+        }
+      });
+  }
+
+  function unsubscribe() {
+    db.collection("posts").where("uid", "==", uid).orderBy("timestamp", "desc");
+  }
+
+  function postLoader(time: number) {
+    try {
+      db.collection("posts")
+        .where("uid", "==", uid)
+        .orderBy("timestamp", "desc")
+        .startAfter(time)
+        .limit(15)
+        .onSnapshot((snapshot) => {
+          handleSnapshot(snapshot);
+          console.log("postLoaderが実行されました");
+        });
+    } catch (error) {
+      alert(error);
+    }
+  }
+
+  function handleSnapshot(snapshot: any) {
+    let added: Post[] = [];
+    let removed: Post[] = [];
+    let modified: Post[] = [];
+    snapshot.docChanges().forEach((change: any) => {
+      const post = {
+        id: change.doc.id,
+        ...change.doc.data(),
+      } as Post;
+      if (change.type === "added") {
+        added.push(post);
+      } else if (change.type === "removed") {
+        removed.push(post);
+      } else if (change.type === "modified") {
+        modified.push(post);
+      }
+    });
+    if (added.length > 0) {
+      setPosts([...posts, ...added]);
+    } else if (removed.length > 0) {
+      return;
+    } else if (modified.length > 0) {
+      setPosts((prev) => {
+        return prev.map((before: Post) => {
+          const after: Post | undefined = modified.find(
+            (find) => find.id === before.id
+          );
+          if (after) {
+            return after;
+          } else {
+            return before;
+          }
+        });
+      });
+    }
+  }
+
   const noUserIcon = `${process.env.PUBLIC_URL}/noUserIcon.png`;
   const classes = useStyles();
 
@@ -242,14 +328,14 @@ const Profile = () => {
           </Main>
         </Wrapper>
       ) : (
-        <>
-          {/* <p>テスト</p> */}
-          <EditProfile
-            closeWindow={() => {
-              closeEdit();
-            }}
-          />
-        </>
+        <EditProfile
+          closeWindow={
+            // () => {
+            closeEdit()
+            // closeEdit()だけpropsとして渡すと、その時点で
+          // }
+        }
+        />
       )}
     </>
   );
