@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { auth } from "../../firebase";
 import styled from "styled-components";
-
 import {
   Button,
   Avatar,
@@ -313,12 +312,8 @@ const Auth: React.FC = () => {
                 data-testid="login"
                 className={classes.login}
                 variant="contained"
-                onClick={async () => {
-                  try {
-                    await signInEmail();
-                  } catch (error) {
-                    alert(error.message);
-                  }
+                onClick={() => {
+                  signInEmail();
                 }}
               >
                 ログインする
@@ -330,12 +325,8 @@ const Auth: React.FC = () => {
                 className={classes.signUp}
                 variant="contained"
                 color="primary"
-                onClick={async () => {
-                  try {
-                    await signUpEmail();
-                  } catch (err) {
-                    alert(err.message);
-                  }
+                onClick={() => {
+                  signUpEmail();
                 }}
               >
                 この内容で登録する

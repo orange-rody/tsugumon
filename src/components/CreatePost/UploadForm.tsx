@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import { selectUser } from "../../features/userSlice";
-import { auth, storage, db } from "../../firebase";
+import { storage, db } from "../../firebase";
 import firebase from "firebase/app";
 import Header from "../Parts/Header";
 import InputFileButton from "../Parts/InputFileButton";
@@ -158,55 +158,53 @@ type Props = {
   closeAdd: any;
 };
 
-export default function CreatePost(props: Props) {
+export default function UploadForm(props: Props) {
   const user = useSelector(selectUser);
   const noImage = `${process.env.PUBLIC_URL}/noPhoto.png`;
-  const [imageUrl, setImageUrl] = useState<string>(noImage);
+  const [file, setFile] = useState("");
   const [caption, setCaption] = useState<string>("");
   const [preview, setPreview] = useState<boolean>(false);
+
+  const types:string[] = ["image/png","image/jpeg"];
 
   const classes = useStyles();
 
   // FIX >> 同一の画像で「選ぶ」→「消す」を繰り返すと、ユーザーの操作に
   //        反応しなくなってしまう問題を解決しなければならない
-  // SOLVED >>  同じファイルを複数回選択すると、onChangeイベントが発火しないことが
-  //            原因と判明した。onClick={(e: any) => (e.target.value = null)}を
-  //            InputFileに追記することで、期待通りに動作するようになった。
-  //            おそらくonClickのイベントによって、事前に登録していたvalueがリセットされ、
-  //            その後、onChangeイベントが発火するようになっているのではないか
-
-  function FileRead(file: File) {
-    const reader = new FileReader();
-    return new Promise((resolve, reject) => {
-      reader.readAsDataURL(file);
-      reader.onload = () => {
-        resolve(reader.result);
-      };
-      reader.onerror = () => {
-        reject(reader.error);
-      };
-    });
-  }
+  // SOLVED >>  stateの内容は初期化されても、e.target.valueの値は残存してしまう。
+  //            そのため、同じファイルを連続で複数回選択した場合、valueの値は更新せず、
+  //            したがって、onChangeイベントが発火しないことが原因であると判明した。
+  //            e.preventDefault()の実行とstateの初期化を行う関数clearを宣言し、
+  //            onClickで実行するように設定したら問題は解決した。
 
   const handleImage = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const fileList: FileList | null = e.target.files;
-    const file: File | null = fileList!.item(0);
+    const selected: File | null = e.target.files![0];
     // NOTE >> Fileオブジェクトはシリアライズされないため、reduxに保存が不可能。
     //         従って、Fileオブジェクトはlocalステートに保存する必要がある。
-    // NOTE >> FILEオブジェクトが存在するときのみ、FileReadを実行するように
-    //         している。
-    if (file) {
-      FileRead(file)
+    if (selected && types.includes(selected.type)) {
+      const reader = new FileReader();
+      return new Promise((resolve, reject) => {
+        reader.readAsDataURL(selected);
+        reader.onload = () => {
+          resolve(reader.result);
+        };
+        reader.onerror = () => {
+          reject(reader.error);
+        };
+      })
         .then((response) => {
-          setImageUrl(response as string);
+          setFile(response as string);
         })
         .catch((error) => alert(error));
+    }else{
+      setFile("");
+      alert("pngもしくはjpgの画像ファイルを選択したください。");
     }
   };
 
-  const clearDraft = (e: React.MouseEvent<HTMLElement>) => {
+  const clear = (e: React.MouseEvent<HTMLElement>) => {
     e.preventDefault();
-    setImageUrl(noImage);
+    setFile("");
     setCaption("");
   };
 
@@ -224,7 +222,7 @@ export default function CreatePost(props: Props) {
     setPreview(!preview);
   };
 
-  const upload = (e: React.MouseEvent<HTMLElement>) => {
+  const upload = (e: React.MouseEvent<HTMLElement>, imageUrl: string) => {
     // NOTE>> uploadが呼び出される瞬間、ブラウザの再読み込みがスタートしてしまうので、
     //        e.preventDefault()で規定の動作をキャンセルしている。
     e.preventDefault();
@@ -275,7 +273,7 @@ export default function CreatePost(props: Props) {
                   })
                   .then(() => {
                     setPreview(false);
-                    setImageUrl(noImage);
+                    setFile("");
                     setCaption("");
                   });
               });
@@ -302,10 +300,10 @@ export default function CreatePost(props: Props) {
           </Header>
           <div style={{ height: "52px" }} />
           <ImageWrap data-testid="imageWrap">
-            {imageUrl === noImage ? (
+            {file === "" ? (
               <>
                 <NoImage
-                  src={imageUrl}
+                  src={noImage}
                   data-testid="noImage"
                   alt="写真が選択されていません。"
                 />
@@ -323,7 +321,7 @@ export default function CreatePost(props: Props) {
               </>
             ) : (
               <Image
-                src={imageUrl}
+                src={file}
                 alt="選択した写真のプレビュー"
                 data-testid="image"
               />
@@ -333,7 +331,7 @@ export default function CreatePost(props: Props) {
             <InputFileButton onChange={handleImage} child="選ぶ" />
             <DefaultButton
               child="消す"
-              onClick={clearDraft}
+              onClick={clear}
               wide={false}
               dataTestId="buttonForClear"
             />
@@ -351,7 +349,7 @@ export default function CreatePost(props: Props) {
           ></Textarea>
           <ButtonArea>
             <ColorButton
-              disabled={imageUrl === noImage ? true : false}
+              disabled={file === "" && true}
               onClick={togglePreview}
               dataTestId="previewOn"
               child="次へ進む"
@@ -375,11 +373,7 @@ export default function CreatePost(props: Props) {
           </Header>
           <div style={{ height: "52px" }} />
           <ImageWrap>
-            <Image
-              src={imageUrl}
-              alt="uploader"
-              data-testid="previewImageUrl"
-            />
+            <Image src={file} alt="uploader" data-testid="previewImageUrl" />
           </ImageWrap>
           <UserInfo>
             {/* TODO >> ユーザーアイコンの画像を取得して、Avatarに読み込む */}
@@ -392,9 +386,11 @@ export default function CreatePost(props: Props) {
           <CommentArea data-testid="commentArea">{caption}</CommentArea>
           <ButtonArea>
             <ColorButton
-              onClick={upload}
+              onClick={(e) => {
+                upload(e, file);
+              }}
               dataTestId="buttonForUpload"
-              disabled={imageUrl === noImage ? true : false}
+              disabled={file === "" && true}
               child="登録する"
               color="secondary"
             />

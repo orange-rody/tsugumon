@@ -1,6 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { selectUser } from "../../features/userSlice";
+import {
+  selectOldestId,
+  selectPosts,
+  edit,
+  getOldestId,
+} from "../../features/postsSlice";
 import { db } from "../../firebase";
 import styled from "styled-components";
 import mediaQuery from "styled-media-query";
@@ -68,13 +74,15 @@ const Grid: React.FC = () => {
 
   type Unsubscribe = () => void;
 
+  const dispatch = useDispatch();
   const user = useSelector(selectUser);
   const uid = user.uid;
   const currentTime: number = new Date().getTime();
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [oldestPostId, setOldestPostId] = useState("");
-  const [loading, setLoading] = useState(false);
+  const posts = useSelector(selectPosts);
+  const oldestId = useSelector(selectOldestId);
   const unsubscribes = useRef<Unsubscribe[]>([]);
+  const [count, setCount] = useState(0);
+  const [loading, setLoading] = useState(false);
 
   // NOTE >> コレクション「posts」の中でtimestampの値が最小のドキュメント(最も古い投稿)のidを取得する。
   function getOldestPostId() {
@@ -85,39 +93,50 @@ const Grid: React.FC = () => {
       .get()
       .then((snapshot) => {
         if (snapshot) {
-          setOldestPostId(snapshot.docs[0].id);
+          dispatch(getOldestId(snapshot.docs[0].id));
         }
       });
   }
 
-  const unsubscribe = () => {
-    db.collection("posts").where("uid", "==", uid).orderBy("timestamp", "desc");
-  };
-
   // NOTE >> 過去の投稿（15件）を読み込む関数を定義する。
-  function postLoader(time: number) {
+  function pastLoader(time: number) {
     try {
-      db.collection("posts")
+      const unSubPast = db
+        .collection("posts")
         .where("uid", "==", uid)
         .orderBy("timestamp", "desc")
         .startAfter(time)
         .limit(15)
         .onSnapshot((snapshot) => {
           handleSnapshot(snapshot);
-          console.log("postLoaderが実行されました");
+          console.log("pastLoaderが実行されました");
         });
-      // NOTE >> 変数「unsubscribe」に関数unsubscribeを追加し、実行する
-      // QUESTION >> onSnapshot()は一度実行したら、バックグラウンドでずっと監視と
-      //             更新処理を続ける事になる。postLoaderが起動するたび、
-      //             onSnapshot()のバックグラウンド処理が増え計算の負荷が増加して
-      //             しまうため、forEach()を使って、unsubscribesに格納したonSnapshot()を
-      //             解除するループを回している。
-      unsubscribes.current.push(unsubscribe);
+      // NOTE >> onSnapshot()はバックグラウンドで監視と更新処理を
+      //         続けるため、pastLoaderが起動するたび、バックグラウンド
+      //         の計算の負荷が増加しまう。そのため、forEach()を使って、
+      //         unsubscribesに格納したonSnapshot()を解除するループを
+      //         回している。
+      unsubscribes.current.push(unSubPast);
     } catch (error) {
       alert(error);
     }
   }
 
+  function futureLoader(time: number) {
+    try {
+      const unSubFuture = db
+        .collection("posts")
+        .where("uid", "==", uid)
+        .orderBy("timestamp", "asc")
+        .onSnapshot((snapshot) => {
+          handleSnapshot(snapshot);
+          console.log("futureLoaderが実行されました。");
+        });
+      unsubscribes.current.push(unSubFuture);
+    } catch (error) {
+      alert(error);
+    }
+  }
   // NOTE >> added,removed,modifiedのそれぞれの変更種類に応じて、
   //         処理を切り分けるようにする。
   function handleSnapshot(snapshot: any) {
@@ -144,12 +163,16 @@ const Grid: React.FC = () => {
       }
 
       if (added.length > 0) {
-        let addedPosts = [...posts, ...added];
-        setPosts(addedPosts.sort((a, b) => b.timestamp - a.timestamp));
-        // NOTE >> 配列のsortメソッドを使って、timestampの大小でaddedの各要素を
-        //         並びかえてから、ステートの内容を書き換える。
-        //         新しい(=timestampが大きい)投稿→古い(=timestampが小さい)投稿の順に
-        //         なるよう、bとaの順番を入れ替えている。
+        console.log(posts);
+        let addedPosts = [...added, ...posts];
+        console.log(addedPosts[0].timestamp);
+
+        let sortedPosts = addedPosts.sort((a, b) => b.timestamp - a.timestamp);
+        // NOTE >> 配列のsortメソッドを使って、addedの各要素が新しい(=timestampが
+        //         大きい)投稿→古い(=timestampが小さい)投稿の順に並ぶよう、
+        //         bとaの順番を入れ替えている。
+        dispatch(edit(sortedPosts));
+        setCount((count) => count + 1);
       } else if (modified.length > 0) {
         let modifiedPosts = posts.map((before: Post) => {
           const after: Post | undefined = modified.find(
@@ -161,32 +184,26 @@ const Grid: React.FC = () => {
             return before;
           }
         });
-        setPosts(modifiedPosts);
+        dispatch(edit(modifiedPosts));
+        setCount((count) => count + 1);
       }
     });
-  }
-
-  // NOTE >> 初回の読み込みを行う関数を定義する。
-  function initialLoad() {
-    setLoading(true);
-    getOldestPostId();
-    postLoader(currentTime);
-    setLoading(false);
-    unsubscribes.current.push(unsubscribe);
   }
 
   // NOTE >> 追加の読み込みを行う関数を定義する。
   function nextLoad() {
     setLoading(true);
-    if (posts.length > 0) {
+    if (posts.length - 1 > 0) {
       const lastPostedTime = posts[posts.length - 1].timestamp;
-      postLoader(lastPostedTime);
+      console.log(lastPostedTime);
+      pastLoader(lastPostedTime);
+      console.log(posts);
       setLoading(false);
     }
   }
 
   function showLoadButton() {
-    if (posts.find((find) => find.id === oldestPostId)) {
+    if (posts.find((find) => find.id === oldestId)) {
       return (
         <ButtonArea>
           <p>最後まで読み込みました！</p>
@@ -220,12 +237,21 @@ const Grid: React.FC = () => {
 
   // NOTE >> コンポーネントのライフサイクルに応じた処理をuseEffect()で指定する。
   useEffect(() => {
-    initialLoad();
+    // NOTE >> 初回の読み込みを行う関数を定義する。
+    if (posts.length === 1) {
+      setCount((count) => count + 1);
+      setLoading(true);
+      getOldestPostId();
+      futureLoader(currentTime);
+      pastLoader(currentTime);
+      setLoading(false);
+    }
     console.log(posts);
     // NOTE >> Unmountの際に、onSnapshot()の監視・更新処理を解除するようにする。
     return () => {
       clear();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const lastLine = posts.length % 3;
@@ -244,7 +270,7 @@ const Grid: React.FC = () => {
         return <PhotoItem />;
     }
   }
-
+  console.log("あ");
   return (
     <>
       <Main>
