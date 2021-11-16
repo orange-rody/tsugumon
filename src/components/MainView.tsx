@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { makeStyles, createStyles } from "@material-ui/core";
-import CreatePost from "./CreatePost/UploadForm";
+import UploadForm from "./UploadForm/UploadForm";
 import Profile from "./Profile/Profile";
 import Wrapper from "./Parts/Wrapper";
 import PaperContainer from "./Parts/PaperContainer";
@@ -199,7 +199,7 @@ const TabBar = () => {
             );
           })}
         </Tabs>
-        <CreatePost
+        <UploadForm
           open={selectedAdd}
           closeAdd={(e: React.MouseEvent<HTMLElement>) => {
             setSelectedAdd(false);

@@ -1,14 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { selectUser } from "../../features/userSlice";
-import { storage, db } from "../../firebase";
-import firebase from "firebase/app";
+import useStorage from "../../hooks/useStorage";
 import Header from "../Parts/Header";
 import InputFileButton from "../Parts/InputFileButton";
 import DefaultButton from "../Parts/DefaultButton";
 import ColorButton from "../Parts/ColorButton";
 import IconButton from "../Parts/IconButton";
-import ProgressBar from "../Parts/ProgressBar";
 import styled from "styled-components";
 // NOTE >> styled-componentをfunctionコンポーネントの中で使用すると、
 //         textareaの入力時に不具合が起きてしまうので注意が必要。
@@ -154,6 +152,14 @@ const CommentArea = styled.p`
   font-size: 1rem;
 `;
 
+const Bar = styled.div`
+  width: 0;
+  height: 5px;
+  margin: 0;
+  background-color: #4fc0ad;
+  z-index: 999;
+`;
+
 type Props = {
   open: boolean;
   closeAdd: any;
@@ -161,12 +167,11 @@ type Props = {
 
 export default function UploadForm(props: Props) {
   const user = useSelector(selectUser);
-  const noImage = `${process.env.PUBLIC_URL}/noPhoto.png`;
-  const [data, setData] = useState<string>("");
+  const [dataUrl, setDataUrl] = useState<string>("");
   const [caption, setCaption] = useState<string>("");
-  const [url, setUrl] = useState<string>("");
   const [preview, setPreview] = useState<boolean>(false);
   const [filename, setFilename] = useState<string>("");
+  const noImage = `${process.env.PUBLIC_URL}/noPhoto.png`;
   const types: string[] = ["image/png", "image/jpeg"];
 
   const classes = useStyles();
@@ -194,20 +199,14 @@ export default function UploadForm(props: Props) {
           reject(reader.error);
         };
       })
-        .then((response) => {
-          setData(response as string);
+        .then((result) => {
+          setDataUrl(result as string);
         })
         .catch((error) => alert(error));
     } else {
-      setData("");
+      setDataUrl("");
       alert("拡張子が「png」もしくは「jpg」の画像ファイルを選択したください。");
     }
-  };
-
-  const clear = (e: React.MouseEvent<HTMLElement>) => {
-    e.preventDefault();
-    setData("");
-    setCaption("");
   };
 
   const handleCaption = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -219,17 +218,22 @@ export default function UploadForm(props: Props) {
     inputText ? setCaption(inputText) : setCaption("");
   };
 
+  const clear = () => {
+    setDataUrl("");
+    setCaption("");
+    preview === true && setPreview(false);
+    filename !== "" && setFilename("");
+  };
+
   const togglePreview = (e: React.MouseEvent<HTMLElement>) => {
     e.preventDefault();
     setPreview(!preview);
   };
 
-  const getFilename = (e: React.MouseEvent<HTMLElement>, data: string) => {
-    // NOTE >> uploadが呼び出される瞬間、ブラウザの再読み込みがスタートしてしまうので、
-    //         e.preventDefault()で規定の動作をキャンセルする。
+  const getFilename = (e: React.MouseEvent<HTMLElement>) => {
     e.preventDefault();
-    if (data !== "") {
-      // NOTE >> ユニークなファイル名を作成する。
+    // NOTE >> ユニークなファイル名を作成する。
+    if (dataUrl !== "") {
       const currentTime = new Date().toString();
       const S =
         "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -248,41 +252,15 @@ export default function UploadForm(props: Props) {
       setFilename(currentTime + randomCharactor);
     }
   };
-  // // NOTE >> Storageに登録
-  // storage
-  // .ref(`posts / ${fileName}`)
-  // .putString(data, "data_url")
-  // .on(
-  //   firebase.storage.TaskEvent.STATE_CHANGED,
-  //   // TODO >> アップロード中にインジケータを表示するようにする。
-  //   // TODO >> アップロード完了後に「投稿が完了しました」のメッセージを表示する。
-  //   () => {},
-  //   (err: any) => {
-  //     alert(err.message);
-  //   },
-  //   () => {
-  //     // NOTE >> getDownloadURL()でstorageから保存した画像のURLを取得する。
-  //     storage
-  //       .ref(`posts / ${fileName}`)
-  //       .getDownloadURL()
-  //       .then((url) => {
-  //         db.collection("posts")
-  //           .add({
-  //             uid: user.uid,
-  //             userName: user.userName,
-  //             imageUrl: url,
-  //             caption: caption,
-  //             timestamp: new Date().getTime(),
-  //           })
-  //           .then(() => {
-  //             setPreview(false);
-  //             setData("");
-  //             setUrl("");
-  //             setCaption("");
-  //           });
-  //       });
-  //   }
-  // );
+
+  const { url, progress } = useStorage(dataUrl, caption, filename);
+  console.log(progress);
+
+  useEffect(() => {
+    if (url) {
+      clear();
+    }
+  }, [url]);
 
   return (
     // NOTE >> Matrial-UIのthemeを適用させるには<ThemeProvider>を
@@ -302,7 +280,7 @@ export default function UploadForm(props: Props) {
           </Header>
           <div style={{ height: "52px" }} />
           <ImageWrap data-testid="imageWrap">
-            {data === "" ? (
+            {dataUrl === "" ? (
               <>
                 <NoImage
                   src={noImage}
@@ -323,7 +301,7 @@ export default function UploadForm(props: Props) {
               </>
             ) : (
               <Image
-                src={data}
+                src={dataUrl}
                 alt="選択した写真のプレビュー"
                 data-testid="image"
               />
@@ -333,7 +311,9 @@ export default function UploadForm(props: Props) {
             <InputFileButton onChange={handleImage} child="選ぶ" />
             <DefaultButton
               child="消す"
-              onClick={clear}
+              onClick={() => {
+                clear();
+              }}
               wide={false}
               dataTestId="buttonForClear"
             />
@@ -351,7 +331,7 @@ export default function UploadForm(props: Props) {
           ></Textarea>
           <ButtonArea>
             <ColorButton
-              disabled={data === "" && true}
+              disabled={dataUrl === "" && true}
               onClick={togglePreview}
               dataTestId="previewOn"
               child="次へ進む"
@@ -375,26 +355,35 @@ export default function UploadForm(props: Props) {
           </Header>
           <div style={{ height: "52px" }} />
           <ImageWrap>
-            {data !== "" && (
-              <Image src={data} alt="uploader" data-testid="previewImageUrl" />
+            {dataUrl !== "" && (
+              <Image
+                src={dataUrl}
+                alt="uploader"
+                data-testid="previewImageUrl"
+              />
             )}
           </ImageWrap>
+          {filename !== "" ? (
+            <Bar style={{ width: progress + "%" }} />
+          ) : (
+            <div style={{ width: "100%", height: "5px" }} />
+          )}
           <UserInfo>
             <UserIcon>
               <UserImage src={user.userIcon} />
             </UserIcon>
             <UserName data-testid="previewUserName">{user.userName}</UserName>
           </UserInfo>
-          <ProgressBar filename={filename} setFilename={setFilename} data={data} setData={setData} caption={caption}setCaption = {setCaption} setPreview={setPreview}/>
           {/* TODO >> CommentAreaの表示文字をスクロールする機能をつくる */}
           <CommentArea data-testid="commentArea">{caption}</CommentArea>
+
           <ButtonArea>
             <ColorButton
-              onClick={(e:React.MouseEvent<HTMLElement>) => {
-                getFilename(e, data);
+              onClick={(e: React.MouseEvent<HTMLElement>) => {
+                getFilename(e);
               }}
               dataTestId="buttonForUpload"
-              disabled={data === "" && true}
+              disabled={dataUrl === "" && true}
               child="登録する"
               color="secondary"
             />

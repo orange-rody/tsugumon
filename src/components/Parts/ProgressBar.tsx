@@ -3,39 +3,39 @@ import useStorage from "../../hooks/useStorage";
 import styled from "styled-components";
 
 const Bar = styled.div`
-height: 5px;
-background-color: "#50a0d0";
-margin-top: 20px;
+  height: 5px;
+  background-color: "#50a0d0";
+  margin-top: 20px;
 `;
 
 type Props = {
-  filename: string;
-  setFilename: any;
-  data: string;
-  setData: any;
+  dataUrl: string;
+  setDataUrl: any;
   caption: string;
   setCaption: any;
+  filename: string;
+  setFilename: any;
   setPreview: any;
 };
 const ProgressBar = ({
-  filename,
-  setFilename,
-  data,
-  setData,
+  dataUrl,
+  setDataUrl,
   caption,
   setCaption,
+  filename,
+  setFilename,
   setPreview,
 }: Props) => {
-  const { url, progress } = useStorage(filename, data, caption);
+  const { url, progress } = useStorage(filename, dataUrl, caption);
   useEffect(() => {
     if (url) {
-      setFilename("");
-      setData("");
+      setDataUrl("");
       setCaption("");
+      setFilename("");
       setPreview(false);
     }
-  },[url,setFilename]);
-  return <Bar style={{width: progress + "%"}} />
+  }, [url]);
+  return <Bar style={{ width: progress + "%" }} />;
 };
 
 export default ProgressBar;
