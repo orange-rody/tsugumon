@@ -167,11 +167,11 @@ const Profile: React.FC = () => {
     caption: string;
     imageUrl: string;
     timestamp: number;
-    userName: string;
+    username: string;
   }
 
   const user = useSelector(selectUser);
-  const { uid, userName, userIcon, prefecture, job, introduction } = user;
+  const { uid, username, userIcon, prefecture, job, introduction } = user;
   const [selectedType, setSelectedType] = useState<string>("grid");
   const [editProfile, setEditProfile] = useState<boolean>(false);
   const [posts, setPosts] = useState<Post[]>([]);
@@ -263,12 +263,12 @@ const Profile: React.FC = () => {
       {!editProfile ? (
         <Wrapper>
           <Header
-            child={userName ? userName : "匿名のユーザー"}
+            child={username ? username : "匿名のユーザー"}
             style={{ zIndex: 3 }}
           >
             <IconButton
               onClick={(e: React.MouseEvent<HTMLElement>) =>
-                console.log(userName)
+                console.log(username)
               }
               dataTestId="settings"
             >
@@ -280,7 +280,7 @@ const Profile: React.FC = () => {
             <UserNameSection>
               <UserIcon src={user.userIcon === "" ? noUserIcon : userIcon} />
               <UserNameArea>
-                <UserName>{userName ? userName : "匿名のユーザー"}</UserName>
+                <UserName>{username ? username : "匿名のユーザー"}</UserName>
                 <ColorButton
                   dataTestId="profileEditButton"
                   onClick={openEdit}

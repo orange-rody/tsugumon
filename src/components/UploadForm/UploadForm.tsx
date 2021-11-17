@@ -260,6 +260,7 @@ export default function UploadForm(props: Props) {
     if (url) {
       clear();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [url]);
 
   return (
@@ -376,7 +377,6 @@ export default function UploadForm(props: Props) {
           </UserInfo>
           {/* TODO >> CommentAreaの表示文字をスクロールする機能をつくる */}
           <CommentArea data-testid="commentArea">{caption}</CommentArea>
-
           <ButtonArea>
             <ColorButton
               onClick={(e: React.MouseEvent<HTMLElement>) => {

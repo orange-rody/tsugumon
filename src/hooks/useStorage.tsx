@@ -12,7 +12,6 @@ const useStorage = (dataUrl: string, caption: string, filename: string) => {
     // NOTE >> dataUrlをStorageに登録する
     if (dataUrl !== "") {
       const storageRef = storage.ref();
-      console.log(dataUrl);
       storageRef
         .child(`posts/${filename}`)
         .putString(dataUrl, "data_url")
@@ -23,14 +22,14 @@ const useStorage = (dataUrl: string, caption: string, filename: string) => {
               (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
             setProgress(percentage);
           },
-          (err) => console.log(err),
+          (err) => alert(err),
           async () => {
             const downloadUrl = await storageRef
               .child(`posts/${filename}`)
               .getDownloadURL();
             db.collection("posts").add({
               uid: user.uid,
-              userName: user.userName,
+              username: user.username,
               imageUrl: downloadUrl,
               caption: caption,
               timestamp: new Date().getTime(),
@@ -39,6 +38,7 @@ const useStorage = (dataUrl: string, caption: string, filename: string) => {
           }
         );
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filename]);
   return { progress, url };
 };

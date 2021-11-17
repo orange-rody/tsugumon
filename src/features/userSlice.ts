@@ -6,7 +6,7 @@ export const userSlice = createSlice({
   initialState: {
     user: {
       uid: "",
-      userName: "",
+      username: "",
       userIcon: "",
       prefecture: "",
       job: "",
@@ -20,7 +20,7 @@ export const userSlice = createSlice({
     logout: (state) => {
       state.user = {
         uid: "",
-        userName: "",
+        username: "",
         userIcon: "",
         prefecture: "",
         job: "",
