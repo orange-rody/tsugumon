@@ -11,14 +11,13 @@ interface Post {
   username: string;
 }
 
-
-const useFirestore = (collection: string) => {
+const useFirestore = (loadCount: number) => {
   const user = useSelector(selectUser);
-  const uid = user.uid;
-    
+  const uid: string = user.uid;
+
   const [oldestId, setOldestId] = useState<string>("");
-  const [posts, setPosts ] = useState<Post[]>([]);
-  
+  const [posts, setPosts] = useState<Post[]>([]);
+
   function getOldestId() {
     db.collection("posts")
       .where("uid", "==", uid)
@@ -29,21 +28,42 @@ const useFirestore = (collection: string) => {
   }
 
   useEffect(() => {
-    const unsub = db
-      .collection("posts")
-      .where("uid", "==", uid)
-      .orderBy("timestamp", "desc")
-      .limit(15)
-      .onSnapshot((snapshot) => {
-        let documents: Post[] = [];
-        snapshot.forEach((doc) => {
-          const post = {id:doc.id,...doc.data()} as Post;
-          documents.push(post);
+    getOldestId();
+    if (posts.length > 0) {
+      const unsub = db
+        .collection("posts")
+        .where("uid", "==", uid)
+        .orderBy("timestamp", "desc")
+        .limit(15)
+        .onSnapshot((snapshot) => {
+          let documents: Post[] = [];
+          snapshot.forEach((doc) => {
+            const post = { id: doc.id, ...doc.data() } as Post;
+            documents.push(post);
+          });
+          setPosts(documents);
         });
-        setPosts(documents);
-      });
-    return () => unsub();
-  }, []);
+      return () => unsub();
+    } else {
+      const lastPostedTime = posts[posts.length].timestamp;
+      const unsub = db
+        .collection("posts")
+        .where("uid", "==", uid)
+        .orderBy("timestamp", "desc")
+        .startAfter(lastPostedTime)
+        .limit(15)
+        .onSnapshot((snapshot) => {
+          let documents: Post[] = [];
+          snapshot.forEach((doc) => {
+            const post = { id: doc.id, ...doc.data() } as Post;
+            documents.push(post);
+            setPosts((prev) => [...prev, ...documents]);
+          });
+        });
+      return () => unsub();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loadCount]);
   return { posts, oldestId };
 };
 
