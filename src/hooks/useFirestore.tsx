@@ -18,6 +18,8 @@ const useFirestore = (loadCount: number) => {
   const [oldestId, setOldestId] = useState<string>("");
   const [posts, setPosts] = useState<Post[]>([]);
 
+  // NOTE >> コレクション「posts」の中でtimestampの値が
+  //         最小のドキュメント(最も古い投稿)のidを取得する。
   function getOldestId() {
     db.collection("posts")
       .where("uid", "==", uid)
@@ -29,7 +31,7 @@ const useFirestore = (loadCount: number) => {
 
   useEffect(() => {
     getOldestId();
-    if (posts.length > 0) {
+    if (posts.length === 0) {
       const unsub = db
         .collection("posts")
         .where("uid", "==", uid)
@@ -41,11 +43,15 @@ const useFirestore = (loadCount: number) => {
             const post = { id: doc.id, ...doc.data() } as Post;
             documents.push(post);
           });
+          console.log(posts);
           setPosts(documents);
         });
       return () => unsub();
-    } else {
-      const lastPostedTime = posts[posts.length].timestamp;
+    } 
+    else {
+      // NOTE >> postsのstateに値が登録されていた場合、
+      //         過去の投稿（15件）を読み込む関数を定義する。
+      const lastPostedTime = posts[1].timestamp;
       const unsub = db
         .collection("posts")
         .where("uid", "==", uid)
@@ -57,6 +63,7 @@ const useFirestore = (loadCount: number) => {
           snapshot.forEach((doc) => {
             const post = { id: doc.id, ...doc.data() } as Post;
             documents.push(post);
+            console.log(posts);
             setPosts((prev) => [...prev, ...documents]);
           });
         });

@@ -165,7 +165,7 @@ export default function UploadForm(props: Props) {
   const [caption, setCaption] = useState<string>("");
   const [preview, setPreview] = useState<boolean>(false);
 
-  const types:string[] = ["image/png","image/jpeg"];
+  const types: string[] = ["image/png", "image/jpeg"];
 
   const classes = useStyles();
 
@@ -196,7 +196,7 @@ export default function UploadForm(props: Props) {
           setFile(response as string);
         })
         .catch((error) => alert(error));
-    }else{
+    } else {
       setFile("");
       alert("pngもしくはjpgの画像ファイルを選択したください。");
     }
@@ -265,7 +265,7 @@ export default function UploadForm(props: Props) {
                 db.collection("posts")
                   .add({
                     uid: user.uid,
-                    userName: user.userName,
+                    username: user.username,
                     imageUrl: url,
                     caption: caption,
                     // timestamp: firebase.firestore.FieldValue.serverTimestamp(),
@@ -380,7 +380,7 @@ export default function UploadForm(props: Props) {
             <UserIcon>
               <UserImage src={user.userIcon} />
             </UserIcon>
-            <UserName data-testid="previewUserName">{user.userName}</UserName>
+            <UserName data-testid="previewUserName">{user.username}</UserName>
           </UserInfo>
           {/* TODO >> CommentAreaの表示文字をスクロールする機能をつくる */}
           <CommentArea data-testid="commentArea">{caption}</CommentArea>

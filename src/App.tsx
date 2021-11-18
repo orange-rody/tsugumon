@@ -25,7 +25,7 @@ const App: React.FC = () => {
           dispatch(
             login({
               uid: authUser.uid,
-              userName: userData.userName,
+              username: userData.username,
               userIcon: userData.userIcon,
               prefecture: userData.prefecture,
               job: userData.job,

@@ -117,7 +117,7 @@ const EditProfile = (props: any) => {
   const dispatch = useDispatch();
   const user = useSelector(selectUser);
   const uid = user.uid;
-  const [userName, setUserName] = useState(user.userName);
+  const [userName, setUserName] = useState(user.username);
   const [userIcon, setUserIcon] = useState(user.userIcon);
   const [prefecture, setPrefecture] = useState(user.prefecture);
   const [job, setJob] = useState(user.job);
