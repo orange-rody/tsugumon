@@ -65,7 +65,7 @@ const Grid: React.FC = () => {
     if (posts.find((find) => find.id === oldestId)) {
       return (
         <ButtonArea>
-          <p>最後まで読み込みました！</p>
+          {posts.length > 3 && <p>最後まで読み込みました！</p>}
         </ButtonArea>
       );
     } else {

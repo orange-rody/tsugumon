@@ -14,7 +14,6 @@ interface Post {
 const useFirestore = (loadCount: number) => {
   const user = useSelector(selectUser);
   const uid: string = user.uid;
-
   const [oldestId, setOldestId] = useState<string>("");
   const [posts, setPosts] = useState<Post[]>([]);
 
@@ -25,52 +24,44 @@ const useFirestore = (loadCount: number) => {
       .where("uid", "==", uid)
       .orderBy("timestamp", "desc")
       .limitToLast(1)
-      .get()
-      .then((documents) => setOldestId(documents.docs[0].id));
+      .onSnapshot((snapshot) => {
+        setOldestId(snapshot.docs[0].id);
+      });
+  }
+
+  function getStartTime(){
+    if(posts.length > 0){
+      return posts[posts.length -1].timestamp;
+    }else{
+      return 9999999999999;
+    }
   }
 
   useEffect(() => {
     getOldestId();
-    if (posts.length === 0) {
       const unsub = db
         .collection("posts")
         .where("uid", "==", uid)
         .orderBy("timestamp", "desc")
-        .limit(15)
+        .startAfter(getStartTime())
+        .limit(3)
         .onSnapshot((snapshot) => {
           let documents: Post[] = [];
           snapshot.forEach((doc) => {
             const post = { id: doc.id, ...doc.data() } as Post;
             documents.push(post);
           });
-          console.log(posts);
-          setPosts(documents);
-        });
-      return () => unsub();
-    } 
-    else {
-      // NOTE >> postsのstateに値が登録されていた場合、
-      //         過去の投稿（15件）を読み込む関数を定義する。
-      const lastPostedTime = posts[1].timestamp;
-      const unsub = db
-        .collection("posts")
-        .where("uid", "==", uid)
-        .orderBy("timestamp", "desc")
-        .startAfter(lastPostedTime)
-        .limit(15)
-        .onSnapshot((snapshot) => {
-          let documents: Post[] = [];
-          snapshot.forEach((doc) => {
-            const post = { id: doc.id, ...doc.data() } as Post;
-            documents.push(post);
-            console.log(posts);
-            setPosts((prev) => [...prev, ...documents]);
+          console.log(documents);
+          documents.forEach((doc) => {
+            setPosts(posts.filter((post) => post.id !== doc.id));
           });
+          setPosts([...posts,...documents]);
         });
       return () => unsub();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loadCount]);
+    , [loadCount]);
+
   return { posts, oldestId };
 };
 
