@@ -56,16 +56,36 @@ const ButtonArea = styled.div`
 `;
 
 const Grid: React.FC = () => {
-  const [loadCount, setLoadCount] = useState<number>(0);
+  interface Post {
+    id: string;
+    caption: string;
+    imageUrl: string;
+    timestamp: number;
+    username: string;
+  }
 
+  const [loadCount, setLoadCount] = useState<number>(0);
   const { posts, oldestId } = useFirestore(loadCount);
-  console.log(posts);
+
+  // let documents:Post[] = [];
+  // let filteredTiles:Post[] = tiles;
+  // console.log(filteredTiles);
+  // posts.forEach((post) => {
+  //   console.log(post);
+  //   filteredTiles = filteredTiles.filter((x) => x.id !== post.id);
+  //   documents.push(post);
+  // });
+  // let sortedTiles = [...filteredTiles,...documents].sort((a, b) => {
+  //   return b.timestamp - a.timestamp;
+  // });
+  // tiles = sortedTiles;
+  // console.log(tiles);
 
   function showLoadButton() {
     if (posts.find((find) => find.id === oldestId)) {
       return (
         <ButtonArea>
-          {posts.length > 3 && <p>最後まで読み込みました！</p>}
+          {posts.length > 6 && <p>最後まで読み込みました！</p>}
         </ButtonArea>
       );
     } else {
@@ -104,10 +124,10 @@ const Grid: React.FC = () => {
     <>
       <Main>
         <PhotoList>
-          {posts.map((post, index) => {
+          {posts.map((tile, index) => {
             return (
               <PhotoItem style={{ backgroundColor: "gray" }} key={index}>
-                <PhotoImage src={post.imageUrl} />
+                <PhotoImage src={tile.imageUrl} />
               </PhotoItem>
             );
           })}
