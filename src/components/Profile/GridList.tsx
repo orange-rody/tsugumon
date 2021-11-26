@@ -64,7 +64,7 @@ const Grid: React.FC = () => {
     username: string;
   }
 
-  const [loadCount, setLoadCount] = useState<number>(0);
+  const [loadCount, setLoadCount] = useState<number>(1);
   const { posts, oldestId } = useFirestore(loadCount);
 
   // let documents:Post[] = [];
