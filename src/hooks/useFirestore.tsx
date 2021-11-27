@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { db } from "../firebase";
 import { useSelector } from "react-redux";
 import { selectUser } from "../features/userSlice";
@@ -10,14 +10,12 @@ interface Post {
   timestamp: number;
   username: string;
 }
-type Listener = () => void;
 
 const useFirestore = (loadCount: number) => {
   const user = useSelector(selectUser);
   const uid: string = user.uid;
   const [oldestId, setOldestId] = useState<string>("");
   const [posts, setPosts] = useState<Post[]>([]);
-  const listeners = useRef<Listener[]>([]);
 
   const ref = db.collection("posts").where("uid", "==", uid);
 
@@ -32,108 +30,63 @@ const useFirestore = (loadCount: number) => {
       });
   }
 
-  let getPosts = (loadCount: number) => {
+  function getPosts(loadCount: number) {
+    console.log(loadCount);
     ref
       .orderBy("timestamp", "desc")
       .limit(loadCount * 6)
-      .onSnapshot((snapshots) => {
-        console.log(snapshots.docs.length);
-        let filteredPosts: Post[] = posts;
-        let documents: Post[] = [];
-        for (let change of snapshots.docChanges()) {
-          if (change.type === "added") {
-            console.log(`${change.doc.data().caption}がaddされました`);
-          } else if (change.type === "removed") {
-            console.log(`${change.doc.data().caption}がremoveされました`);
-          } else if (change.type === "modified") {
-            console.log(`${change.doc.data().caption}がmodifyされました`);
-          }
-        }
-        snapshots.forEach((snapshot) => {
-          filteredPosts = filteredPosts.filter((x) => x.id !== snapshot.id);
-          const post = { id: snapshot.id, ...snapshot.data() } as Post;
-          documents.push(post);
-        });
-        console.log([...filteredPosts, ...documents]);
-        setPosts(
-          [...filteredPosts, ...documents].sort((a, b) => {
-            return b.timestamp - a.timestamp;
-          })
-        );
-      });
-      ref
-      .orderBy("timestamp", "desc")
-      .limit(loadCount * 6)
-      .onSnapshot(()=>{
-        console.log("unsubscribeしました！");
-      });
-  };
-
-  function getMorePosts() {
-    let start = posts[posts.length - 1].timestamp;
-    let listener = ref
-      .orderBy("timestamp", "desc")
-      .startAfter(start)
-      .limit(6)
-      .onSnapshot((snapshots) => {
-        console.log(snapshots.docs);
-        let end = snapshots.docs[snapshots.docs.length - 1].data().timestamp;
+      .get()
+      .then((snapshots) => {
+        let backRowEnd =
+          snapshots.docs[snapshots.docs.length - 1].data().timestamp;
         ref
           .orderBy("timestamp", "desc")
-          .startAfter(start)
-          .endAt(end)
+          .endAt(backRowEnd)
           .onSnapshot((docs) => {
-            posts.forEach((post) => {
-              console.log(post.id);
-            });
             let filteredPosts: Post[] = posts;
             let documents: Post[] = [];
-            console.log(docs.size);
+            // NOTE >> firestoreの更新がonSnapshotで取得できているか確認します。
+            for (let change of docs.docChanges()) {
+              if (change.type === "added") {
+                console.log(`${change.doc.data().caption}がaddされました`);
+              } else if (change.type === "removed") {
+                console.log(`${change.doc.data().caption}がremoveされました`);
+              } else if (change.type === "modified") {
+                console.log(`${change.doc.data().caption}がmodifyされました`);
+              }
+            }
             docs.forEach((doc) => {
-              // console.log(doc.data);
               filteredPosts = filteredPosts.filter((x) => x.id !== doc.id);
               const post = { id: doc.id, ...doc.data() } as Post;
               documents.push(post);
             });
-            setPosts(
-              [...filteredPosts, ...documents].sort((a, b) => {
-                return b.timestamp - a.timestamp;
-              })
-            );
-            posts.forEach((post) => {
-              console.log(post.caption);
+            let sortedPosts = [...filteredPosts, ...documents].sort((a, b) => {
+              return b.timestamp - a.timestamp;
             });
-            // console.log(posts.length);
+            setPosts(sortedPosts);
+            posts.forEach((post) => console.log(post.caption));
+            // NOTE >> 前回行ったスナップショットの消去
           });
-        // listeners.current.push(innerListener);
+        if (loadCount > 1) {
+          let frontRowEnd =
+            snapshots.docs[snapshots.docs.length - 7].data().timestamp;
+          ref
+            .orderBy("timestamp", "desc")
+            .endAt(frontRowEnd)
+            .onSnapshot(() => {});
+          console.log("前回行ったスナップショットを消去しました！");
+        }
       });
-    listeners.current.push(listener);
-    // console.log(posts.length);
   }
 
   useEffect(
     () => {
       getOldestId();
-      if (loadCount === 1) {
-        getPosts(1);
-      }
       getPosts(loadCount);
-      // loadCount > 0 && getMorePosts();
-      if (loadCount > 1) {
-        getPosts(loadCount);
-        getPosts(loadCount - 1);
-      }
-      return () => {
-        listeners.current.forEach((listener) => {
-          listener();
-          console.log("clearが実行されました。");
-        });
-      };
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [loadCount]
   );
-  // console.log(posts);
   return { posts, oldestId };
 };
 
