@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { makeStyles, createStyles } from "@material-ui/core";
-import UploadForm from "./UploadForm/UploadForm";
+import UploadForm from "./Upload/UploadForm";
 import Profile from "./Profile/Profile";
 import Wrapper from "./Parts/Wrapper";
 import PaperContainer from "./Parts/PaperContainer";

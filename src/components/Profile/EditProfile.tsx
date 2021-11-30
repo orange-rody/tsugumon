@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { selectUser, update } from "../../features/userSlice";
 import { db, storage } from "../../firebase";
@@ -117,7 +117,7 @@ const EditProfile = (props: any) => {
   const dispatch = useDispatch();
   const user = useSelector(selectUser);
   const uid = user.uid;
-  const [userName, setUserName] = useState(user.username);
+  const [username, setUsername] = useState(user.username);
   const [userIcon, setUserIcon] = useState(user.userIcon);
   const [prefecture, setPrefecture] = useState(user.prefecture);
   const [job, setJob] = useState(user.job);
@@ -134,7 +134,8 @@ const EditProfile = (props: any) => {
       const reader = new FileReader();
       reader.readAsDataURL(file);
       reader.onload = () => {
-        dispatch(update({ userIcon: reader.result as string }));
+        setUserIcon(reader.result as string);
+        console.log(userIcon);
       };
       reader.onerror = (error) => {
         alert(error);
@@ -146,15 +147,17 @@ const EditProfile = (props: any) => {
     e.preventDefault();
     const { value, name } = e.target;
     switch (name) {
-      case "userName":
-        value ? setUserName(value) : setUserName("");
-        console.log(userName);
+      case "username":
+        value ? setUsername(value) : setUsername("");
+        console.log(username);
         break;
       case "prefecture":
         value ? setPrefecture(value) : setPrefecture("");
+        console.log(prefecture);
         break;
       case "job":
         value ? setJob(value) : setJob("");
+        console.log(job);
         break;
       default:
         console.log("その他の値です。");
@@ -181,38 +184,48 @@ const EditProfile = (props: any) => {
           },
           () => {
             storage
-              .ref(`userIcons/${uid}`)
+              .ref(`userIcons / ${uid}`)
               .getDownloadURL()
               .then((url) => {
-                db.collection("users").doc(uid).set(
-                  {
+                console.log(url);
+                db.collection("users").doc(uid).set({
+                  userIcon: url,
+                });
+                dispatch(
+                  update({
+                    uid: uid,
                     userIcon: url,
-                  },
-                  { merge: true }
+                    username: username,
+                    prefecture: prefecture,
+                    job: job,
+                    introduction: introduction,
+                  })
                 );
-                dispatch(update({ userIcon: userIcon }));
               });
           }
         );
+    } else {
     }
-    db.collection("users")
-      .doc(uid)
-      .set(
-        {
-          userName: userName,
-          prefecture: prefecture,
-          job: job,
-          introduction: introduction,
-        },
-        { merge: true }
-      )
-      .then(() => {
-        closeEdit();
-      });
-  }
-
-  function closeEdit() {
-    return props.closeWindow();
+    db.collection("users").doc(uid).set(
+      {
+        uid: uid,
+        username: username,
+        prefecture: prefecture,
+        job: job,
+        introduction: introduction,
+      },
+      { merge: true }
+    );
+    dispatch(
+      update({
+        uid:uid,
+        username: username,
+        prefecture: prefecture,
+        job: job,
+        introduction: introduction,
+      })
+    );
+    return props.closeEdit();
   }
 
   return (
@@ -222,7 +235,7 @@ const EditProfile = (props: any) => {
           <IconButton
             dataTestId="backButton"
             onClick={() => {
-              closeEdit();
+              return props.closeEdit();
             }}
           >
             <NavigateBefore className={classes.icon} />
@@ -233,9 +246,11 @@ const EditProfile = (props: any) => {
           <UserNameSection>
             <UserIcon src={userIcon === "" ? noUserIcon : userIcon} />
             <UserNameArea>
-              <UserName>{userName ? userName : "匿名のユーザー"}</UserName>
+              <UserName>{username ? username : "匿名のユーザー"}</UserName>
               <InputFileButton
-                onChange={changeImage}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                  changeImage(e);
+                }}
                 child="写真を選ぶ"
                 style={{
                   width: "160px",
@@ -249,10 +264,10 @@ const EditProfile = (props: any) => {
             <Label>
               ユーザーネーム
               <Input
-                data-testid="userNameInput"
+                data-testid="usernameInput"
                 placeholder="あなたの名前(必須)"
-                value={userName}
-                name="userName"
+                value={username}
+                name="username"
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                   changeInput(e);
                 }}
@@ -261,7 +276,7 @@ const EditProfile = (props: any) => {
             <Label>
               都道府県
               <Input
-                data-testid="userNameInput"
+                data-testid="usernameInput"
                 placeholder="あなたの住んでいる都道府県"
                 value={prefecture}
                 name="prefecture"
@@ -273,7 +288,7 @@ const EditProfile = (props: any) => {
             <Label>
               お仕事
               <Input
-                data-testid="userNameInput"
+                data-testid="usernameInput"
                 placeholder="あなたの現在のお仕事"
                 value={job}
                 name="job"

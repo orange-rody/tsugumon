@@ -33,17 +33,16 @@ const App: React.FC = () => {
             })
           );
         });
+        console.log(auth.currentUser);
       } else {
         dispatch(logout());
       }
     });
-    // useEffectではAppコンポーネントがアンマウントされたときに実行する処理を指定することができる。
-    // 「Appコンポーネントがアンマウントされたときに実行する処理」のことをクリーンアップ関数という。
-    // クリーンアップ関数はreturn構文を使って指定することができる。
     return () => {
       unSubscribe();
     };
-  }, [dispatch]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <>

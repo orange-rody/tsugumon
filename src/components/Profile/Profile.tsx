@@ -1,7 +1,6 @@
-import React, { useState } from "react";
+import React, { ReactHTMLElement, useState } from "react";
 import { useSelector } from "react-redux";
 import { selectUser } from "../../features/userSlice";
-import { db } from "../../firebase";
 import EditProfile from "./EditProfile";
 import Header from "../Parts/Header";
 import IconButton from "../Parts/IconButton";
@@ -118,12 +117,10 @@ const UserNameArea = styled.div`
 `;
 
 const UserName = styled.p`
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
+  display: block
   width: 90%;
-  height: 60px;
-  margin-top: 10px;
+  height: 30px;
+  margin-top: 20px;
   font-size: 1.2rem;
   overflow: hidden;
   color: #555;
@@ -131,6 +128,23 @@ const UserName = styled.p`
   ${mediaMobile`
     font-size: 1.2rem 
   `};
+`;
+
+const Prefecture = styled.p`
+  display: inline-block;
+  height: 15px;
+  margin: 0px 10px 15px 0px;
+  color: #006152;
+  font-size: 0.8rem;
+`;
+
+const Job = styled.p`
+  display: inline-block;
+  width: calc(90% - 40px);
+  height: 15px;
+  margin: 0px;
+  color: #006152;
+  font-size: 0.8rem;
 `;
 
 const DisplayTypeList = styled.ul`
@@ -162,105 +176,28 @@ const DisplayTypeName = styled.p`
 `;
 
 const Profile: React.FC = () => {
-  interface Post {
-    id: string;
-    caption: string;
-    imageUrl: string;
-    timestamp: number;
-    username: string;
-  }
-
+  console.log("Profileがレンダリングされました。");
   const user = useSelector(selectUser);
-  const { uid, username, userIcon, prefecture, job, introduction } = user;
+  const { username, userIcon, prefecture, job, introduction } = user;
   const [selectedType, setSelectedType] = useState<string>("grid");
-  const [editProfile, setEditProfile] = useState<boolean>(false);
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [oldestPostId, setOldestPostId] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  function getOldestPostId() {
-    db.collection("posts")
-      .where("uid", "==", uid)
-      .orderBy("timestamp", "desc")
-      .limitToLast(1)
-      .get()
-      .then((snapshot) => {
-        if (snapshot) {
-          setOldestPostId(snapshot.docs[0].id);
-        }
-      });
-  }
-
-  function unsubscribe() {
-    db.collection("posts").where("uid", "==", uid).orderBy("timestamp", "desc");
-  }
-
-  function postLoader(time: number) {
-    try {
-      db.collection("posts")
-        .where("uid", "==", uid)
-        .orderBy("timestamp", "desc")
-        .startAfter(time)
-        .limit(15)
-        .onSnapshot((snapshot) => {
-          handleSnapshot(snapshot);
-          console.log("postLoaderが実行されました");
-        });
-    } catch (error) {
-      alert(error);
-    }
-  }
-
-  function handleSnapshot(snapshot: any) {
-    let added: Post[] = [];
-    let removed: Post[] = [];
-    let modified: Post[] = [];
-    snapshot.docChanges().forEach((change: any) => {
-      const post = {
-        id: change.doc.id,
-        ...change.doc.data(),
-      } as Post;
-      if (change.type === "added") {
-        added.push(post);
-      } else if (change.type === "removed") {
-        removed.push(post);
-      } else if (change.type === "modified") {
-        modified.push(post);
-      }
-    });
-    if (added.length > 0) {
-      setPosts([...posts, ...added]);
-    } else if (removed.length > 0) {
-      return;
-    } else if (modified.length > 0) {
-      setPosts((prev) => {
-        return prev.map((before: Post) => {
-          const after: Post | undefined = modified.find(
-            (find) => find.id === before.id
-          );
-          if (after) {
-            return after;
-          } else {
-            return before;
-          }
-        });
-      });
-    }
-  }
+  const [edit, setEdit] = useState<boolean>(false);
 
   const noUserIcon = `${process.env.PUBLIC_URL}/noUserIcon.png`;
   const classes = useStyles();
 
   function openEdit() {
-    setEditProfile(true);
+    console.log("openEditが呼ばれました。");
+    setEdit(true);
+    console.log(edit);
   }
   function closeEdit() {
-    setEditProfile(false);
+    setEdit(false);
   }
 
   return (
     <>
-      {!editProfile ? (
+      {" "}
+      {!edit ? (
         <Wrapper>
           <Header
             child={username ? username : "匿名のユーザー"}
@@ -278,9 +215,11 @@ const Profile: React.FC = () => {
           <div style={{ width: "100%", height: "52px", margin: "0px" }} />
           <Main>
             <UserNameSection>
-              <UserIcon src={user.userIcon === "" ? noUserIcon : userIcon} />
+              <UserIcon src={userIcon === "" ? noUserIcon : userIcon} />
               <UserNameArea>
                 <UserName>{username ? username : "匿名のユーザー"}</UserName>
+                <Prefecture>{prefecture ? prefecture : ""}</Prefecture>
+                <Job>{job ? job : ""}</Job>
                 <ColorButton
                   dataTestId="profileEditButton"
                   onClick={openEdit}
@@ -328,14 +267,7 @@ const Profile: React.FC = () => {
           </Main>
         </Wrapper>
       ) : (
-        <EditProfile
-          closeWindow={
-            // () => {
-            closeEdit()
-            // closeEdit()だけpropsとして渡すと、その時点で
-          // }
-        }
-        />
+        <EditProfile closeEdit={closeEdit} />
       )}
     </>
   );

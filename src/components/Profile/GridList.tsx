@@ -56,30 +56,10 @@ const ButtonArea = styled.div`
 `;
 
 const Grid: React.FC = () => {
-  interface Post {
-    id: string;
-    caption: string;
-    imageUrl: string;
-    timestamp: number;
-    username: string;
-  }
-
   const [loadCount, setLoadCount] = useState<number>(1);
   const { posts, oldestId } = useFirestore(loadCount);
 
   // let documents:Post[] = [];
-  // let filteredTiles:Post[] = tiles;
-  // console.log(filteredTiles);
-  // posts.forEach((post) => {
-  //   console.log(post);
-  //   filteredTiles = filteredTiles.filter((x) => x.id !== post.id);
-  //   documents.push(post);
-  // });
-  // let sortedTiles = [...filteredTiles,...documents].sort((a, b) => {
-  //   return b.timestamp - a.timestamp;
-  // });
-  // tiles = sortedTiles;
-  // console.log(tiles);
 
   function showLoadButton() {
     if (posts.find((find) => find.id === oldestId)) {

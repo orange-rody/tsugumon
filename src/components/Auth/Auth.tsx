@@ -170,21 +170,6 @@ const Auth: React.FC = () => {
   const [password, setPassword] = useState("");
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
-  // const [openModal, setOpenModal] = useState(false);
-  // const [resetEmail, setResetEmail] = useState("");
-
-  // const sendResetEmail = async (e: React.MouseEvent<HTMLElement>) => {
-  //   await auth
-  //     .sendPasswordResetEmail(resetEmail)
-  //     .then(() => {
-  //       setOpenModal(false);
-  //       setResetEmail("");
-  //     })
-  //     .catch((err) => {
-  //       alert(err.message);
-  //       setResetEmail("");
-  //     });
-  // };
 
   const testUserLogin = async () => {
     await auth.signInWithEmailAndPassword("testUser@gmail.com", "350125go");

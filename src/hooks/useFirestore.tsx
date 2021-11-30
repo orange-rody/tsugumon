@@ -74,7 +74,7 @@ const useFirestore = (loadCount: number) => {
             .orderBy("timestamp", "desc")
             .endAt(frontRowEnd)
             .onSnapshot(() => {});
-          console.log("前回行ったスナップショットを消去しました！");
+          console.log("前回行ったスナップショットを消去しました。");
         }
       });
   }
@@ -87,6 +87,7 @@ const useFirestore = (loadCount: number) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [loadCount]
   );
+  console.log(`returnします。`);
   return { posts, oldestId };
 };
 
