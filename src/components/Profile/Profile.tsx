@@ -1,4 +1,4 @@
-import React, { ReactHTMLElement, useState } from "react";
+import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import { selectUser } from "../../features/userSlice";
 import EditProfile from "./EditProfile";

@@ -1,8 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { selectUser } from "../../features/userSlice";
-import { storage, db } from "../../firebase";
-import firebase from "firebase/app";
+import useStorage from "../../hooks/useStorage";
 import Header from "../Parts/Header";
 import InputFileButton from "../Parts/InputFileButton";
 import DefaultButton from "../Parts/DefaultButton";
@@ -153,6 +152,14 @@ const CommentArea = styled.p`
   font-size: 1rem;
 `;
 
+const Bar = styled.div`
+  width: 0;
+  height: 5px;
+  margin: 0;
+  background-color: #4fc0ad;
+  z-index: 999;
+`;
+
 type Props = {
   open: boolean;
   closeAdd: any;
@@ -160,17 +167,17 @@ type Props = {
 
 export default function UploadForm(props: Props) {
   const user = useSelector(selectUser);
-  const noImage = `${process.env.PUBLIC_URL}/noPhoto.png`;
-  const [file, setFile] = useState("");
+  const [dataUrl, setDataUrl] = useState<string>("");
   const [caption, setCaption] = useState<string>("");
   const [preview, setPreview] = useState<boolean>(false);
-
+  const [filename, setFilename] = useState<string>("");
+  const noImage = `${process.env.PUBLIC_URL}/noPhoto.png`;
   const types: string[] = ["image/png", "image/jpeg"];
 
   const classes = useStyles();
 
   // FIX >> 同一の画像で「選ぶ」→「消す」を繰り返すと、ユーザーの操作に
-  //        反応しなくなってしまう問題を解決しなければならない
+  //        反応しなくなってしまう問題を解決しなければならない。
   // SOLVED >>  stateの内容は初期化されても、e.target.valueの値は残存してしまう。
   //            そのため、同じファイルを連続で複数回選択した場合、valueの値は更新せず、
   //            したがって、onChangeイベントが発火しないことが原因であると判明した。
@@ -185,27 +192,50 @@ export default function UploadForm(props: Props) {
       const reader = new FileReader();
       return new Promise((resolve, reject) => {
         reader.readAsDataURL(selected);
-        reader.onload = () => {
-          resolve(reader.result);
+        reader.onload = (e: ProgressEvent<FileReader>) => {
+          // NOTE >> Fileオブジェクトを読み込んだら、画像のデータ容量を圧縮する
+          //         処理を実行する。
+          const imgElement = document.createElement("img");
+          console.log("imgElementが作成されました。");
+          // NOTE >> 定数originalには元データのdata:URL文字列が格納される。
+          const original = e.target!.result as string;
+          imgElement.src = original;
+          console.log(original);
+          imgElement.onload = () => {
+            const canvas = document.createElement("canvas");
+            const MAX_WIDTH = 640;
+            const IMG_WIDTH = imgElement.naturalWidth;
+            console.log(`IMG_WIDTH:${IMG_WIDTH}`);
+            const scaleSize = MAX_WIDTH / IMG_WIDTH;
+            console.log(`scaleSize:${scaleSize}`);
+            canvas.width = MAX_WIDTH;
+            console.log(`canvas.width:${canvas.width}`);
+            canvas.height = imgElement.naturalHeight * scaleSize;
+            console.log(`canvas_height:${canvas.height}`);
+            const ctx = canvas.getContext("2d")!;
+            ctx.drawImage(imgElement, 0, 0, canvas.width, canvas.height);
+            // NOTE >> 定数compressedには、canvasに描写後のdata:URL文字列が
+            //         格納される。
+            const compressed = ctx.canvas.toDataURL();
+            console.log(`compressed:${compressed}`);
+            compressed.length > original.length
+              ? resolve(original)
+              : resolve(compressed);
+          };
         };
         reader.onerror = () => {
           reject(reader.error);
         };
       })
-        .then((response) => {
-          setFile(response as string);
+        .then((result) => {
+          console.log(result);
+          setDataUrl(result as string);
         })
         .catch((error) => alert(error));
     } else {
-      setFile("");
-      alert("pngもしくはjpgの画像ファイルを選択したください。");
+      setDataUrl("");
+      alert("拡張子が「png」もしくは「jpg」の画像ファイルを選択したください。");
     }
-  };
-
-  const clear = (e: React.MouseEvent<HTMLElement>) => {
-    e.preventDefault();
-    setFile("");
-    setCaption("");
   };
 
   const handleCaption = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -217,16 +247,22 @@ export default function UploadForm(props: Props) {
     inputText ? setCaption(inputText) : setCaption("");
   };
 
+  const clear = () => {
+    setDataUrl("");
+    setCaption("");
+    preview === true && setPreview(false);
+    filename !== "" && setFilename("");
+  };
+
   const togglePreview = (e: React.MouseEvent<HTMLElement>) => {
     e.preventDefault();
     setPreview(!preview);
   };
 
-  const upload = (e: React.MouseEvent<HTMLElement>, imageUrl: string) => {
-    // NOTE>> uploadが呼び出される瞬間、ブラウザの再読み込みがスタートしてしまうので、
-    //        e.preventDefault()で規定の動作をキャンセルしている。
+  const getFilename = (e: React.MouseEvent<HTMLElement>) => {
     e.preventDefault();
-    if (imageUrl !== noImage) {
+    // NOTE >> ユニークなファイル名を作成する。
+    if (dataUrl !== "") {
       const currentTime = new Date().toString();
       const S =
         "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -236,51 +272,25 @@ export default function UploadForm(props: Props) {
         // NOTE  >> crypt.getRandomValues(new Uint32Array(N))は、32ビット符号なしの
         //          整数値の中から、N個分、ランダムな整数を作成することを表す。
         crypto.getRandomValues(new Uint32Array(N))
-      )
         // NOTE >> .map((n) => S[n % S.length])で、上記で作った16個のランダム整数を
-        //          S.lengthで割り、その余りの数をインデックスとする要素を抜き出している。
-        //          結果、crypto.getRandomValuesを使ったランダムな16桁の文字列が完成する。
+        //         S.lengthで割り、その余りの数をインデックスとする要素を抜き出している。
+        //         結果、crypto.getRandomValuesを使ったランダムな16桁の文字列が完成する。
+      )
         .map((n) => S[n % S.length])
         .join("");
-      const fileName = currentTime + randomCharactor;
-      storage
-        .ref(`posts / ${fileName}`)
-        .putString(imageUrl, "data_url")
-        .on(
-          firebase.storage.TaskEvent.STATE_CHANGED,
-          // TODO >> アップロード中にインジケータを表示するようにする。
-          // TODO >> アップロード完了後に「投稿が完了しました」のメッセージを表示する。
-          () => {},
-          (err: any) => {
-            alert(err.message);
-          },
-          () => {
-            // NOTE >> getDownloadURL()でstorageから保存した画像のURLを取得する。
-            storage
-              .ref(`posts / ${fileName}`)
-              .getDownloadURL()
-              .then((url) => {
-                // NOTE >> firestoreのルール設定が書き込み不可になっていた場合、
-                //         エラーになってしまうので注意！
-                db.collection("posts")
-                  .add({
-                    uid: user.uid,
-                    username: user.username,
-                    imageUrl: url,
-                    caption: caption,
-                    // timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-                    timestamp: new Date().getTime(),
-                  })
-                  .then(() => {
-                    setPreview(false);
-                    setFile("");
-                    setCaption("");
-                  });
-              });
-          }
-        );
+      setFilename(currentTime + randomCharactor);
     }
   };
+
+  const { url, progress } = useStorage(dataUrl, caption, filename);
+  console.log(progress);
+
+  useEffect(() => {
+    if (url) {
+      clear();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [url]);
 
   return (
     // NOTE >> Matrial-UIのthemeを適用させるには<ThemeProvider>を
@@ -300,7 +310,7 @@ export default function UploadForm(props: Props) {
           </Header>
           <div style={{ height: "52px" }} />
           <ImageWrap data-testid="imageWrap">
-            {file === "" ? (
+            {dataUrl === "" ? (
               <>
                 <NoImage
                   src={noImage}
@@ -321,7 +331,7 @@ export default function UploadForm(props: Props) {
               </>
             ) : (
               <Image
-                src={file}
+                src={dataUrl}
                 alt="選択した写真のプレビュー"
                 data-testid="image"
               />
@@ -331,7 +341,9 @@ export default function UploadForm(props: Props) {
             <InputFileButton onChange={handleImage} child="選ぶ" />
             <DefaultButton
               child="消す"
-              onClick={clear}
+              onClick={() => {
+                clear();
+              }}
               wide={false}
               dataTestId="buttonForClear"
             />
@@ -349,7 +361,7 @@ export default function UploadForm(props: Props) {
           ></Textarea>
           <ButtonArea>
             <ColorButton
-              disabled={file === "" && true}
+              disabled={dataUrl === "" && true}
               onClick={togglePreview}
               dataTestId="previewOn"
               child="次へ進む"
@@ -373,10 +385,20 @@ export default function UploadForm(props: Props) {
           </Header>
           <div style={{ height: "52px" }} />
           <ImageWrap>
-            <Image src={file} alt="uploader" data-testid="previewImageUrl" />
+            {dataUrl !== "" && (
+              <Image
+                src={dataUrl}
+                alt="uploader"
+                data-testid="previewImageUrl"
+              />
+            )}
           </ImageWrap>
+          {filename !== "" ? (
+            <Bar style={{ width: progress + "%" }} />
+          ) : (
+            <div style={{ width: "100%", height: "5px" }} />
+          )}
           <UserInfo>
-            {/* TODO >> ユーザーアイコンの画像を取得して、Avatarに読み込む */}
             <UserIcon>
               <UserImage src={user.userIcon} />
             </UserIcon>
@@ -386,11 +408,11 @@ export default function UploadForm(props: Props) {
           <CommentArea data-testid="commentArea">{caption}</CommentArea>
           <ButtonArea>
             <ColorButton
-              onClick={(e) => {
-                upload(e, file);
+              onClick={(e: React.MouseEvent<HTMLElement>) => {
+                getFilename(e);
               }}
               dataTestId="buttonForUpload"
-              disabled={file === "" && true}
+              disabled={dataUrl === "" && true}
               child="登録する"
               color="secondary"
             />

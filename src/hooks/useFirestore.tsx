@@ -51,6 +51,7 @@ const useFirestore = (loadCount: number) => {
                 console.log(`${change.doc.data().caption}がaddされました`);
               } else if (change.type === "removed") {
                 console.log(`${change.doc.data().caption}がremoveされました`);
+                filteredPosts = filteredPosts.filter((x)=>x.id !== change.doc.id);
               } else if (change.type === "modified") {
                 console.log(`${change.doc.data().caption}がmodifyされました`);
               }

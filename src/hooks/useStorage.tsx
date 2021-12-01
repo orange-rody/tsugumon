@@ -29,7 +29,7 @@ const useStorage = (dataUrl: string, caption: string, filename: string) => {
               .getDownloadURL();
             db.collection("posts").add({
               uid: user.uid,
-              username: user.username,
+              username: user.username ? user.username : "",
               imageUrl: downloadUrl,
               caption: caption,
               timestamp: new Date().getTime(),
@@ -38,7 +38,7 @@ const useStorage = (dataUrl: string, caption: string, filename: string) => {
           }
         );
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filename]);
   return { progress, url };
 };
