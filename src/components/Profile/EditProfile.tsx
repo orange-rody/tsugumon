@@ -124,24 +124,60 @@ const EditProfile = (props: any) => {
   const [introduction, setIntroduction] = useState(user.introduction);
   const oldUserIcon = user.userIcon;
   const noUserIcon = `${process.env.PUBLIC_URL}/noUserIcon.png`;
+  const types: string[] = ["image/png", "image/jpeg"];
   const classes = useStyles();
 
   function changeImage(e: React.ChangeEvent<HTMLInputElement>) {
     e.preventDefault();
-    const files: FileList | null = e.target.files;
-    const file: File | null = files!.item(0);
-    if (file) {
+    const selected: File | null = e.target.files![0];
+    if (selected && types.includes(selected.type)) {
       const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => {
-        setUserIcon(reader.result as string);
-        console.log(userIcon);
-      };
-      reader.onerror = (error) => {
-        alert(error);
-      };
+      return new Promise((resolve, reject) => {
+        reader.readAsDataURL(selected);
+        reader.onload = (e: ProgressEvent<FileReader>) => {
+          // NOTE >> Fileオブジェクトを読み込んだら、画像のデータ容量を圧縮する
+          //         処理を実行する。
+          const imgElement = document.createElement("img");
+          console.log("imgElementが作成されました。");
+          // NOTE >> 定数originalには元データのdata:URL文字列が格納される。
+          const original = e.target!.result as string;
+          imgElement.src = original;
+          console.log(original);
+          imgElement.onload = () => {
+            const canvas = document.createElement("canvas");
+            const MAX_WIDTH = 200;
+            const IMG_WIDTH = imgElement.naturalWidth;
+            console.log(`IMG_WIDTH:${IMG_WIDTH}`);
+            const scaleSize = MAX_WIDTH / IMG_WIDTH;
+            console.log(`scaleSize:${scaleSize}`);
+            canvas.width = MAX_WIDTH;
+            console.log(`canvas.width:${canvas.width}`);
+            canvas.height = imgElement.naturalHeight * scaleSize;
+            console.log(`canvas_height:${canvas.height}`);
+            const ctx = canvas.getContext("2d")!;
+            ctx.drawImage(imgElement, 0, 0, canvas.width, canvas.height);
+            // NOTE >> 定数compressedには、canvasに描写後のdata:URL文字列が
+            //         格納される。
+            const compressed = ctx.canvas.toDataURL();
+            console.log(`compressed:${compressed}`);
+            compressed.length > original.length
+              ? resolve(original)
+              : resolve(compressed);
+          };
+        };
+        reader.onerror = () => {
+          reject(reader.error);
+        };
+      })
+        .then((result) => {
+          console.log(result);
+          setUserIcon(result as string);
+        })
+        .catch((error) => alert(error));
+    } else {
+      alert("拡張子が「png」もしくは「jpg」の画像ファイルを選択したください。");
     }
-  }
+  };
 
   function changeInput(e: React.ChangeEvent<HTMLInputElement>) {
     e.preventDefault();
