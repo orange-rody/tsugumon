@@ -224,7 +224,7 @@ const EditProfile = (props: any) => {
               .getDownloadURL()
               .then((url) => {
                 console.log(url);
-                db.collection("users").doc(uid).set({
+                db.collection("users").doc(uid).update({
                   userIcon: url,
                 });
                 dispatch(
@@ -242,15 +242,14 @@ const EditProfile = (props: any) => {
         );
     } else {
     }
-    db.collection("users").doc(uid).set(
+    db.collection("users").doc(uid).update(
       {
-        uid: uid,
         username: username,
         prefecture: prefecture,
         job: job,
         introduction: introduction,
       },
-      { merge: true }
+      // { merge: true }
     );
     dispatch(
       update({
