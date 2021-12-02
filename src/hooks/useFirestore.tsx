@@ -32,7 +32,6 @@ const useFirestore = (loadCount: number) => {
   }
 
   function getPosts(loadCount: number) {
-    console.log(loadCount);
     ref
       .orderBy("timestamp", "desc")
       .limit(loadCount * 6)
@@ -44,9 +43,12 @@ const useFirestore = (loadCount: number) => {
           .orderBy("timestamp", "desc")
           .endAt(backRowEnd)
           .onSnapshot((docs) => {
+            // NOTE >> filteredPostsにはpostsの中身を入れておいて、要素が追加
+            //         されるたびに、重複する要素を消していくようにする。
             let filteredPosts: Post[] = posts;
-            let documents: Post[] = [];
-            // NOTE >> firestoreの更新がonSnapshotで取得できているか確認します。
+            // NOTE >> uploadPostsには空の配列をいれておいて、ドキュメントが
+            //         更新されるたびに、要素を足していくようにする。
+            let uploadPosts: Post[] = [];
             for (let change of docs.docChanges()) {
               if (change.type === "added") {
                 console.log(`${change.doc.data().caption}がaddされました`);
@@ -61,37 +63,35 @@ const useFirestore = (loadCount: number) => {
             }
             docs.forEach((doc) => {
               filteredPosts = filteredPosts.filter((x) => x.id !== doc.id);
-              const post = { id: doc.id, ...doc.data() } as Post;
-              documents.push(post);
+              const post = {
+                id: doc.id,
+                ...doc.data(),
+              } as Post;
+              uploadPosts.push(post);
             });
-            function adjust(postsA: Post[], postsB: Post[]) {
-              let sortedPosts = [...postsA, ...postsB].sort((a, b) => {
+
+            let tunedPosts: Post[] = [...filteredPosts, ...uploadPosts].sort(
+              (a, b) => {
                 return b.timestamp - a.timestamp;
-              });
-              let tunedPosts: Post[] = [];
-              if (sortedPosts.length % 3) {
-                ref
-                  .orderBy("timestamp", "desc")
-                  .startAfter(sortedPosts[sortedPosts.length - 1].timestamp)
-                  .limit(3 - (sortedPosts.length % 3))
-                  .get()
-                  .then((snapshots) => {
-                    snapshots.forEach((snapshot) => {
-                      const post = {
-                        id: snapshot.id,
-                        ...snapshot.data(),
-                      } as Post;
-                      tunedPosts.push(post);
-                      console.log(tunedPosts);
-                    });
-                    tunedPosts = [...sortedPosts, ...tunedPosts];
-                    setPosts(tunedPosts);
-                  });
-              } else {
-                setPosts(sortedPosts);
               }
-            }
-            adjust(filteredPosts, documents);
+            );
+            ref
+              .orderBy("timestamp", "desc")
+              .startAfter(tunedPosts[tunedPosts.length - 1].timestamp)
+              .limit(3 - (tunedPosts.length % 3))
+              .get()
+              .then((snapshots) => {
+                snapshots.forEach((snapshot) => {
+                  const post = {
+                    id: snapshot.id,
+                    ...snapshot.data(),
+                  } as Post;
+                  tunedPosts.push(post);
+                  console.log(tunedPosts);
+                });
+                console.log(tunedPosts);
+                setPosts(tunedPosts);
+              });
           });
 
         posts.forEach((post) => console.log(post.caption));
