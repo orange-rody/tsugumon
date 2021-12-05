@@ -5,7 +5,7 @@ import EditProfile from "./EditProfile";
 import Header from "../Parts/Header";
 import IconButton from "../Parts/IconButton";
 import ColorButton from "../Parts/ColorButton";
-import GridList from "./GridList";
+import Selfy from "./Selfy";
 import styled from "styled-components";
 import { makeStyles, createStyles, Theme } from "@material-ui/core";
 import {
@@ -256,6 +256,7 @@ const Profile: React.FC = () => {
                       aria-label={data.value}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                         setSelectedType(data.value);
+                        console.log(data.value);
                       }}
                     />
                     <DisplayTypeName>{data.title}</DisplayTypeName>
@@ -263,7 +264,10 @@ const Profile: React.FC = () => {
                 );
               })}
             </DisplayTypeList>
-            {selectedType === "grid" ? <GridList /> : <div></div>}
+            {selectedType === "grid" && <Selfy selectedType="grid" />}
+            {selectedType === "single" && <Selfy selectedType="single" />}
+            {selectedType === "tag" && <div></div>}
+            {selectedType === "calendar" && <div></div>}
           </Main>
         </Wrapper>
       ) : (

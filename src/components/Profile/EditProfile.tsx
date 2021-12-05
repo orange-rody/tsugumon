@@ -177,7 +177,7 @@ const EditProfile = (props: any) => {
     } else {
       alert("拡張子が「png」もしくは「jpg」の画像ファイルを選択したください。");
     }
-  };
+  }
 
   function changeInput(e: React.ChangeEvent<HTMLInputElement>) {
     e.preventDefault();
@@ -244,16 +244,17 @@ const EditProfile = (props: any) => {
     }
     db.collection("users").doc(uid).update(
       {
+        userIcon: userIcon,
         username: username,
         prefecture: prefecture,
         job: job,
         introduction: introduction,
-      },
+      }
       // { merge: true }
     );
     dispatch(
       update({
-        uid:uid,
+        uid: uid,
         username: username,
         prefecture: prefecture,
         job: job,
