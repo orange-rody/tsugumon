@@ -3,6 +3,7 @@ import useFirestore from "../../hooks/useFirestore";
 import styled from "styled-components";
 import mediaQuery from "styled-media-query";
 import DefaultButton from "../Parts/DefaultButton";
+import { FavoriteRounded, ChatRounded, SendRounded } from "@material-ui/icons";
 
 const mediaMobile = mediaQuery.lessThan("medium");
 
@@ -38,13 +39,6 @@ const GridItem = styled.li`
   }
 `;
 
-const SingleItem = styled.li`
-  width: 100%;
-  margin: 0 auto;
-  height: 600px;
-  position: relative;
-`;
-
 const ImageWrap = styled.div`
   width: 100%;
   margin: 0 auto;
@@ -65,18 +59,82 @@ const PhotoImage = styled.img`
   object-fit: cover;
 `;
 
-const PostInfo = styled.div`
-  width:100%;
-  height: 80px;
+const PostStatus = styled.div`
+  display: flex;
+  width: 100%;
+  margin: 0 auto;
+  position: relative;
+  flex-flow: row;
+  justify-content: space-around;
   border: 1px;
   border-top: 1px solid silver;
   border-bottom: 1px solid silver;
+  :before {
+    content: "";
+    display: block;
+    padding-top: 15%;
+  }
+`;
+
+const Box = styled.div`
+  padding: 0;
+  width: 33%;
+`;
+
+const Container = styled.div`
+  display: flex;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+`;
+
+const CountBox = styled.div`
+  height: 70%;
+  width: 40%;
+  margin: 0;
+  padding: 0;
+`;
+
+const Count = styled.p`
+  display: inline-block;
+  width: 100%;
+  font-size: 1rem;
+  margin: 0 auto;
+  padding: 0;
+  text-align: left;
+  vertical-align: text-top;
+`;
+
+const Title = styled.p`
+  height: 25%;
+  margin: 2%;
+  text-align: center;
+  font-size: 0.8rem;
+  ${mediaMobile`
+  font-size: 0.6rem;
+`}
 `;
 
 const CaptionArea = styled.div`
+  display: flex;
   width: 100%;
-  height:   100px;
+  margin: 0 auto;
+  position: relative;
+  border: 1px;
   border-bottom: 1px solid silver;
+  vertical-align: top;
+  :before {
+    content: "";
+    display: block;
+    padding-top: 38%;
+  }
+`;
+
+const Caption = styled.div`
+  width: 90%;
+  height: 90%;
+  margin: 2% auto;
 `;
 
 const ButtonArea = styled.div`
@@ -161,13 +219,73 @@ const Grid: React.FC<{ selectedType: string }> = (props) => {
             {console.log(props.selectedType)}
             {posts.map((tile, index) => {
               return (
-                <SingleItem style={{ backgroundColor: "gray" }} key={index}>
+                <>
                   <ImageWrap>
                     <PhotoImage src={tile.imageUrl} />
                   </ImageWrap>
-                  <PostInfo />
-                  <CaptionArea />
-                </SingleItem>
+                  <PostStatus>
+                    <Box>
+                      <Title>いいね！</Title>
+                      <Container>
+                        <FavoriteRounded
+                          style={{
+                            display: "inline-block",
+                            width: "50%",
+                            marginLeft: "10%",
+                            fontSize: "40px",
+                            textAlign: "center",
+                            lineHeight: "75%",
+                            color: "#4fc0ad",
+                          }}
+                        />
+                        <CountBox>
+                          <Count>200</Count>
+                        </CountBox>
+                      </Container>
+                    </Box>
+                    <Box>
+                      <Title>コメント</Title>
+                      <Container>
+                        <ChatRounded
+                          style={{
+                            display: "inline-block",
+                            width: "50%",
+                            marginLeft: "10%",
+                            fontSize: "40px",
+                            textAlign: "center",
+                            lineHeight: "75%",
+                            color: "#4fc0ad",
+                          }}
+                        />
+                        <CountBox>
+                          <Count>200</Count>
+                        </CountBox>
+                      </Container>
+                    </Box>
+                    <Box>
+                      <Title>メッセージ</Title>
+                      <Container>
+                        <SendRounded
+                          style={{
+                            display: "inline-block",
+                            width: "50%",
+                            marginLeft: "10%",
+                            fontSize: "40px",
+                            textAlign: "center",
+                            lineHeight: "75%",
+                            color: "#4fc0ad",
+                          }}
+                        />
+                        <CountBox>
+                          <Count>200</Count>
+                        </CountBox>
+                      </Container>
+                    </Box>
+                  </PostStatus>
+                  <CaptionArea>
+                    <Caption>{tile.caption}</Caption>
+                  </CaptionArea>
+                </>
               );
             })}
             {showLoadButton()}
