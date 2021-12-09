@@ -1,24 +1,17 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { selectUser } from "../../features/userSlice";
-import { auth, storage, db } from "../../firebase";
-import firebase from "firebase/app";
+import useStorage from "../../hooks/useStorage";
 import Header from "../Parts/Header";
-import ArrowBackButton from "../Parts/ArrowBackButton";
 import InputFileButton from "../Parts/InputFileButton";
 import DefaultButton from "../Parts/DefaultButton";
-import SecondaryButton from "../Parts/SecondaryButton";
+import ColorButton from "../Parts/ColorButton";
+import IconButton from "../Parts/IconButton";
 import styled from "styled-components";
 // NOTE >> styled-componentをfunctionコンポーネントの中で使用すると、
 //         textareaの入力時に不具合が起きてしまうので注意が必要。
-import {
-  makeStyles,
-  createStyles,
-  Theme,
-  Slide,
-  IconButton,
-} from "@material-ui/core";
-import { ArrowDownward, Close } from "@material-ui/icons";
+import { makeStyles, createStyles, Theme, Slide } from "@material-ui/core";
+import { ArrowDownward, Close, NavigateBefore } from "@material-ui/icons";
 import mediaQuery from "styled-media-query";
 
 // NOTE >> mediumよりサイズが小さかったらmediaMobileのプロパティが設定されるようにする。
@@ -32,6 +25,7 @@ const useStyles = makeStyles((theme: Theme) =>
       position: "absolute",
       top: "0",
       left: "0",
+      zIndex: 998,
     },
     paperForPreview: {
       with: "100%",
@@ -39,18 +33,12 @@ const useStyles = makeStyles((theme: Theme) =>
       position: "absolute",
       top: "0",
       width: "0",
+      zIndex: 999,
     },
-    closeButton: {
-      position: "absolute",
-      top: "5px",
-      left: "5px",
-      width: "42px",
-      height: "42px",
-    },
-    closeIcon: {
+    icon: {
       left: "5px",
       width: "32px",
-      height: "32px",
+      height: "42px",
       borderRadius: "100%",
     },
   })
@@ -67,10 +55,9 @@ const Main = styled.main`
 const UserInfo = styled.div`
   display: flex;
   width: 100%;
-  height: 60px;
-  margin: 0 auto;
+  height: 52px;
+  margin: 10px auto 0px;
   background-color: hsl(0, 0%, 100%);
-  border-bottom: 1px solid hsla(26, 100%, 12%, 0.2);
   box-sizing: border-box;
 `;
 
@@ -165,70 +152,106 @@ const CommentArea = styled.p`
   font-size: 1rem;
 `;
 
+const Bar = styled.div`
+  width: 0;
+  height: 5px;
+  margin: 0;
+  background-color: #4fc0ad;
+  z-index: 999;
+`;
+
 type Props = {
   open: boolean;
   closeAdd: any;
 };
 
-export default function CreatePost(props: Props) {
+export default function UploadForm(props: Props) {
   const user = useSelector(selectUser);
-  const noImage = `${process.env.PUBLIC_URL}/noPhoto.png`;
-  const [imageUrl, setImageUrl] = useState<string>(noImage);
+  const [dataUrl, setDataUrl] = useState<string>("");
   const [caption, setCaption] = useState<string>("");
   const [preview, setPreview] = useState<boolean>(false);
+  const [filename, setFilename] = useState<string>("");
+  const noImage = `${process.env.PUBLIC_URL}/noPhoto.png`;
+  const types: string[] = ["image/png", "image/jpeg"];
 
   const classes = useStyles();
 
   // FIX >> 同一の画像で「選ぶ」→「消す」を繰り返すと、ユーザーの操作に
-  //        反応しなくなってしまう問題を解決しなければならない
-  // SOLVED >>  同じファイルを複数回選択すると、onChangeイベントが発火しないことが
-  //            原因と判明した。onClick={(e: any) => (e.target.value = null)}を
-  //            InputFileに追記することで、期待通りに動作するようになった。
-  //            おそらくonClickのイベントによって、事前に登録していたvalueがリセットされ、
-  //            その後、onChangeイベントが発火するようになっているのではないか
-
-  function FileRead(file: File) {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => {
-        resolve(reader.result);
-      };
-      reader.onerror = () => {
-        reject(reader.error);
-      };
-    });
-  }
+  //        反応しなくなってしまう問題を解決しなければならない。
+  // SOLVED >>  stateの内容は初期化されても、e.target.valueの値は残存してしまう。
+  //            そのため、同じファイルを連続で複数回選択した場合、valueの値は更新せず、
+  //            したがって、onChangeイベントが発火しないことが原因であると判明した。
+  //            e.preventDefault()の実行とstateの初期化を行う関数clearを宣言し、
+  //            onClickで実行するように設定したら問題は解決した。
 
   const handleImage = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let FileList: FileList | null = e.target.files;
-    let file: File | null = FileList!.item(0);
+    const selected: File | null = e.target.files![0];
     // NOTE >> Fileオブジェクトはシリアライズされないため、reduxに保存が不可能。
     //         従って、Fileオブジェクトはlocalステートに保存する必要がある。
-    // NOTE >> FILEオブジェクトが存在するときのみ、FileReadを実行するように
-    //         している。
-    if (file) {
-      FileRead(file)
-        .then((response) => {
-          setImageUrl(response as string);
+    if (selected && types.includes(selected.type)) {
+      const reader = new FileReader();
+      return new Promise((resolve, reject) => {
+        reader.readAsDataURL(selected);
+        reader.onload = (e: ProgressEvent<FileReader>) => {
+          // NOTE >> Fileオブジェクトを読み込んだら、画像のデータ容量を圧縮する
+          //         処理を実行する。
+          const imgElement = document.createElement("img");
+          console.log("imgElementが作成されました。");
+          // NOTE >> 定数originalには元データのdata:URL文字列が格納される。
+          const original = e.target!.result as string;
+          imgElement.src = original;
+          console.log(original);
+          imgElement.onload = () => {
+            const canvas = document.createElement("canvas");
+            const MAX_WIDTH = 640;
+            const IMG_WIDTH = imgElement.naturalWidth;
+            console.log(`IMG_WIDTH:${IMG_WIDTH}`);
+            const scaleSize = MAX_WIDTH / IMG_WIDTH;
+            console.log(`scaleSize:${scaleSize}`);
+            canvas.width = MAX_WIDTH;
+            console.log(`canvas.width:${canvas.width}`);
+            canvas.height = imgElement.naturalHeight * scaleSize;
+            console.log(`canvas_height:${canvas.height}`);
+            const ctx = canvas.getContext("2d")!;
+            ctx.drawImage(imgElement, 0, 0, canvas.width, canvas.height);
+            // NOTE >> 定数compressedには、canvasに描写後のdata:URL文字列が
+            //         格納される。
+            const compressed = ctx.canvas.toDataURL();
+            console.log(`compressed:${compressed}`);
+            compressed.length > original.length
+              ? resolve(original)
+              : resolve(compressed);
+          };
+        };
+        reader.onerror = () => {
+          reject(reader.error);
+        };
+      })
+        .then((result) => {
+          console.log(result);
+          setDataUrl(result as string);
         })
         .catch((error) => alert(error));
+    } else {
+      setDataUrl("");
+      alert("拡張子が「png」もしくは「jpg」の画像ファイルを選択したください。");
     }
-  };
-
-  const clearDraft = (e: React.MouseEvent<HTMLElement>) => {
-    e.preventDefault();
-    setImageUrl(noImage);
-    setCaption("");
   };
 
   const handleCaption = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const inputText = e.target.value;
     // NOTE >> 入力文字が1文字もない場合は、テキストエリアが空白となるよう、
     //         setCaption("")で初期化を行なっている。
-    // NOTE >> もしClearCaptionを実行しなかったら、ユーザーがいくら操作しても、
+    // NOTE >> もしsetCaption("")を実行しなかったら、ユーザーがいくら操作しても、
     //         テキストエリアの最後の1文字を消去することができなくなる。
     inputText ? setCaption(inputText) : setCaption("");
+  };
+
+  const clear = () => {
+    setDataUrl("");
+    setCaption("");
+    preview === true && setPreview(false);
+    filename !== "" && setFilename("");
   };
 
   const togglePreview = (e: React.MouseEvent<HTMLElement>) => {
@@ -236,65 +259,38 @@ export default function CreatePost(props: Props) {
     setPreview(!preview);
   };
 
-  const upload = (e: React.MouseEvent<HTMLElement>) => {
-    // NOTE>> uploadが呼び出される瞬間、ブラウザの再読み込みがスタートしてしまうので、
-    //        e.preventDefault()で規定の動作をキャンセルしている。
+  const getFilename = (e: React.MouseEvent<HTMLElement>) => {
     e.preventDefault();
-    if (imageUrl !== noImage) {
+    // NOTE >> ユニークなファイル名を作成する。
+    if (dataUrl !== "") {
       const currentTime = new Date().toString();
       const S =
         "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
       const N = 16;
       const randomCharactor = Array.from(
-        // NOTE >> Uint32Array(N)は、32 ビット符号なし整数値がN個並んだ
-        //         配列を表す。
+        // NOTE >> Uint32Array()は、32 ビット符号なし整数値が並んだ配列を格納する箱を表す。
         // NOTE  >> crypt.getRandomValues(new Uint32Array(N))は、32ビット符号なしの
-        //          整数値の中から、N個分、ランダムな整数を選ぶことを表す。
+        //          整数値の中から、N個分、ランダムな整数を作成することを表す。
         crypto.getRandomValues(new Uint32Array(N))
-      )
         // NOTE >> .map((n) => S[n % S.length])で、上記で作った16個のランダム整数を
-        //          S.lengthで割り、その余りの数をインデックスとする要素を抜き出している。
-        //          結果、crypto.getRandomValuesを使ったランダムな16桁の文字列が完成する。
+        //         S.lengthで割り、その余りの数をインデックスとする要素を抜き出している。
+        //         結果、crypto.getRandomValuesを使ったランダムな16桁の文字列が完成する。
+      )
         .map((n) => S[n % S.length])
         .join("");
-      const fileName = currentTime + randomCharactor;
-      storage
-        .ref(`posts / ${fileName}`)
-        .putString(imageUrl, "data_url")
-        .on(
-          firebase.storage.TaskEvent.STATE_CHANGED,
-          // TODO >> アップロード中にインジケータを表示するようにする。
-          // TODO >> アップロード完了後に「投稿が完了しました」のメッセージを表示する。
-          () => {},
-          (err: any) => {
-            alert(err.message);
-          },
-          () => {
-            // NOTE >> getDownloadURL()でstorageから保存した画像のURLを取得する。
-            storage
-              .ref(`posts / ${fileName}`)
-              .getDownloadURL()
-              .then((url) => {
-                // NOTE >> firestoreのルール設定が書き込み不可になっていた場合、
-                //         エラーになってしまうので注意！
-                db.collection("posts")
-                  .add({
-                    uid: user.uid,
-                    userName: user.userName,
-                    imageUrl: url,
-                    caption: caption,
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-                  })
-                  .then(() => {
-                    setPreview(false);
-                    setImageUrl(noImage);
-                    setCaption("");
-                  });
-              });
-          }
-        );
+      setFilename(currentTime + randomCharactor);
     }
   };
+
+  const { url, progress } = useStorage(dataUrl, caption, filename);
+  console.log(progress);
+
+  useEffect(() => {
+    if (url) {
+      clear();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [url]);
 
   return (
     // NOTE >> Matrial-UIのthemeを適用させるには<ThemeProvider>を
@@ -302,22 +298,22 @@ export default function CreatePost(props: Props) {
     <div data-testid="createPost">
       <Slide in={props.open} direction="up" mountOnEnter unmountOnExit>
         <Main className={classes.paperForDraft} data-testid="main">
-          <Header child="写真を登録する">
+          <Header child="写真を登録する" style={{ zIndex: 999 }}>
             <IconButton
-              className={classes.closeButton}
-              data-testid="closeButton"
+              dataTestId="closeButton"
               onClick={(e: React.MouseEvent<HTMLElement>) => {
                 props.closeAdd();
               }}
             >
-              <Close className={classes.closeIcon} />
+              <Close className={classes.icon} />
             </IconButton>
           </Header>
+          <div style={{ height: "52px" }} />
           <ImageWrap data-testid="imageWrap">
-            {imageUrl === noImage ? (
+            {dataUrl === "" ? (
               <>
                 <NoImage
-                  src={imageUrl}
+                  src={noImage}
                   data-testid="noImage"
                   alt="写真が選択されていません。"
                 />
@@ -335,17 +331,20 @@ export default function CreatePost(props: Props) {
               </>
             ) : (
               <Image
-                src={imageUrl}
+                src={dataUrl}
                 alt="選択した写真のプレビュー"
                 data-testid="image"
               />
             )}
           </ImageWrap>
           <ButtonArea data-testid="buttonArea">
-            <InputFileButton onChange={handleImage} />
+            <InputFileButton onChange={handleImage} child="選ぶ" />
             <DefaultButton
               child="消す"
-              onClick={clearDraft}
+              onClick={() => {
+                clear();
+              }}
+              wide={false}
               dataTestId="buttonForClear"
             />
           </ButtonArea>
@@ -361,50 +360,67 @@ export default function CreatePost(props: Props) {
             data-testid="textarea"
           ></Textarea>
           <ButtonArea>
-            <SecondaryButton
-              disabled={imageUrl === noImage ? true : false}
+            <ColorButton
+              disabled={dataUrl === "" && true}
               onClick={togglePreview}
               dataTestId="previewOn"
               child="次へ進む"
+              color="secondary"
             />
           </ButtonArea>
         </Main>
       </Slide>
       <Slide direction="left" in={preview} mountOnEnter unmountOnExit>
         <Main className={classes.paperForPreview} data-testid="paperForPreview">
-          <Header child="この内容で登録しますか？">
-            <ArrowBackButton
-              dataTestId="arrowBackButton"
+          <Header child="この内容で登録しますか？" style={{ zIndex: 999 }}>
+            <IconButton
               onClick={togglePreview}
-            />
+              dataTestId="navigateBeforeButton"
+            >
+              <NavigateBefore
+                className={classes.icon}
+                data-testid="navigateBeforeIcon"
+              />
+            </IconButton>
           </Header>
-          <UserInfo>
-            {/* TODO >> ユーザーアイコンの画像を取得して、Avatarに読み込む */}
-            <UserIcon>
-              <UserImage />
-            </UserIcon>
-            <UserName data-testid="previewUserName">{user.userName}</UserName>
-          </UserInfo>
+          <div style={{ height: "52px" }} />
           <ImageWrap>
-            <Image
-              src={imageUrl}
-              alt="uploader"
-              data-testid="previewImageUrl"
-            />
+            {dataUrl !== "" && (
+              <Image
+                src={dataUrl}
+                alt="uploader"
+                data-testid="previewImageUrl"
+              />
+            )}
           </ImageWrap>
+          {filename !== "" ? (
+            <Bar style={{ width: progress + "%" }} />
+          ) : (
+            <div style={{ width: "100%", height: "5px" }} />
+          )}
+          <UserInfo>
+            <UserIcon>
+              <UserImage src={user.userIcon} />
+            </UserIcon>
+            <UserName data-testid="previewUserName">{user.username}</UserName>
+          </UserInfo>
           {/* TODO >> CommentAreaの表示文字をスクロールする機能をつくる */}
           <CommentArea data-testid="commentArea">{caption}</CommentArea>
           <ButtonArea>
-            <SecondaryButton
-              onClick={upload}
+            <ColorButton
+              onClick={(e: React.MouseEvent<HTMLElement>) => {
+                getFilename(e);
+              }}
               dataTestId="buttonForUpload"
-              disabled={imageUrl === noImage ? true : false}
+              disabled={dataUrl === "" && true}
               child="登録する"
+              color="secondary"
             />
             <DefaultButton
               onClick={togglePreview}
-              dataTestId="previewOff"
               child="戻る"
+              wide={false}
+              dataTestId="previewOff"
             />
           </ButtonArea>
         </Main>

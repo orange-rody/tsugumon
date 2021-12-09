@@ -40,8 +40,10 @@ const useStyles = makeStyles((theme: Theme) =>
 type Props = {
   dataTestId: string;
   onClick: (e: React.MouseEvent<HTMLButtonElement>) => void;
-  disabled: boolean;
+  disabled?: boolean;
   child: string;
+  color?: "primary" | "secondary" | undefined;
+  style?: any;
 };
 
 const SecondaryButton = (props: Props) => {
@@ -54,8 +56,9 @@ const SecondaryButton = (props: Props) => {
         disabled={props.disabled}
         variant="contained"
         component="span"
-        size="large"
-        color="secondary"
+        size="medium"
+        color={props.color}
+        style={props.style}
         className={classes.button}
       >
         {props.child}

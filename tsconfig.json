@@ -26,5 +26,5 @@
   },
   "include": [
     "src"
-, "src/firebase.ts"  ]
+, "src/firebase.ts", "src/components/Profile/Selfy.tsx"  ]
 }

@@ -1,4 +1,5 @@
 import { configureStore, ThunkAction, Action } from "@reduxjs/toolkit";
+// NOTE >> configureStoreで各レデューサーを結合するためインポートしている。
 import userReducer from "../features/userSlice";
 
 export const store = configureStore({

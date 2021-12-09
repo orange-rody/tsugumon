@@ -4,7 +4,7 @@ import userEvent from "@testing-library/user-event";
 import { Provider } from "react-redux";
 import { store } from "../app/store";
 import MainView from "./MainView";
-import CreatePost from "./CreatePost/CreatePost";
+import CreatePost from "./Upload/UploadForm";
 
 afterEach(() => cleanup());
 

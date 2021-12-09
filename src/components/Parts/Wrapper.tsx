@@ -15,13 +15,15 @@ const WrapperComponent = styled.div`
   width: 30vw;
   ${mediaMobile`
 width: 100vw;`}
-  height: calc(100vh - 40px);
+  height: calc(100% - 40px);
   ${mediaMobile`
 height: 100vh`};
-  margin: 20px auto;
+  margin: 0 auto;
   ${mediaMobile`
-margin: 0;`}
-  padding: 0;
+margin: 0`};
+  top: 20px;
+  ${mediaMobile`
+top: 0`};
 `;
 
 type Props = {

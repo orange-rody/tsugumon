@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { auth } from "../../firebase";
 import styled from "styled-components";
-
 import {
   Button,
   Avatar,
@@ -171,21 +170,6 @@ const Auth: React.FC = () => {
   const [password, setPassword] = useState("");
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
-  // const [openModal, setOpenModal] = useState(false);
-  // const [resetEmail, setResetEmail] = useState("");
-
-  // const sendResetEmail = async (e: React.MouseEvent<HTMLElement>) => {
-  //   await auth
-  //     .sendPasswordResetEmail(resetEmail)
-  //     .then(() => {
-  //       setOpenModal(false);
-  //       setResetEmail("");
-  //     })
-  //     .catch((err) => {
-  //       alert(err.message);
-  //       setResetEmail("");
-  //     });
-  // };
 
   const testUserLogin = async () => {
     await auth.signInWithEmailAndPassword("testUser@gmail.com", "350125go");
@@ -313,12 +297,8 @@ const Auth: React.FC = () => {
                 data-testid="login"
                 className={classes.login}
                 variant="contained"
-                onClick={async () => {
-                  try {
-                    await signInEmail();
-                  } catch (err) {
-                    alert(err.message);
-                  }
+                onClick={() => {
+                  signInEmail();
                 }}
               >
                 ログインする
@@ -330,12 +310,8 @@ const Auth: React.FC = () => {
                 className={classes.signUp}
                 variant="contained"
                 color="primary"
-                onClick={async () => {
-                  try {
-                    await signUpEmail();
-                  } catch (err) {
-                    alert(err.message);
-                  }
+                onClick={() => {
+                  signUpEmail();
                 }}
               >
                 この内容で登録する

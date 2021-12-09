@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import { makeStyles, createStyles } from "@material-ui/core";
-import CreatePost from "./CreatePost/CreatePost";
+import UploadForm from "./Upload/UploadForm";
+import Profile from "./Profile/Profile";
 import Wrapper from "./Parts/Wrapper";
 import PaperContainer from "./Parts/PaperContainer";
+import mediaQuery from "styled-media-query";
 import {
   HomeRounded,
   SearchRounded,
@@ -11,6 +13,8 @@ import {
   PersonRounded,
 } from "@material-ui/icons";
 import styled from "styled-components";
+
+const mediaMobile = mediaQuery.lessThan("medium");
 
 const TabDataLeft = [
   { value: "home", title: "ホーム", tabIcon: "HOME" },
@@ -50,8 +54,8 @@ const TabTitle = styled.p`
   text-align: center;
   font-size: 10px;
 `;
+const iconStyle = { margin: "4px auto 0", padding: 0, fontSize: "30px" };
 function getTabIcon(icon: string) {
-  const iconStyle = { margin: "4px auto 0", padding: 0, fontSize: "30px" };
   switch (icon) {
     case "HOME":
       return <HomeRounded style={iconStyle} />;
@@ -72,10 +76,10 @@ function getTabPanel(tab: string) {
       return <div>home</div>;
     case "search":
       return <div>search</div>;
-    case "notification:":
+    case "notification":
       return <div>notification</div>;
     case "profile":
-      return <div>profile</div>;
+      return <Profile />;
     default:
       return <div>home</div>;
   }
@@ -83,15 +87,23 @@ function getTabPanel(tab: string) {
 
 const Tabs = styled.ul`
   display: flex;
-  width: 100%;
+  position: fixed;
+  width: 30vw;
+  ${mediaMobile`
+    width: 100vw;
+  `};
   height: 50px;
   margin: 0;
   padding: 0;
-  position: absolute;
-  bottom: 0;
+  bottom: 20px;
+  ${mediaMobile`
+    bottom: 0
+  `};
   flex-flow: row;
-  background-color: hsl(0, 0, 100%);
+  background-color: #fff;
+  box-sizing: boreder-box;
   border-top: 1px solid silver;
+  z-index: 6;
 `;
 
 const useStyles = makeStyles(() =>
@@ -155,15 +167,9 @@ const TabBar = () => {
               setSelectedAdd(true);
             }}
             data-testid="add"
+            style={{ color: "#555", marginTop: "2px" }}
           >
-            <AddBoxRounded
-              style={{
-                margin: "4px auto 0",
-                padding: 0,
-                fontSize: "30px",
-                color: "#555555",
-              }}
-            />
+            <AddBoxRounded style={iconStyle} />
             <TabTitle>追加</TabTitle>
           </TabBoxAdd>
           {TabDataRight.map((data) => {
@@ -193,7 +199,7 @@ const TabBar = () => {
             );
           })}
         </Tabs>
-        <CreatePost
+        <UploadForm
           open={selectedAdd}
           closeAdd={(e: React.MouseEvent<HTMLElement>) => {
             setSelectedAdd(false);

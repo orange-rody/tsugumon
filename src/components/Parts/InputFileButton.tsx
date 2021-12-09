@@ -37,6 +37,9 @@ const useStyles = makeStyles((theme: Theme) =>
 //         プロパティ(onChange)の型宣言を行なっている。
 type Props = {
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  child?: string;
+  style?: any;
+  ref?: any;
 };
 
 // NOTE >> Input type="file"専用のボタンを作成
@@ -52,17 +55,18 @@ const InputFileButton = (props: Props) => {
         onChange={(e: React.ChangeEvent<HTMLInputElement>) => props.onChange(e)}
         data-testid="inputFile"
       />
-      <label htmlFor="inputFile">
+      <label htmlFor="inputFile" style={{height: "0"}}>
         <Button
           variant="contained"
           component="span"
-          size="large"
+          size="medium"
           startIcon={<CropOriginal />}
           color="primary"
           className={classes.button}
           data-testid="buttonForSelect"
+          style={props.style}
         >
-          選ぶ
+          {props.child}
         </Button>
       </label>
     </ThemeProvider>

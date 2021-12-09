@@ -3,12 +3,13 @@ import { render, screen, cleanup } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Provider } from "react-redux";
 import { store } from "../../app/store";
-import CreatePost from "./CreatePost";
+import CreatePost from "./UploadForm";
 import InputFileButton from "../Parts/InputFileButton";
 import DefaultButton from "../Parts/DefaultButton";
-import SecondaryButton from "../Parts/SecondaryButton";
+import ColorButton from "../Parts/ColorButton";
+import IconButton from "../Parts/IconButton";
 import Header from "../Parts/Header";
-import ArrowBackButton from "../Parts/ArrowBackButton";
+import NavigateBefore from "@material-ui/icons";
 
 afterEach(() => cleanup());
 const closeAdd = jest.fn();
@@ -131,11 +132,12 @@ describe("「次へ進む」ボタンが正常に起動するか確認する", (
   it("「次へ進む」ボタンをクリックした際にtogglePreviewが呼び出されるか確認する", () => {
     const togglePreview = jest.fn();
     render(
-      <SecondaryButton
+      <ColorButton
         dataTestId="toggleButton"
         onClick={togglePreview}
         disabled={false}
         child="次へ進む"
+        color="secondary"
       />
     );
     const toggleButton = screen.getByTestId("toggleButton");
@@ -176,11 +178,12 @@ describe("「次へ進む」ボタンが正常に起動するか確認する", (
   it("「投稿する」ボタンをクリックしたときにuploadが呼び出されるか確認する", () => {
     const upload = jest.fn();
     render(
-      <SecondaryButton
+      <ColorButton
         dataTestId="buttonForUpload"
         onClick={upload}
         disabled={false}
         child="投稿する"
+        color="secondary"
       />
     );
     const buttonForUpload = screen.getByTestId("buttonForUpload");
@@ -207,17 +210,5 @@ describe("Closeボタンが正常に稼働するか確認する。", () => {
     const closeButton = screen.getByTestId("closeButton");
     userEvent.click(closeButton);
     expect(closeAdd).toHaveBeenCalledTimes(1);
-  });
-});
-
-describe("ArrowBackボタンが正常に稼働するか確認する。", () => {
-  const togglePreview = jest.fn();
-  it("HeaderでArrowBackボタンが適正に描写されるか確認する", () => {
-    render(
-      <Header child="写真を登録する">
-        <ArrowBackButton onClick={togglePreview} dataTestId="arrowBackButton" />
-      </Header>
-    );
-    expect(screen.getByRole("button")).toBeTruthy();
   });
 });

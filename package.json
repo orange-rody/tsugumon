@@ -15,10 +15,12 @@
     "@types/react-redux": "^7.1.16",
     "@types/styled-components": "^5.1.9",
     "clsx": "^1.1.1",
-    "firebase": "^8.2.10",
+    "firebase": "^8.10.0",
+    "firebase-tools": "^9.22.0",
     "prop-types": "^15.7.2",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
+    "react-infinite-scroller": "^1.2.4",
     "react-redux": "^7.2.2",
     "react-scripts": "4.0.3",
     "react-testing-library": "^8.0.1",
@@ -55,6 +57,7 @@
   "devDependencies": {
     "@testing-library/dom": "^8.0.0",
     "@testing-library/user-event": "^13.1.9",
+    "@types/react-infinite-scroller": "^1.2.2",
     "jest-dom": "^4.0.0",
     "react-test-render": "^1.1.2"
   }

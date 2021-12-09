@@ -1,22 +1,27 @@
 import React from "react";
 import styled from "styled-components";
+import mediaQuery from "styled-media-query";
 
-const Header = styled.div`
+const mediaMobile = mediaQuery.lessThan("medium");
+
+const Wrapper = styled.div`
   display: flex;
-  position: relative;
-  width: 100%;
+  position: fixed;
+  width: 30vw;
+  ${mediaMobile`
+width: 100vw`};
   height: 52px;
   margin: 0 auto;
   background-color: hsl(0, 0%, 100%);
-  border-bottom: 1px solid hsla(26, 100%, 12%, 0.2);
   box-sizing: border-box;
+  border-bottom: 1px solid hsla(26, 100%, 12%, 0.2);
 `;
 
 const Title = styled.h2`
   width: 100%;
   height: 52px;
   margin: 0 auto;
-  font-size: 18px;
+  font-size: 16px;
   line-height: 52px;
   text-align: center;
   color: hsl(0, 0%, 10%);
@@ -27,17 +32,20 @@ const Title = styled.h2`
 type Props = {
   child: string;
   children: JSX.Element;
+  style?: React.CSSProperties | undefined;
 };
 
-const HeaderA = (props: Props) => {
+const Header = (props: Props) => {
   return (
-    <Header data-testid="header">
-      <div>
-        {props.children}
-      </div>
-      <Title data-testid="title">{props.child}</Title>
-    </Header>
+    <>
+      <Wrapper data-testid="header" style={props.style}>
+        <div>{props.children}</div>
+        <Title data-testid="title">
+          {props.child}
+        </Title>
+      </Wrapper>
+    </>
   );
 };
 
-export default HeaderA;
+export default Header;
