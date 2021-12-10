@@ -5,7 +5,7 @@ import EditProfile from "./EditProfile";
 import Header from "../Parts/Header";
 import IconButton from "../Parts/IconButton";
 import ColorButton from "../Parts/ColorButton";
-import Selfy from "./Selfy";
+import Selfy from "./MyPost";
 import styled from "styled-components";
 import { makeStyles, createStyles, Theme } from "@material-ui/core";
 import {
@@ -102,7 +102,6 @@ const Introduction = styled(UserNameSection)`
   height: 120px;
   margin: 10px auto;
   overflow: hidden;
-  }
 `;
 
 const UserIcon = styled.img`
@@ -117,7 +116,7 @@ const UserNameArea = styled.div`
 `;
 
 const UserName = styled.p`
-  display: block
+  display: block;
   width: 90%;
   height: 30px;
   margin-top: 20px;

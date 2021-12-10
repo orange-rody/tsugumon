@@ -375,11 +375,11 @@ export default function UploadForm(props: Props) {
           <Header child="この内容で登録しますか？" style={{ zIndex: 999 }}>
             <IconButton
               onClick={togglePreview}
-              dataTestId="navigateBeforeButton"
+              dataTestId="before"
             >
               <NavigateBefore
                 className={classes.icon}
-                data-testid="navigateBeforeIcon"
+                data-testid="beforeIcon"
               />
             </IconButton>
           </Header>
