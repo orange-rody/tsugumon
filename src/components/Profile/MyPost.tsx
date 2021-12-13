@@ -39,15 +39,17 @@ const GridItem = styled.li`
   }
 `;
 
-const ImageWrap = styled.div`
+const SingleItem = styled.div`
   width: 100%;
+  height: 90vh;
   margin: 0 auto;
   position: relative;
-  :before {
-    content: "";
-    display: block;
-    padding-top: 90%;
-  }
+`;
+
+const PhotoBox = styled.div`
+  position: relative;
+  width: 100%;
+  height: 50vh;
 `;
 
 const PhotoImage = styled.img`
@@ -62,6 +64,7 @@ const PhotoImage = styled.img`
 const PostStatus = styled.div`
   display: flex;
   width: 100%;
+  height: 10vh;
   margin: 0 auto;
   position: relative;
   flex-flow: row;
@@ -69,15 +72,10 @@ const PostStatus = styled.div`
   border: 1px;
   border-top: 1px solid silver;
   border-bottom: 1px solid silver;
-  :before {
-    content: "";
-    display: block;
-    padding-top: 15%;
-  }
 `;
 
 const Box = styled.div`
-  padding: 0;
+  padding-top: 1%;
   width: 33%;
 `;
 
@@ -119,22 +117,22 @@ const Title = styled.p`
 const CaptionArea = styled.div`
   display: flex;
   width: 100%;
+  height: 30vh;
   margin: 0 auto;
   position: relative;
   border: 1px;
   border-bottom: 1px solid silver;
   vertical-align: top;
-  :before {
-    content: "";
-    display: block;
-    padding-top: 38%;
-  }
 `;
 
-const Caption = styled.div`
+const Caption = styled.p`
   width: 90%;
   height: 90%;
   margin: 2% auto;
+  overflow: hidden;
+  color: transparent;
+  background: linear-gradient(180deg,rgb(0,0,0)70%,#fff 90%);
+  -webkit-background-clip:text;
 `;
 
 const ButtonArea = styled.div`
@@ -203,9 +201,9 @@ const Grid: React.FC<{ selectedType: string }> = (props) => {
         {props.selectedType === "grid" && (
           <List>
             {console.log(props.selectedType)}
-            {posts.map((tile, index) => {
+            {posts.map((tile) => {
               return (
-                <GridItem style={{ backgroundColor: "gray" }} key={index}>
+                <GridItem style={{ backgroundColor: "gray" }} key={tile.id}>
                   <PhotoImage src={tile.imageUrl} />
                 </GridItem>
               );
@@ -219,10 +217,10 @@ const Grid: React.FC<{ selectedType: string }> = (props) => {
             {console.log(props.selectedType)}
             {posts.map((tile, index) => {
               return (
-                <>
-                  <ImageWrap>
+                <SingleItem key={tile.id}>
+                  <PhotoBox>
                     <PhotoImage src={tile.imageUrl} />
-                  </ImageWrap>
+                  </PhotoBox>
                   <PostStatus>
                     <Box>
                       <Title>いいね！</Title>
@@ -232,7 +230,7 @@ const Grid: React.FC<{ selectedType: string }> = (props) => {
                             display: "inline-block",
                             width: "50%",
                             marginLeft: "10%",
-                            fontSize: "40px",
+                            fontSize: "30px",
                             textAlign: "center",
                             lineHeight: "75%",
                             color: "#4fc0ad",
@@ -251,7 +249,7 @@ const Grid: React.FC<{ selectedType: string }> = (props) => {
                             display: "inline-block",
                             width: "50%",
                             marginLeft: "10%",
-                            fontSize: "40px",
+                            fontSize: "30px",
                             textAlign: "center",
                             lineHeight: "75%",
                             color: "#4fc0ad",
@@ -270,7 +268,7 @@ const Grid: React.FC<{ selectedType: string }> = (props) => {
                             display: "inline-block",
                             width: "50%",
                             marginLeft: "10%",
-                            fontSize: "40px",
+                            fontSize: "30px",
                             textAlign: "center",
                             lineHeight: "75%",
                             color: "#4fc0ad",
@@ -285,7 +283,7 @@ const Grid: React.FC<{ selectedType: string }> = (props) => {
                   <CaptionArea>
                     <Caption>{tile.caption}</Caption>
                   </CaptionArea>
-                </>
+                </SingleItem>
               );
             })}
             {showLoadButton()}

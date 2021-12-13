@@ -38,12 +38,12 @@ const TabBox = styled.label`
 
 const TabBoxAdd = styled(TabBox)`
   "&active":{
-      backgroundColor: "#4fc0ad",
-      color: "white",
-      fontWeight: "bold",
-      transitionProperty: "all",
-      transitionDuration: "0.3s",
-      transitionTimingFunction: "ease",
+      backgroundColor: "#4fc0ad";
+      color: "white";
+      fontWeight: "bold";
+      transitionProperty: "all";
+      transitionDuration: "0.3s";
+      transitionTimingFunction: "ease";
   }
 `;
 
