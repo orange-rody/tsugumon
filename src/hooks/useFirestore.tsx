@@ -1,4 +1,3 @@
-/* eslint-disable no-loop-func */
 import { useState, useEffect } from "react";
 import { db } from "../firebase";
 import { useSelector } from "react-redux";
@@ -37,11 +36,10 @@ const useFirestore = (loadCount: number) => {
       .limit(loadCount * 6)
       .get()
       .then((snapshots) => {
-        let backRowEnd =
-          snapshots.docs[snapshots.docs.length - 1].data().timestamp;
+        let end = snapshots.docs[snapshots.docs.length - 1].data().timestamp;
         ref
           .orderBy("timestamp", "desc")
-          .endAt(backRowEnd)
+          .endAt(end)
           .onSnapshot((docs) => {
             // NOTE >> filteredPostsにはpostsの中身を入れておいて、要素が追加
             //         されるたびに、重複する要素を消していくようにする。
@@ -89,7 +87,6 @@ const useFirestore = (loadCount: number) => {
                   tunedPosts.push(post);
                   console.log(tunedPosts);
                 });
-                console.log(tunedPosts);
                 setPosts(tunedPosts);
               });
           });
@@ -97,11 +94,10 @@ const useFirestore = (loadCount: number) => {
         posts.forEach((post) => console.log(post.caption));
         // NOTE >> 前回行ったスナップショットの消去
         if (loadCount > 1) {
-          let frontRowEnd =
-            snapshots.docs[snapshots.docs.length - 7].data().timestamp;
+          let end = snapshots.docs[snapshots.docs.length - 7].data().timestamp;
           ref
             .orderBy("timestamp", "desc")
-            .endAt(frontRowEnd)
+            .endAt(end)
             .onSnapshot(() => {});
           console.log("前回行ったスナップショットを消去しました。");
         }
@@ -112,6 +108,10 @@ const useFirestore = (loadCount: number) => {
     () => {
       getOldestId();
       getPosts(loadCount);
+      return () => {
+        console.log("onSnapshotをクリーンアップします。");
+        getPosts(loadCount);
+      };
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [loadCount]
