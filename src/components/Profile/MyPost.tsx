@@ -41,7 +41,7 @@ const GridItem = styled.li`
 
 const SingleItem = styled.div`
   width: 100%;
-  height: 90vh;
+  height: calc(100vh -52px -51px);
   margin: 0 auto;
   position: relative;
 `;
@@ -49,7 +49,7 @@ const SingleItem = styled.div`
 const PhotoBox = styled.div`
   position: relative;
   width: 100%;
-  height: 50vh;
+  padding-top: 100%;
 `;
 
 const PhotoImage = styled.img`
@@ -75,7 +75,7 @@ const PostStatus = styled.div`
 `;
 
 const Box = styled.div`
-  padding-top: 1%;
+  padding-top: 2%;
   width: 33%;
 `;
 
@@ -98,7 +98,8 @@ const Count = styled.p`
   display: inline-block;
   width: 100%;
   font-size: 1rem;
-  margin: 0 auto;
+  margin-left: 0;
+  margin-top:0;
   padding: 0;
   text-align: left;
   vertical-align: text-top;
@@ -106,7 +107,8 @@ const Count = styled.p`
 
 const Title = styled.p`
   height: 25%;
-  margin: 2%;
+  margin-top: 2%;
+  margin-bottom: 3%;
   text-align: center;
   font-size: 0.8rem;
   ${mediaMobile`
@@ -121,7 +123,7 @@ const CaptionArea = styled.div`
   margin: 0 auto;
   position: relative;
   border: 1px;
-  border-bottom: 1px solid silver;
+  /* border-bottom: 1px solid silver; */
   vertical-align: top;
 `;
 
@@ -131,14 +133,14 @@ const Caption = styled.p`
   margin: 2% auto;
   overflow: hidden;
   color: transparent;
-  background: linear-gradient(180deg,rgb(0,0,0)70%,#fff 90%);
+  background: linear-gradient(180deg,rgb(0,0,0)70%,#fff 95%);
   -webkit-background-clip:text;
 `;
 
 const ButtonArea = styled.div`
   width: 200px;
-  height: 40px;
-  margin: 0 auto;
+  height: 30px;
+  margin: 10px auto;
   padding: 0;
 `;
 
@@ -156,12 +158,14 @@ const Grid: React.FC<{ selectedType: string }> = (props) => {
 
   function showLoadButton() {
     if (posts.find((find: Post) => find.id === oldestId)) {
+      console.log("最後まで読み込みました。");
       return (
         <ButtonArea>
-          {posts.length > 6 && <p>最後まで読み込みました！</p>}
+          {posts.length >= 6 && <p>最後まで読み込みました！</p>}
         </ButtonArea>
       );
     } else {
+      console.log("更に読み込みできます。");
       return (
         <ButtonArea>
           <DefaultButton
@@ -229,7 +233,6 @@ const Grid: React.FC<{ selectedType: string }> = (props) => {
                           style={{
                             display: "inline-block",
                             width: "50%",
-                            marginLeft: "10%",
                             fontSize: "30px",
                             textAlign: "center",
                             lineHeight: "75%",
@@ -237,7 +240,7 @@ const Grid: React.FC<{ selectedType: string }> = (props) => {
                           }}
                         />
                         <CountBox>
-                          <Count>200</Count>
+                          <Count>9999</Count>
                         </CountBox>
                       </Container>
                     </Box>
@@ -248,7 +251,6 @@ const Grid: React.FC<{ selectedType: string }> = (props) => {
                           style={{
                             display: "inline-block",
                             width: "50%",
-                            marginLeft: "10%",
                             fontSize: "30px",
                             textAlign: "center",
                             lineHeight: "75%",
@@ -256,7 +258,7 @@ const Grid: React.FC<{ selectedType: string }> = (props) => {
                           }}
                         />
                         <CountBox>
-                          <Count>200</Count>
+                          <Count>9999</Count>
                         </CountBox>
                       </Container>
                     </Box>
@@ -267,7 +269,6 @@ const Grid: React.FC<{ selectedType: string }> = (props) => {
                           style={{
                             display: "inline-block",
                             width: "50%",
-                            marginLeft: "10%",
                             fontSize: "30px",
                             textAlign: "center",
                             lineHeight: "75%",
@@ -275,7 +276,7 @@ const Grid: React.FC<{ selectedType: string }> = (props) => {
                           }}
                         />
                         <CountBox>
-                          <Count>200</Count>
+                          <Count>9999</Count>
                         </CountBox>
                       </Container>
                     </Box>
