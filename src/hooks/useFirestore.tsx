@@ -19,104 +19,81 @@ const useFirestore = (loadCount: number) => {
 
   const ref = db.collection("posts").where("uid", "==", uid);
 
-  // NOTE >> コレクション「posts」の中でtimestampの値が
-  //         最小のドキュメント(最も古い投稿)のidを取得する。
-  function getOldestId() {
+  // NOTE >> コレクション「posts」の中で最も古い投稿のidを取得する。
+  function getOldestId(isMounted: boolean) {
     ref
       .orderBy("timestamp", "desc")
       .limitToLast(1)
       .onSnapshot((snapshot) => {
-        setOldestId(snapshot.docs[0].id);
-      });
-  }
-
-  function getPosts(loadCount: number) {
-    ref
-      .orderBy("timestamp", "desc")
-      .limit(loadCount * 6)
-      .get()
-      .then((snapshots) => {
-        let end = snapshots.docs[snapshots.docs.length - 1].data().timestamp;
-        ref
-          .orderBy("timestamp", "desc")
-          .endAt(end)
-          .onSnapshot((docs) => {
-            // NOTE >> filteredPostsにはpostsの中身を入れておいて、要素が追加
-            //         されるたびに、重複する要素を消していくようにする。
-            let filteredPosts: Post[] = posts;
-            // NOTE >> uploadPostsには空の配列をいれておいて、ドキュメントが
-            //         更新されるたびに、要素を足していくようにする。
-            let uploadPosts: Post[] = [];
-            for (let change of docs.docChanges()) {
-              if (change.type === "added") {
-                console.log(`${change.doc.data().caption}がaddされました`);
-              } else if (change.type === "removed") {
-                console.log(`${change.doc.data().caption}がremoveされました`);
-                filteredPosts = filteredPosts.filter(
-                  (x) => x.id !== change.doc.id
-                );
-              } else if (change.type === "modified") {
-                console.log(`${change.doc.data().caption}がmodifyされました`);
-              }
-            }
-            docs.forEach((doc) => {
-              filteredPosts = filteredPosts.filter((x) => x.id !== doc.id);
-              const post = {
-                id: doc.id,
-                ...doc.data(),
-              } as Post;
-              uploadPosts.push(post);
-            });
-
-            let tunedPosts: Post[] = [...filteredPosts, ...uploadPosts].sort(
-              (a, b) => {
-                return b.timestamp - a.timestamp;
-              }
-            );
-            ref
-              .orderBy("timestamp", "desc")
-              .startAfter(tunedPosts[tunedPosts.length - 1].timestamp)
-              .limit(3 - (tunedPosts.length % 3))
-              .get()
-              .then((snapshots) => {
-                snapshots.forEach((snapshot) => {
-                  const post = {
-                    id: snapshot.id,
-                    ...snapshot.data(),
-                  } as Post;
-                  tunedPosts.push(post);
-                  console.log(tunedPosts);
-                });
-                setPosts(tunedPosts);
-              });
-          });
-
-        posts.forEach((post) => console.log(post.caption));
-        // NOTE >> 前回行ったスナップショットの消去
-        if (loadCount > 1) {
-          let end = snapshots.docs[snapshots.docs.length - 7].data().timestamp;
-          ref
-            .orderBy("timestamp", "desc")
-            .endAt(end)
-            .onSnapshot(() => {});
-          console.log("前回行ったスナップショットを消去しました。");
-        }
+        isMounted && setOldestId(snapshot.docs[0].id);
       });
   }
 
   useEffect(
     () => {
-      getOldestId();
-      getPosts(loadCount);
+      let isMounted = true;
+      const unsubscribe = ref
+        .orderBy("timestamp", "desc")
+        .limit(loadCount * 6)
+        .onSnapshot((docs) => {
+          // NOTE >> uploadPostsには空の配列をいれておいて、ドキュメントが
+          //         更新されるたびに、要素を足していくようにする。
+          let uploadPosts: Post[] = [];
+          // NOTE >> filteredPostsにはpostsの中身を入れておいて、要素が追加
+          //         されるたびに、重複する要素を消していくようにする。
+          let filteredPosts: Post[] = posts;
+          for (let change of docs.docChanges()) {
+            if (change.type === "added") {
+              console.log(`add:${change.doc.data().caption}`);
+            } else if (change.type === "removed") {
+              console.log(`remove:${change.doc.data().caption}`);
+              filteredPosts = filteredPosts.filter(
+                (x) => x.id !== change.doc.id
+              );
+            } else if (change.type === "modified") {
+              console.log(`modify:${change.doc.data().caption}`);
+            }
+          }
+          docs.forEach((doc) => {
+            filteredPosts = filteredPosts.filter((x) => x.id !== doc.id);
+            uploadPosts.push({ id: doc.id, ...doc.data() } as Post);
+          });
+          let tunedPosts: Post[] = [...filteredPosts, ...uploadPosts].sort(
+            (a, b) => {
+              return b.timestamp - a.timestamp;
+            }
+          );
+          console.log(isMounted);
+          isMounted && setPosts(tunedPosts);
+          // NOTE >> 最後の行が3未満だった際、不足分を再度取得するようにする。
+          let deficit: number = loadCount * 6 - tunedPosts.length;
+          if (deficit > 0) {
+            ref
+              .orderBy("timestamp", "desc")
+              .startAfter(tunedPosts[tunedPosts.length - 1].timestamp)
+              .limit(deficit)
+              .onSnapshot((snapshots) => {
+                snapshots.forEach((snapshot) => {
+                  tunedPosts.push({
+                    id: snapshot.id,
+                    ...snapshot.data(),
+                  } as Post);
+                });
+              });
+            isMounted && setPosts(tunedPosts);
+          }
+        });
+      getOldestId(isMounted);
+
       return () => {
-        console.log("onSnapshotをクリーンアップします。");
-        getPosts(loadCount);
+        isMounted = false;
+        unsubscribe();
+        console.log(`isMounted: ${isMounted} onSnapshotの処理をdetachしました。`)
       };
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [loadCount]
   );
-  console.log(`returnします。`);
   return { posts, oldestId };
 };
 

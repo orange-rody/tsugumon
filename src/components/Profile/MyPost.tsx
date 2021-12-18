@@ -3,7 +3,12 @@ import useFirestore from "../../hooks/useFirestore";
 import styled from "styled-components";
 import mediaQuery from "styled-media-query";
 import DefaultButton from "../Parts/DefaultButton";
-import { FavoriteRounded, ChatRounded, SendRounded } from "@material-ui/icons";
+import {
+  FavoriteRounded,
+  ChatRounded,
+  SendRounded,
+  ArrowDropDownRounded,
+} from "@material-ui/icons";
 
 const mediaMobile = mediaQuery.lessThan("medium");
 
@@ -50,6 +55,7 @@ const PhotoBox = styled.div`
   position: relative;
   width: 100%;
   padding-top: 100%;
+  border-top: 1px solid silver;
 `;
 
 const PhotoImage = styled.img`
@@ -99,7 +105,7 @@ const Count = styled.p`
   width: 100%;
   font-size: 1rem;
   margin-left: 0;
-  margin-top:0;
+  margin-top: 0;
   padding: 0;
   text-align: left;
   vertical-align: text-top;
@@ -116,14 +122,12 @@ const Title = styled.p`
 `}
 `;
 
-const CaptionArea = styled.div`
-  display: flex;
+const CaptionArea = styled.div<CustomProps>`
   width: 100%;
-  height: 30vh;
+  height: ${(props) => (props?.include ? "100%" : "30vh")};
   margin: 0 auto;
   position: relative;
   border: 1px;
-  /* border-bottom: 1px solid silver; */
   vertical-align: top;
 `;
 
@@ -133,8 +137,8 @@ const Caption = styled.p`
   margin: 2% auto;
   overflow: hidden;
   color: transparent;
-  background: linear-gradient(180deg,rgb(0,0,0)70%,#fff 95%);
-  -webkit-background-clip:text;
+  background: linear-gradient(180deg, rgb(0, 0, 0) 60%, #fff 100%);
+  -webkit-background-clip: text;
 `;
 
 const ButtonArea = styled.div`
@@ -143,6 +147,11 @@ const ButtonArea = styled.div`
   margin: 10px auto;
   padding: 0;
 `;
+
+// 独自定義のプロパティ
+type CustomProps = {
+  include?: boolean;
+};
 
 const Grid: React.FC<{ selectedType: string }> = (props) => {
   interface Post {
@@ -154,6 +163,7 @@ const Grid: React.FC<{ selectedType: string }> = (props) => {
   }
 
   const [loadCount, setLoadCount] = useState<number>(1);
+  const [extended, setExtended] = useState<string[]>([]);
   const { posts, oldestId } = useFirestore(loadCount);
 
   function showLoadButton() {
@@ -199,6 +209,12 @@ const Grid: React.FC<{ selectedType: string }> = (props) => {
     }
   }
 
+  function extendCaption(targetId: string) {
+    [...extended].includes(targetId)
+      ? setExtended([...extended].filter((id) => id !== targetId))
+      : setExtended([...extended, targetId]);
+  }
+
   return (
     <>
       <Main>
@@ -221,7 +237,7 @@ const Grid: React.FC<{ selectedType: string }> = (props) => {
             {console.log(props.selectedType)}
             {posts.map((tile, index) => {
               return (
-                <SingleItem key={tile.id}>
+                <SingleItem key={tile.id} id={tile.id}>
                   <PhotoBox>
                     <PhotoImage src={tile.imageUrl} />
                   </PhotoBox>
@@ -281,8 +297,33 @@ const Grid: React.FC<{ selectedType: string }> = (props) => {
                       </Container>
                     </Box>
                   </PostStatus>
-                  <CaptionArea>
+                  <CaptionArea
+                    include={
+                      [...extended].includes(tile.id) &&
+                      tile.caption.length > 100
+                        ? true
+                        : false
+                    }
+                    onClick={() => {
+                      extendCaption(tile.id);
+                      console.log(tile.caption.length);
+                    }}
+                  >
                     <Caption>{tile.caption}</Caption>
+                    <p style={{ margin: "0 auto", width: "5%" }}>
+                      {[...extended].includes(tile.id) ||
+                      tile.caption.length <= 100 ? (
+                        ""
+                      ) : (
+                        <ArrowDropDownRounded
+                          style={{
+                            color: "gray",
+                            position: "absolute",
+                            bottom: "0",
+                          }}
+                        />
+                      )}
+                    </p>
                   </CaptionArea>
                 </SingleItem>
               );
