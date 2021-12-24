@@ -17,21 +17,8 @@ width: 100vw`};
   border-bottom: 1px solid hsla(26, 100%, 12%, 0.2);
 `;
 
-const Title = styled.h2`
-  width: 100%;
-  height: 52px;
-  margin: 0 auto;
-  font-size: 16px;
-  line-height: 52px;
-  text-align: center;
-  color: hsl(0, 0%, 10%);
-  font-weight: bold;
-  letter-spacing: 2px;
-`;
-
 type Props = {
-  child: string;
-  children: JSX.Element;
+  children: React.ReactNode;
   style?: React.CSSProperties | undefined;
 };
 
@@ -39,10 +26,7 @@ const Header = (props: Props) => {
   return (
     <>
       <Wrapper data-testid="header" style={props.style}>
-        <div>{props.children}</div>
-        <Title data-testid="title">
-          {props.child}
-        </Title>
+        {props.children}
       </Wrapper>
     </>
   );

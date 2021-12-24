@@ -4,8 +4,7 @@ import { selectUser } from "../../features/userSlice";
 import useStorage from "../../hooks/useStorage";
 import Header from "../Parts/Header";
 import InputFileButton from "../Parts/InputFileButton";
-import DefaultButton from "../Parts/DefaultButton";
-import ColorButton from "../Parts/ColorButton";
+import Btn from "../Parts/Button";
 import IconButton from "../Parts/IconButton";
 import styled from "styled-components";
 // NOTE >> styled-componentをfunctionコンポーネントの中で使用すると、
@@ -50,6 +49,17 @@ const Main = styled.main`
   width: 100%;
   margin: 0 auto;
   background-color: hsl(0, 0%, 100%);
+`;
+
+const Title = styled.div`
+  width: 100%;
+  height: 52px;
+  margin: 0 auto;
+  font-size: 16px;
+  line-height: 52px;
+  color: hsl(0, 0%, 10%);
+  font-weight: bold;
+  letter-spacing: 2px;
 `;
 
 const UserInfo = styled.div`
@@ -298,7 +308,7 @@ export default function UploadForm(props: Props) {
     <div data-testid="createPost">
       <Slide in={props.open} direction="up" mountOnEnter unmountOnExit>
         <Main className={classes.paperForDraft} data-testid="main">
-          <Header child="写真を登録する" style={{ zIndex: 999 }}>
+          <Header style={{ zIndex: 999 }}>
             <IconButton
               dataTestId="closeButton"
               onClick={(e: React.MouseEvent<HTMLElement>) => {
@@ -307,6 +317,7 @@ export default function UploadForm(props: Props) {
             >
               <Close className={classes.icon} />
             </IconButton>
+            <Title>写真を登録する</Title>
           </Header>
           <div style={{ height: "52px" }} />
           <ImageWrap data-testid="imageWrap">
@@ -339,14 +350,16 @@ export default function UploadForm(props: Props) {
           </ImageWrap>
           <ButtonArea data-testid="buttonArea">
             <InputFileButton onChange={handleImage} child="選ぶ" />
-            <DefaultButton
-              child="消す"
+            <Btn
               onClick={() => {
                 clear();
               }}
-              wide={false}
               dataTestId="buttonForClear"
-            />
+              style={{ width: "120px" }}
+              variant="outlined"
+            >
+              消す
+            </Btn>
           </ButtonArea>
           {/* TODO >> Textareaの文字数制限を設定する */}
           {/* TODO >> Textareaの自動スクロール機能をつくる */}
@@ -360,28 +373,29 @@ export default function UploadForm(props: Props) {
             data-testid="textarea"
           ></Textarea>
           <ButtonArea>
-            <ColorButton
+            <Btn
               disabled={dataUrl === "" && true}
               onClick={togglePreview}
               dataTestId="previewOn"
-              child="次へ進む"
               color="secondary"
-            />
+              style={{ width: "140px" }}
+              variant="contained"
+            >
+              次へ進む
+            </Btn>
           </ButtonArea>
         </Main>
       </Slide>
       <Slide direction="left" in={preview} mountOnEnter unmountOnExit>
         <Main className={classes.paperForPreview} data-testid="paperForPreview">
-          <Header child="この内容で登録しますか？" style={{ zIndex: 999 }}>
-            <IconButton
-              onClick={togglePreview}
-              dataTestId="before"
-            >
+          <Header style={{ zIndex: 999 }}>
+            <IconButton onClick={togglePreview} dataTestId="before">
               <NavigateBefore
                 className={classes.icon}
                 data-testid="beforeIcon"
               />
             </IconButton>
+            <Title>この内容で登録しますか？</Title>
           </Header>
           <div style={{ height: "52px" }} />
           <ImageWrap>
@@ -407,21 +421,26 @@ export default function UploadForm(props: Props) {
           {/* TODO >> CommentAreaの表示文字をスクロールする機能をつくる */}
           <CommentArea data-testid="commentArea">{caption}</CommentArea>
           <ButtonArea>
-            <ColorButton
+            <Btn
               onClick={(e: React.MouseEvent<HTMLElement>) => {
                 getFilename(e);
               }}
               dataTestId="buttonForUpload"
               disabled={dataUrl === "" && true}
-              child="登録する"
               color="secondary"
-            />
-            <DefaultButton
+              style={{width: "120px"}}
+              variant="contained"
+            >
+              登録する
+            </Btn>
+            <Btn
               onClick={togglePreview}
-              child="戻る"
-              wide={false}
-              dataTestId="previewOff"
-            />
+              dataTestId="exit"
+              style={{ width: "120px" }}
+              variant="outlined"
+            >
+              戻る
+            </Btn>
           </ButtonArea>
         </Main>
       </Slide>

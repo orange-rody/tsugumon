@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import useFirestore from "../../hooks/useFirestore";
 import styled from "styled-components";
 import mediaQuery from "styled-media-query";
-import DefaultButton from "../Parts/DefaultButton";
+import Btn from "../Parts/Button";
 import {
   FavoriteRounded,
   ChatRounded,
@@ -178,14 +178,16 @@ const Grid: React.FC<{ selectedType: string }> = (props) => {
       console.log("更に読み込みできます。");
       return (
         <ButtonArea>
-          <DefaultButton
-            child="更に読み込む"
+          <Btn
             onClick={(e: React.MouseEvent<HTMLElement>) => {
               setLoadCount((prev) => prev + 1);
             }}
-            dataTestId="buttonForLoading"
-            wide={true}
-          />
+            dataTestId="load"
+            style={{width: "180px"}}
+            variant="outlined"
+          >
+            更に読み込む
+          </Btn>
         </ButtonArea>
       );
     }

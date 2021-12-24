@@ -25,17 +25,19 @@ const theme = createMuiTheme({
   },
 });
 
-const useStyles = makeStyles((thme: Theme) =>
+type Props = {
+  dataTestId: string;
+  onClick: (e: React.MouseEvent<HTMLButtonElement>) => void;
+  disabled?: boolean;
+  children:React.ReactNode;
+  color?: "primary" | "secondary" | undefined;
+  style?: React.CSSProperties;
+  variant: "outlined" | "contained"
+};
+
+const useStyles = makeStyles((theme: Theme) =>
   createStyles({
-    narrow: {
-      width: "120px",
-      height: "40px",
-      borderRadius: "50px",
-      fontSize: "18px",
-      fontWeight: "bold",
-    },
-    wide: {
-      width: "200px",
+    button: {
       height: "40px",
       borderRadius: "50px",
       fontSize: "18px",
@@ -44,28 +46,26 @@ const useStyles = makeStyles((thme: Theme) =>
   })
 );
 
-type Props = {
-  dataTestId: string;
-  onClick: (e: React.MouseEvent<HTMLElement>) => void;
-  child: string;
-  wide:boolean;
-};
-const DefaultButton = (props: Props) => {
+
+const Btn = (props: Props) => {
   const classes = useStyles();
   return (
     <ThemeProvider theme={theme}>
       <Button
         data-testid={props.dataTestId}
-        onClick={(e: React.MouseEvent<HTMLElement>) => props.onClick(e)}
-        variant="outlined"
-        color="default"
-        size="large"
-        className={props.wide ? classes.wide : classes.narrow}
+        onClick={(e: React.MouseEvent<HTMLButtonElement>) => props.onClick(e)}
+        disabled={props.disabled}
+        variant={props.variant}
+        component="span"
+        size="medium"
+        color={props.color}
+        style={props.style}
+        className={classes.button}
       >
-        {props.child}
+        {props.children}
       </Button>
     </ThemeProvider>
   );
 };
 
-export default DefaultButton;
+export default Btn;

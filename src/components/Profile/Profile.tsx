@@ -4,7 +4,7 @@ import { selectUser } from "../../features/userSlice";
 import EditProfile from "./EditProfile";
 import Header from "../Parts/Header";
 import IconButton from "../Parts/IconButton";
-import ColorButton from "../Parts/ColorButton";
+import ColorButton from "../Parts/Button";
 import Selfy from "./MyPost";
 import styled from "styled-components";
 import { makeStyles, createStyles, Theme } from "@material-ui/core";
@@ -71,6 +71,16 @@ const Main = styled.main`
   ${mediaMobile`
     width: 100vw
   `};
+`;
+
+const Title = styled.div`
+  width: 90%;
+  height: 52px;
+  font-size: 16px;
+  line-height: 52px;
+  color: hsl(0, 0%, 10%);
+  font-weight: bold;
+  letter-spacing: 2px;
 `;
 
 const UserNameSection = styled.div`
@@ -198,10 +208,7 @@ const Profile: React.FC = () => {
       {" "}
       {!edit ? (
         <Wrapper>
-          <Header
-            child={username ? username : "匿名のユーザー"}
-            style={{ zIndex: 3 }}
-          >
+          <Header style={{ display: "flex", zIndex: 3 }}>
             <IconButton
               onClick={(e: React.MouseEvent<HTMLElement>) =>
                 console.log(username)
@@ -210,6 +217,7 @@ const Profile: React.FC = () => {
             >
               <Settings className={classes.settingIcon} />
             </IconButton>
+            <Title>{username ? username : "匿名のユーザー"}</Title>
           </Header>
           <div style={{ width: "100%", height: "52px", margin: "0px" }} />
           <Main>
@@ -222,13 +230,15 @@ const Profile: React.FC = () => {
                 <ColorButton
                   dataTestId="profileEditButton"
                   onClick={openEdit}
-                  child="編集する"
                   color="primary"
                   style={{
                     left: "10px",
                     width: "150px",
                   }}
-                ></ColorButton>
+                  variant="contained"
+                >
+                  編集する
+                </ColorButton>
               </UserNameArea>
             </UserNameSection>
             <IntroductionSection>

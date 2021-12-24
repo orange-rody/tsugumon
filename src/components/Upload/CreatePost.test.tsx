@@ -6,7 +6,7 @@ import { store } from "../../app/store";
 import CreatePost from "./UploadForm";
 import InputFileButton from "../Parts/InputFileButton";
 import DefaultButton from "../Parts/DefaultButton";
-import ColorButton from "../Parts/ColorButton";
+import ColorButton from "../Parts/Button";
 import IconButton from "../Parts/IconButton";
 import Header from "../Parts/Header";
 import NavigateBefore from "@material-ui/icons";

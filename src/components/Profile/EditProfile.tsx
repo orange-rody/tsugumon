@@ -6,7 +6,7 @@ import firebase from "firebase/app";
 import Header from "../Parts/Header";
 import IconButton from "../Parts/IconButton";
 import InputFileButton from "../Parts/InputFileButton";
-import ColorButton from "../Parts/ColorButton";
+import ColorButton from "../Parts/Button";
 import { makeStyles, createStyles, Theme } from "@material-ui/core";
 import { NavigateBefore } from "@material-ui/icons";
 import styled from "styled-components";
@@ -267,7 +267,7 @@ const EditProfile = (props: any) => {
   return (
     <>
       <Wrapper>
-        <Header child="プロフィールを編集する" style={{ zIndex: 3 }}>
+        <Header style={{ zIndex: 3 }}>
           <IconButton
             dataTestId="backButton"
             onClick={() => {
@@ -276,6 +276,7 @@ const EditProfile = (props: any) => {
           >
             <NavigateBefore className={classes.icon} />
           </IconButton>
+          child="プロフィールを編集する"
         </Header>
         <div style={{ width: "100%", height: "52px", margin: "0px" }} />
         <Main>
@@ -344,17 +345,18 @@ const EditProfile = (props: any) => {
               ></Textarea>
             </Label>
             <ColorButton
-              dataTestId="SubmitButton"
+              dataTestId="Submit"
               onClick={(e: React.MouseEvent<HTMLButtonElement>) =>
                 submitChanges(e)
               }
-              child="この内容で登録する"
               color="primary"
               style={{
                 width: "200px",
-                margin: "0 auto",
               }}
-            />
+              variant="contained"
+            >
+              この内容で登録する
+            </ColorButton>
           </Form>
         </Main>
       </Wrapper>

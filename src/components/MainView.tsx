@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { makeStyles, createStyles } from "@material-ui/core";
 import UploadForm from "./Upload/UploadForm";
 import Profile from "./Profile/Profile";
+import Search from "./Search/Search";
 import Wrapper from "./Parts/Wrapper";
 import PaperContainer from "./Parts/PaperContainer";
 import mediaQuery from "styled-media-query";
@@ -37,13 +38,13 @@ const TabBox = styled.label`
 `;
 
 const TabBoxAdd = styled(TabBox)`
-  "&active":{
-      backgroundColor: "#4fc0ad";
-      color: "white";
-      fontWeight: "bold";
-      transitionProperty: "all";
-      transitionDuration: "0.3s";
-      transitionTimingFunction: "ease";
+  "&active": {
+    backgroundcolor: "#4fc0ad";
+    color: "white";
+    fontweight: "bold";
+    transitionproperty: "all";
+    transitionduration: "0.3s";
+    transitiontimingfunction: "ease";
   }
 `;
 
@@ -75,7 +76,7 @@ function getTabPanel(tab: string) {
     case "home":
       return <div>home</div>;
     case "search":
-      return <div>search</div>;
+      return <Search />;
     case "notification":
       return <div>notification</div>;
     case "profile":

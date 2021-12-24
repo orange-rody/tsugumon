@@ -3,16 +3,11 @@ import styled from "styled-components";
 
 const IconWrapper = styled.div`
   display: block;
-  position: absolute;
   width: 42px;
   height: 42px;
-  top: 5px;
-  left: 5px;
+  margin: 5px;
   text-align: center;
-  padding: 0;
   color: #555;
-  background-color: #fff;
-  border: none;
   transition: all 0.3s ease-out;
   &:active {
     color: #ccc;
@@ -20,7 +15,7 @@ const IconWrapper = styled.div`
 `;
 
 type Props = {
-  children: JSX.Element;
+  children: React.ReactNode;
   onClick: (e: React.MouseEvent<HTMLElement>) => void;
   dataTestId: string;
 };
