@@ -4,7 +4,7 @@ import { selectUser } from "../../features/userSlice";
 import EditProfile from "./EditProfile";
 import Header from "../Parts/Header";
 import IconButton from "../Parts/IconButton";
-import ColorButton from "../Parts/Button";
+import Button from "../Parts/Button";
 import Selfy from "./MyPost";
 import styled from "styled-components";
 import { makeStyles, createStyles, Theme } from "@material-ui/core";
@@ -185,7 +185,6 @@ const DisplayTypeName = styled.p`
 `;
 
 const Profile: React.FC = () => {
-  console.log("Profileがレンダリングされました。");
   const user = useSelector(selectUser);
   const { username, userIcon, prefecture, job, introduction } = user;
   const [selectedType, setSelectedType] = useState<string>("grid");
@@ -227,7 +226,7 @@ const Profile: React.FC = () => {
                 <UserName>{username ? username : "匿名のユーザー"}</UserName>
                 <Prefecture>{prefecture ? prefecture : ""}</Prefecture>
                 <Job>{job ? job : ""}</Job>
-                <ColorButton
+                <Button
                   dataTestId="profileEditButton"
                   onClick={openEdit}
                   color="primary"
@@ -238,7 +237,7 @@ const Profile: React.FC = () => {
                   variant="contained"
                 >
                   編集する
-                </ColorButton>
+                </Button>
               </UserNameArea>
             </UserNameSection>
             <IntroductionSection>

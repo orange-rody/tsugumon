@@ -18,6 +18,7 @@ type Props = {
   children: React.ReactNode;
   onClick: (e: React.MouseEvent<HTMLElement>) => void;
   dataTestId: string;
+  style?: React.CSSProperties | undefined;
 };
 
 const IconButton = (props: Props) => {
@@ -25,6 +26,7 @@ const IconButton = (props: Props) => {
     <IconWrapper
       onClick={props.onClick}
       data-testid={props.dataTestId}
+      style={props.style}
     >
       {props.children}
     </IconWrapper>

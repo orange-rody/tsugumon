@@ -1,21 +1,21 @@
 import React, { useState } from "react";
-import { useSelector } from "react-redux";
-import { selectUser } from "../../features/userSlice";
 import Header from "../Parts/Header";
-import ColorButton from "../Parts/Button";
+import Button from "../Parts/Button";
 import IconButton from "../Parts/IconButton";
 import styled from "styled-components";
 import mediaQuery from "styled-media-query";
-import { makeStyles, createStyles, Theme } from "@material-ui/core";
-import { SearchOutlined, SearchRounded } from "@material-ui/icons";
+import { makeStyles, createStyles, Theme} from "@material-ui/core";
+import { SearchRounded } from "@material-ui/icons";
 const mediaMobile = mediaQuery.lessThan("medium");
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
-    settingIcon: {
-      width: "32px",
+    searchIcon: {
+      left: "5px",
+      width: "30px",
       height: "42px",
-      borderRadius: "100%",
+      marginLeft: "35%",
+      marginRight: "3%",
     },
     selected: {
       color: "#50a0d0",
@@ -41,26 +41,52 @@ const Main = styled.main`
   `};
 `;
 
+const Input = styled.input`
+ width: 70%;
+ height: 35px;
+ margin:3px;
+ border-radius: 5%;
+ border: 1px solid  #555;
+`;
+
 const Search: React.FC = () => {
+  const [searchInput, setSearchInput] = useState(false);
   const classes = useStyles();
   return (
     <>
       <Wrapper>
         <Main>
-          {/* <Header child="">
-            <div style={{ width: "100vw", marginLeft: "20vw", padding: 0 }}>
+          <Header style={{ display: "flex", zIndex: 3 }}>
+            {searchInput ? (
+              <Input type="text" />
+            ) : (
               <IconButton
-                onClick={(e: React.MouseEvent<HTMLElement>) =>
-                  console.log("clicked")
-                }
-                dataTestId="search"
+                onClick={() => {
+                  setSearchInput(true);
+                }}
+                dataTestId="searching"
+                style={{
+                  display: "flex",
+                  width: "80%",
+                  lineHeight: "100%",
+                  fontSize: "1rem",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                }}
               >
-                <SearchRounded className={classes.settingIcon}>
-                </SearchRounded>
+                <SearchRounded className={classes.searchIcon} />
+                <p
+                  style={{
+                    margin: 0,
+                    lineHeight: "42px",
+                    letterSpacing: "2px",
+                  }}
+                >
+                  検索する
+                </p>
               </IconButton>
-              
-            </div>
-          </Header> */}
+            )}
+          </Header>
         </Main>
       </Wrapper>
     </>

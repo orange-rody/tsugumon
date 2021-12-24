@@ -51,14 +51,15 @@ const Main = styled.main`
   background-color: hsl(0, 0%, 100%);
 `;
 
-const Title = styled.div`
-  width: 100%;
+const Title = styled.p`
   height: 52px;
+  width: 80%;
   margin: 0 auto;
   font-size: 16px;
   line-height: 52px;
   color: hsl(0, 0%, 10%);
   font-weight: bold;
+  text-align: center;
   letter-spacing: 2px;
 `;
 
@@ -314,6 +315,7 @@ export default function UploadForm(props: Props) {
               onClick={(e: React.MouseEvent<HTMLElement>) => {
                 props.closeAdd();
               }}
+              style={{position:"absolute"}}
             >
               <Close className={classes.icon} />
             </IconButton>
@@ -393,9 +395,10 @@ export default function UploadForm(props: Props) {
               <NavigateBefore
                 className={classes.icon}
                 data-testid="beforeIcon"
+                style={{position:"absolute"}}
               />
             </IconButton>
-            <Title>この内容で登録しますか？</Title>
+            <Title style={{textAlign: "left"}}>この内容で登録しますか？</Title>
           </Header>
           <div style={{ height: "52px" }} />
           <ImageWrap>
