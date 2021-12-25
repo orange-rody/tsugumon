@@ -1,7 +1,5 @@
 import { useState, useEffect } from "react";
 import { db } from "../firebase";
-import { useSelector } from "react-redux";
-import { selectUser } from "../features/userSlice";
 
 interface Post {
   id: string;
@@ -11,23 +9,10 @@ interface Post {
   username: string;
 }
 
-const useFirestore = (loadCount: number) => {
-  const user = useSelector(selectUser);
-  const uid: string = user.uid;
-  const [oldestId, setOldestId] = useState<string>("");
+const useRecent = (loadCount: number) => {
   const [posts, setPosts] = useState<Post[]>([]);
 
-  const ref = db.collection("posts").where("uid", "==", uid);
-
-  // NOTE >> コレクション「posts」の中で最も古い投稿のidを取得する。
-  function getOldestId(isMounted: boolean) {
-    ref
-      .orderBy("timestamp", "desc")
-      .limitToLast(1)
-      .onSnapshot((snapshot) => {
-        isMounted && setOldestId(snapshot.docs[0].id);
-      });
-  }
+  const ref = db.collection("posts");
 
   useEffect(
     () => {
@@ -36,11 +21,7 @@ const useFirestore = (loadCount: number) => {
         .orderBy("timestamp", "desc")
         .limit(loadCount * 6)
         .onSnapshot((docs) => {
-          // NOTE >> uploadPostsには空の配列をいれておいて、ドキュメントが
-          //         更新されるたびに、要素を足していくようにする。
           let uploadPosts: Post[] = [];
-          // NOTE >> filteredPostsにはpostsの中身を入れておいて、要素が追加
-          //         されるたびに、重複する要素を消していくようにする。
           let filteredPosts: Post[] = posts;
           for (let change of docs.docChanges()) {
             if (change.type === "added") {
@@ -64,7 +45,6 @@ const useFirestore = (loadCount: number) => {
             }
           );
           isMounted && setPosts(tunedPosts);
-          // NOTE >> 最後の行が3未満だった際、不足分を再度取得するようにする。
           let deficit: number = loadCount * 6 - tunedPosts.length;
           if (deficit > 0) {
             ref
@@ -82,20 +62,15 @@ const useFirestore = (loadCount: number) => {
             isMounted && setPosts(tunedPosts);
           }
         });
-      getOldestId(isMounted);
-
       return () => {
         isMounted = false;
         unsubscribe();
-        console.log(
-          `isMounted: ${isMounted} onSnapshotの処理をdetachしました。`
-        );
       };
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [loadCount]
   );
-  return { posts, oldestId };
+  return posts;
 };
 
-export default useFirestore;
+export default useRecent;
