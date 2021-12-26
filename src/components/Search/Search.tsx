@@ -1,11 +1,12 @@
 import React, { useState } from "react";
 import Header from "../Parts/Header";
-import Button from "../Parts/Button";
 import IconButton from "../Parts/IconButton";
+import RecentPost from "./RecentPost";
 import styled from "styled-components";
-import mediaQuery from "styled-media-query";
 import { makeStyles, createStyles, Theme } from "@material-ui/core";
 import { SearchRounded, Close } from "@material-ui/icons";
+import mediaQuery from "styled-media-query";
+
 const mediaMobile = mediaQuery.lessThan("medium");
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -14,7 +15,7 @@ const useStyles = makeStyles((theme: Theme) =>
       left: "5px",
       width: "30px",
       height: "51px",
-      marginRight: "10%"
+      marginRight: "10%",
     },
     innerIcon: {
       position: "absolute",
@@ -60,6 +61,7 @@ const Input = styled.input`
 
 const Search: React.FC = () => {
   const [searchInput, setSearchInput] = useState(false);
+  const [word, setWord] = useState<string>("");
   const classes = useStyles();
   return (
     <>
@@ -79,16 +81,22 @@ const Search: React.FC = () => {
           >
             {searchInput ? (
               <>
-                <Input type="text" placeholder="キーワードを入力" />
+                <Input
+                  type="text"
+                  placeholder="キーワードを入力"
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    setWord(e.target.value);
+                  }}
+                />
                 <SearchRounded className={classes.innerIcon} />
                 <IconButton
                   onClick={() => {
                     setSearchInput(false);
                   }}
                   dataTestId="cancel"
-                  style={{margin: "0 auto"}}
+                  style={{ margin: "0 auto" }}
                 >
-                  <Close className={classes.icon}/>
+                  <Close className={classes.icon} />
                 </IconButton>
               </>
             ) : (
@@ -122,6 +130,8 @@ const Search: React.FC = () => {
               </IconButton>
             )}
           </Header>
+          <div style={{ width: "100%", height: "52px", margin: "0px" }} />
+          <RecentPost word={word} />
         </Main>
       </Wrapper>
     </>

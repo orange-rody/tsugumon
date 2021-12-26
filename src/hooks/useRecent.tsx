@@ -9,10 +9,20 @@ interface Post {
   username: string;
 }
 
-const useRecent = (loadCount: number) => {
+const useRecent = (word: string, loadCount: number) => {
+  const [oldestId, setOldestId] = useState<string>("");
   const [posts, setPosts] = useState<Post[]>([]);
 
   const ref = db.collection("posts");
+
+  function getOldestId(isMounted: boolean) {
+    ref
+      .orderBy("timestamp", "desc")
+      .limitToLast(1)
+      .onSnapshot((snapshot) => {
+        isMounted && setOldestId(snapshot.docs[0].id);
+      });
+  }
 
   useEffect(
     () => {
@@ -62,15 +72,17 @@ const useRecent = (loadCount: number) => {
             isMounted && setPosts(tunedPosts);
           }
         });
+      getOldestId(isMounted);
       return () => {
         isMounted = false;
         unsubscribe();
+        console.log(`isMounted: ${isMounted}`);
       };
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [loadCount]
   );
-  return posts;
+  return { posts, oldestId };
 };
 
 export default useRecent;

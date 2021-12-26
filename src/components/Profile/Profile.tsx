@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import { selectUser } from "../../features/userSlice";
-import EditProfile from "./EditProfile";
 import Header from "../Parts/Header";
 import IconButton from "../Parts/IconButton";
 import Button from "../Parts/Button";
-import Selfy from "./MyPost";
+import MyPost from "./MyPost";
+import EditProfile from "./EditProfile";
 import styled from "styled-components";
 import { makeStyles, createStyles, Theme } from "@material-ui/core";
 import {
@@ -21,7 +21,7 @@ const mediaMobile = mediaQuery.lessThan("medium");
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
-    settingIcon: {
+    icon: {
       left: "5px",
       width: "32px",
       height: "42px",
@@ -214,7 +214,7 @@ const Profile: React.FC = () => {
               }
               dataTestId="settings"
             >
-              <Settings className={classes.settingIcon} />
+              <Settings className={classes.icon} />
             </IconButton>
             <Title>{username ? username : "匿名のユーザー"}</Title>
           </Header>
@@ -272,8 +272,8 @@ const Profile: React.FC = () => {
                 );
               })}
             </DisplayTypeList>
-            {selectedType === "grid" && <Selfy selectedType="grid" />}
-            {selectedType === "single" && <Selfy selectedType="single" />}
+            {selectedType === "grid" && <MyPost selectedType="grid" />}
+            {selectedType === "single" && <MyPost selectedType="single" />}
             {selectedType === "tag" && <div></div>}
             {selectedType === "calendar" && <div></div>}
           </Main>

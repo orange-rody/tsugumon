@@ -153,7 +153,7 @@ type CustomProps = {
   include?: boolean;
 };
 
-const Grid: React.FC<{ selectedType: string }> = (props) => {
+const MyPost: React.FC<{ selectedType: string }> = (props) => {
   interface Post {
     id: string;
     caption: string;
@@ -168,14 +168,12 @@ const Grid: React.FC<{ selectedType: string }> = (props) => {
 
   function showLoadButton() {
     if (posts.find((find: Post) => find.id === oldestId)) {
-      console.log("最後まで読み込みました。");
       return (
         <ButtonArea>
-          {posts.length >= 6 && <p>最後まで読み込みました！</p>}
+          <p>最後まで読み込みました!</p>
         </ButtonArea>
       );
     } else {
-      console.log("更に読み込みできます。");
       return (
         <ButtonArea>
           <Btn
@@ -183,7 +181,7 @@ const Grid: React.FC<{ selectedType: string }> = (props) => {
               setLoadCount((prev) => prev + 1);
             }}
             dataTestId="load"
-            style={{width: "180px"}}
+            style={{ width: "180px" }}
             variant="outlined"
           >
             更に読み込む
@@ -222,7 +220,6 @@ const Grid: React.FC<{ selectedType: string }> = (props) => {
       <Main>
         {props.selectedType === "grid" && (
           <List>
-            {console.log(props.selectedType)}
             {posts.map((tile) => {
               return (
                 <GridItem style={{ backgroundColor: "gray" }} key={tile.id}>
@@ -338,4 +335,4 @@ const Grid: React.FC<{ selectedType: string }> = (props) => {
   );
 };
 
-export default Grid;
+export default MyPost;

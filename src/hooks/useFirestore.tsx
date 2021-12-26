@@ -87,9 +87,7 @@ const useFirestore = (loadCount: number) => {
       return () => {
         isMounted = false;
         unsubscribe();
-        console.log(
-          `isMounted: ${isMounted} onSnapshotの処理をdetachしました。`
-        );
+        console.log(`isMounted: ${isMounted}`);
       };
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
