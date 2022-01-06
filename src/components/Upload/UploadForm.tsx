@@ -52,8 +52,8 @@ const Main = styled.main`
 `;
 
 const Title = styled.p`
-  height: 52px;
   width: 80%;
+  height: 52px;
   margin: 0 auto;
   font-size: 16px;
   line-height: 52px;

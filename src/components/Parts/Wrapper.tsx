@@ -28,6 +28,7 @@ top: 0`};
 
 type Props = {
   children: JSX.Element;
+  style?: React.CSSProperties | undefined;
 };
 
 const Wrapper = (props: Props) => {

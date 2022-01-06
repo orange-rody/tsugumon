@@ -28,11 +28,12 @@ const theme = createMuiTheme({
 type Props = {
   dataTestId: string;
   onClick: (e: React.MouseEvent<HTMLButtonElement>) => void;
+  onMouseDown?: (e: React.MouseEvent<HTMLButtonElement>) => void;
   disabled?: boolean;
-  children:React.ReactNode;
+  children: React.ReactNode;
   color?: "primary" | "secondary" | undefined;
   style?: React.CSSProperties;
-  variant: "outlined" | "contained"
+  variant: "outlined" | "contained";
 };
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -45,7 +46,6 @@ const useStyles = makeStyles((theme: Theme) =>
     },
   })
 );
-
 
 const Btn = (props: Props) => {
   const classes = useStyles();

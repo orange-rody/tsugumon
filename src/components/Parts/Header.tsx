@@ -10,7 +10,7 @@ const Wrapper = styled.div`
   width: 30vw;
   ${mediaMobile`
 width: 100vw`};
-  height: 52px;
+  height: 3rem;
   margin: 0 auto;
   background-color: hsl(0, 0%, 100%);
   box-sizing: border-box;

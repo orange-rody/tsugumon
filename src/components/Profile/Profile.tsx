@@ -73,7 +73,7 @@ const Main = styled.main`
   `};
 `;
 
-const Title = styled.div`
+const Title = styled.p`
   width: 90%;
   height: 52px;
   font-size: 16px;

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { auth } from "../firebase";
 import { makeStyles, createStyles } from "@material-ui/core";
 import UploadForm from "./Upload/UploadForm";
 import Profile from "./Profile/Profile";
@@ -74,7 +75,18 @@ function getTabIcon(icon: string) {
 function getTabPanel(tab: string) {
   switch (tab) {
     case "home":
-      return <div>home</div>;
+      return (
+        <div>
+          <p>home</p>
+          <button
+            onClick={() => {
+              auth.signOut();
+            }}
+          >
+            logout
+          </button>
+        </div>
+      );
     case "search":
       return <Search />;
     case "notification":

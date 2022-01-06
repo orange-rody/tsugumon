@@ -16,6 +16,7 @@ const App: React.FC = () => {
   useEffect(() => {
     const unSubscribe = auth.onAuthStateChanged((authUser) => {
       if (authUser) {
+        
         //firestoreのusersコレクションの中からauthUser.uidに対応するドキュメントを参照する
         const userRef = db.collection("users").doc(authUser.uid);
         userRef.get().then((user) => {
