@@ -10,7 +10,7 @@ export const userSlice = createSlice({
       userIcon: "",
       prefecture: "",
       job: "",
-      introduction: "",
+      introduction: "", 
     },
   },
   reducers: {
@@ -35,6 +35,7 @@ export const userSlice = createSlice({
 
 // NOTE >> stateとactionsは他のコンポーネントで呼び出すためにエクスポートしている。
 export const selectUser = (state: RootState) => state.user.user;
+
 export const { login, logout, update } = userSlice.actions;
 
 // NOTE >> reducerはstoreでconfigureStoreするために必要なのでエクスポートしている。

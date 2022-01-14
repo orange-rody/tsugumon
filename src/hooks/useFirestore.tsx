@@ -90,7 +90,7 @@ const useFirestore = (loadCount: number) => {
         console.log(`isMounted: ${isMounted}`);
       };
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
     [loadCount]
   );
   return { posts, oldestId };
